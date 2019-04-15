@@ -7,7 +7,7 @@ sed -i 's^"assets^"qrc:///assets^g' build/index.html
 minify build/index.html > build/index.min.html
 mv build/index.min.html build/index.html
 #mv build/index.html.min build/index.html
-> build/shadow.qrc
+> build/spectre.qrc
 IFS=$'\n'
 MINIFY="
 assets/plugins/framework/framework.js
@@ -17,12 +17,12 @@ assets/plugins/jquery-scrollbar/jquery.scrollbar.js
 assets/css/font-awesome-buttons.css
 assets/css/framework-icons.css
 assets/css/framework.css
-assets/css/shadow.css
+assets/css/spectre.css
 assets/js/navigation.js
 assets/js/pages/send.js
 assets/js/qrcode.js
 assets/js/tooltip.js
-assets/js/shadow.js
+assets/js/spectre.js
 "
 
 for file in $MINIFY
@@ -42,16 +42,16 @@ cd ..
 
 while read line
 do
-    echo "$line" >> build/shadow.qrc
+    echo "$line" >> build/spectre.qrc
     if [ "$line" == '    <qresource prefix="/">' ]
     then
         for asset in $assets
         do
             [[ $MINIFY =~ $asset ]] && continue
-            echo '        <file alias="'$asset'">src/qt/res/'$asset'</file>' >> build/shadow.qrc
+            echo '        <file alias="'$asset'">src/qt/res/'$asset'</file>' >> build/spectre.qrc
         done
     fi
-done < shadow.qrc
+done < spectre.qrc
 
 ALIASES=()
 FILES=()
@@ -66,7 +66,7 @@ do
         ALIASES+=(${line})
         FILES+=("build/${line}")
     fi
-done < build/shadow.qrc
+done < build/spectre.qrc
 
 for index in ${!FILES[*]}
 do
