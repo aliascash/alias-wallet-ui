@@ -1,4 +1,4 @@
-(function($) {
+(function ($) {
 
     var prevPage = null;
 
@@ -10,7 +10,7 @@
         $("#navitems li").removeClass("selected");
         $(this).parent("li").addClass("selected");
 
-        if(toPage.length == 1 && toPage[0].tagName.toLowerCase() == "article") {
+        if (toPage.length == 1 && toPage[0].tagName.toLowerCase() == "article") {
             event.preventDefault();
             $(window).scrollTop(0);
             $("article").hide();
@@ -19,18 +19,18 @@
         }
     }
 
-    $(function() {
-      // Menu icon onclick
-      $("#navlink").on("click", function() {
-          $("#layout").toggleClass('active');
-      });
+    $(function () {
+        // Menu icon onclick
+        $("#navlink").on("click", function () {
+            $("#layout").toggleClass('active');
+        });
 
-      $(document).ready(function() {
-          $("#navitems a[href='#overview']").trigger('click');
-      });
+        $(document).ready(function () {
+            $("#navitems a[href='#overview']").trigger('click');
+        });
 
-      // Change page handler
-      $("#navitems a, .navigate a").on("click", changePage);
+        // Change page handler
+        $("#navitems a, .navigate a").on("click", changePage);
     });
 
 })(jQuery);

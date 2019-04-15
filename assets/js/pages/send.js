@@ -1,5 +1,5 @@
 /* Send Page */
-var sendPage = (function($) {
+var sendPage = (function ($) {
 
     'use strict';
 
@@ -37,47 +37,44 @@ var sendPage = (function($) {
     }
 
     function updateCoinControl() {
-        if(!$("#coincontrol").is(':visible'))
+        if (!$("#coincontrol").is(':visible'))
             return;
         var amount = 0;
 
-        for(var i=0;i<recipients;i++)
-            amount += unit.parse($("#amount"+i).val());
+        for (var i = 0; i < recipients; i++)
+            amount += unit.parse($("#amount" + i).val());
 
         bridge.updateCoinControlAmount(amount);
     }
 
-    function updateCoinControlInfo(quantity, amount, fee, afterfee, bytes, priority, low, change)
-    {
-        if(!$("#coincontrol").is(':visible'))
+    function updateCoinControlInfo(quantity, amount, fee, afterfee, bytes, priority, low, change) {
+        if (!$("#coincontrol").is(':visible'))
             return;
 
         $("#coincontrol_auto").toggle(quantity === 0);
         $("#coincontrol_labels").toggle(quantity > 0);
 
-        if (quantity > 0)
-        {
+        if (quantity > 0) {
             $("#coincontrol_quantity").text(quantity);
-            $("#coincontrol_amount")  .text(unit.format(amount));
-            $("#coincontrol_fee")     .text(unit.format(fee));
+            $("#coincontrol_amount").text(unit.format(amount));
+            $("#coincontrol_fee").text(unit.format(fee));
             $("#coincontrol_afterfee").text(unit.format(afterfee));
-            $("#coincontrol_bytes")   .text("~"+bytes).css("color", (bytes > 10000 ? "red" : null));
+            $("#coincontrol_bytes").text("~" + bytes).css("color", (bytes > 10000 ? "red" : null));
             $("#coincontrol_priority").text(priority).css("color", (priority.indexOf("low") == 0 ? "red" : null)); // TODO: Translations of low...
-            $("#coincontrol_low")     .text(low).toggle(change).css("color", (low == "yes" ? "red" : null)); // TODO: Translations of low outputs
-            $("#coincontrol_change")  .text(unit.format(change)).toggle(change);
+            $("#coincontrol_low").text(low).toggle(change).css("color", (low == "yes" ? "red" : null)); // TODO: Translations of low outputs
+            $("#coincontrol_change").text(unit.format(change)).toggle(change);
 
             $("label[for='coincontrol_low'],label[for='coincontrol_change']").toggle(change);
 
-        } else
-        {
+        } else {
             $("#coincontrol_quantity").text("");
-            $("#coincontrol_amount")  .text("");
-            $("#coincontrol_fee")     .text("");
+            $("#coincontrol_amount").text("");
+            $("#coincontrol_fee").text("");
             $("#coincontrol_afterfee").text("");
-            $("#coincontrol_bytes")   .text("");
+            $("#coincontrol_bytes").text("");
             $("#coincontrol_priority").text("");
-            $("#coincontrol_low")     .text("");
-            $("#coincontrol_change")  .text("");
+            $("#coincontrol_low").text("");
+            $("#coincontrol_change").text("");
         }
     }
 
@@ -88,20 +85,20 @@ var sendPage = (function($) {
     function addRecipient() {
         $("#recipients").append(((recipientCount() == 0 ? '' : '<hr />') + recipientTemplate.replace(/recipient-template/g, 'recipient[count]')).replace(/\[count\]/g, ++recipientID));
 
-        $("#recipient"+(recipientID).toString()+" [data-title]").tooltip();
+        $("#recipient" + (recipientID).toString() + " [data-title]").tooltip();
 
         // Don't allow characters in numeric fields
-        $("#amount"+(recipientID).toString()).on("keydown", unit.keydown).on("paste",  unit.paste);
+        $("#amount" + (recipientID).toString()).on("keydown", unit.keydown).on("paste", unit.paste);
 
         bridge.userAction(['clearRecipients']);
     }
 
     function addRecipientDetail(address, label, narration, amount) {
         clearRecipients();
-        $("#recipient"+(recipientID).toString()+" .pay_to").val(address).change();
-        $("#recipient"+(recipientID).toString()+" .pay_to_label").val(label).change();
-        $("#recipient"+(recipientID).toString()+" .amount").val(amount).change();
-        $("#recipient"+(recipientID).toString()+" .narration").val(narration).change();
+        $("#recipient" + (recipientID).toString() + " .pay_to").val(address).change();
+        $("#recipient" + (recipientID).toString() + " .pay_to_label").val(label).change();
+        $("#recipient" + (recipientID).toString() + " .amount").val(amount).change();
+        $("#recipient" + (recipientID).toString() + " .narration").val(narration).change();
         $('[href=#send]').click();
     }
 
@@ -113,12 +110,12 @@ var sendPage = (function($) {
     }
 
     function removeRecipient(recipient) {
-        if(recipientCount() <= 1)
+        if (recipientCount() <= 1)
             clearRecipients();
         else {
-            recipient=$(recipient);
+            recipient = $(recipient);
 
-            if(recipient.next('hr').remove().length==0)
+            if (recipient.next('hr').remove().length == 0)
                 recipient.prev('hr').remove();
 
             recipient.remove();
@@ -129,20 +126,20 @@ var sendPage = (function($) {
     function suggestRingSize() {
         chainDataPage.updateAnonOutputs();
 
-        var minsize = bridge.info.options.MinRingSize||3,
-            maxsize = bridge.info.options.MaxRingSize||32;
+        var minsize = bridge.info.options.MinRingSize || 3,
+            maxsize = bridge.info.options.MaxRingSize || 32;
 
         function mature(value, min_owned) {
-            if(min_owned == undefined || !$.isNumeric(min_owned))
+            if (min_owned == undefined || !$.isNumeric(min_owned))
                 min_owned = 1;
 
             var anonOutput = chainDataPage.anonOutputs[value];
 
-            if(anonOutput)
+            if (anonOutput)
                 return Math.min(anonOutput
-                   && anonOutput.owned_mature  >= min_owned
-                   && anonOutput.system_mature >= minsize
-                   && anonOutput.system_mature, maxsize);
+                    && anonOutput.owned_mature >= min_owned
+                    && anonOutput.system_mature >= minsize
+                    && anonOutput.system_mature, maxsize);
             else
                 return 0;
         }
@@ -152,24 +149,24 @@ var sendPage = (function($) {
                 case 0:
                     return maxsize;
                 case 2:
-                    return mature(1*test, 2)||getOutputRingSize(++output, test, maxsize);
+                    return mature(1 * test, 2) || getOutputRingSize(++output, test, maxsize);
                 case 6:
-                    return Math.min(mature(5*test, 1),
-                                    mature(1*test, 1))||getOutputRingSize(++output, test, maxsize);
+                    return Math.min(mature(5 * test, 1),
+                        mature(1 * test, 1)) || getOutputRingSize(++output, test, maxsize);
                 case 7:
-                    return Math.min(mature(4*test, 1),
-                                    mature(3*test, 1))||getOutputRingSize(++output, test, maxsize);
+                    return Math.min(mature(4 * test, 1),
+                        mature(3 * test, 1)) || getOutputRingSize(++output, test, maxsize);
                 case 8:
-                    return Math.min(mature(5*test, 1),
-                                    mature(3*test, 1))||getOutputRingSize(++output, test, maxsize);
+                    return Math.min(mature(5 * test, 1),
+                        mature(3 * test, 1)) || getOutputRingSize(++output, test, maxsize);
                 case 9:
-                    return Math.min(mature(5*test, 1),
-                                    mature(4*test, 1))||getOutputRingSize(++output, test, maxsize);
+                    return Math.min(mature(5 * test, 1),
+                        mature(4 * test, 1)) || getOutputRingSize(++output, test, maxsize);
                 default:
-                    if(output == 10)
-                        return mature(test/2, 2);
+                    if (output == 10)
+                        return mature(test / 2, 2);
 
-                    maxsize = Math.max(mature(output*test, 1),mature(1*test, output))||getOutputRingSize(output==1?3:++output, test, maxsize);
+                    maxsize = Math.max(mature(output * test, 1), mature(1 * test, output)) || getOutputRingSize(output == 1 ? 3 : ++output, test, maxsize);
             }
             return maxsize;
         }
@@ -180,27 +177,29 @@ var sendPage = (function($) {
                 el = $(this).find('.amount'),
                 amount = unit.parse(el.val(), $(this).find(".unit").val());
 
-            $("[name=err"+el.attr('id')+"]").remove();
+            $("[name=err" + el.attr('id') + "]").remove();
 
             while (amount >= test && maxsize >= minsize) {
                 output = parseInt((amount / test) % 10);
                 try {
                     maxsize = getOutputRingSize(output, test, maxsize);
-                } catch(e) {
+                } catch (e) {
                     console.log(e);
                 } finally {
-                    if(!maxsize)
-                        maxsize = mature(output*test);
+                    if (!maxsize)
+                        maxsize = mature(output * test);
 
                     test *= 10;
                 }
             }
 
-            if(maxsize < minsize) {
+            if (maxsize < minsize) {
                 invalid(el);
-                el.parent().before("<div name='err"+el.attr('id')+"' class='warning'>Not enough system and or owned outputs for the requested amount. Only <b>"
-                         +maxsize+"</b> anonymous outputs exist for coin value: <b>" + unit.format(output*(test/10), $(this).find(".unit")) + "</b></div>");
-                el.on('change', function(){$("[name=err"+el.attr('id')+"]").remove();});
+                el.parent().before("<div name='err" + el.attr('id') + "' class='warning'>Not enough system and or owned outputs for the requested amount. Only <b>"
+                    + maxsize + "</b> anonymous outputs exist for coin value: <b>" + unit.format(output * (test / 10), $(this).find(".unit")) + "</b></div>");
+                el.on('change', function () {
+                    $("[name=err" + el.attr('id') + "]").remove();
+                });
 
                 $("#tx_ringsize").show();
                 $("#suggest_ring_size").show();
@@ -212,7 +211,7 @@ var sendPage = (function($) {
         if ($("#send-balance").is(":visible"))
             $("#send-balance").each(validateRecipient);
         else
-        $("div.recipient").each(validateRecipient);
+            $("div.recipient").each(validateRecipient);
 
         $("#ring_size").val(maxsize);
     }
@@ -223,7 +222,7 @@ var sendPage = (function($) {
 
         bridge.userAction(['clearRecipients']);
 
-        if(bridge.info.options.AutoRingSize && txType > 1)
+        if (bridge.info.options.AutoRingSize && txType > 1)
             suggestRingSize();
 
         // Takes context of element containing address, amount, etc...
@@ -233,10 +232,10 @@ var sendPage = (function($) {
 
             valid = valid && invalid(pay, bridge.validateAddress(pay.val()));
 
-            if(unit.parse(amount.val()) == 0 && !invalid(amount))
+            if (unit.parse(amount.val()) == 0 && !invalid(amount))
                 valid = false;
 
-            if(!valid || !bridge.addRecipient(pay.val(), $(this).find(".pay_to_label").val(), $(this).find(".narration").val(), unit.parse(amount.val(), $(this).find(".unit").val()), txType, $("#ring_size").val()))
+            if (!valid || !bridge.addRecipient(pay.val(), $(this).find(".pay_to_label").val(), $(this).find(".narration").val(), unit.parse(amount.val(), $(this).find(".unit").val()), txType, $("#ring_size").val()))
                 return false;
         }
 
@@ -245,7 +244,7 @@ var sendPage = (function($) {
         else
             $("div.recipient").each(validateRecipient); // Send main...
 
-        if(valid && bridge.sendCoins($("#coincontrol").is(":visible"), $("#change_address").val()))
+        if (valid && bridge.sendCoins($("#coincontrol").is(":visible"), $("#change_address").val()))
             clearRecipients();
     }
 
@@ -260,11 +259,11 @@ var sendPage = (function($) {
         var to_type = $("[name=transaction_type_to  ]:checked").val(),
             tx_type = getTransactionType();
 
-        $("#spend_sdc")   .toggle(from_type === "public");
+        $("#spend_sdc").toggle(from_type === "public");
         $("#spend_shadow").toggle(from_type === "private");
 
-        $("#to_sdc")      .toggle(to_type === "public");
-        $("#to_shadow")   .toggle(to_type === "private");
+        $("#to_sdc").toggle(to_type === "public");
+        $("#to_shadow").toggle(to_type === "private");
 
         $("#to_balance").toggle(!main);
 
@@ -292,7 +291,7 @@ var sendPage = (function($) {
          * TXT_ANON_TO_SDC,
          */
         var from_public = $("[name=transaction_type_from]:checked").val() === "public",
-              to_public = $("[name=transaction_type_to  ]:checked").val() === "public";
+            to_public = $("[name=transaction_type_to  ]:checked").val() === "public";
 
         if (from_public)
             return +!to_public; // 0 (SDC_TO_SDC) or 1 (SDC_TO_ANON)
@@ -304,7 +303,7 @@ var sendPage = (function($) {
         init: init,
         initSendBalance: initSendBalance,
         toggleCoinControl: toggleCoinControl,
-        addRecipient:addRecipient,
+        addRecipient: addRecipient,
         addRecipientDetail: addRecipientDetail,
         clearRecipients: clearRecipients,
         removeRecipient: removeRecipient,
