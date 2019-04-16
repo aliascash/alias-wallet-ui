@@ -259,11 +259,11 @@ var sendPage = (function ($) {
         var to_type = $("[name=transaction_type_to  ]:checked").val(),
             tx_type = getTransactionType();
 
-        $("#spend_sdc").toggle(from_type === "public");
-        $("#spend_shadow").toggle(from_type === "private");
+        $("#spend_spec").toggle(from_type === "public");
+        $("#spend_spectre").toggle(from_type === "private");
 
-        $("#to_sdc").toggle(to_type === "public");
-        $("#to_shadow").toggle(to_type === "private");
+        $("#to_spec").toggle(to_type === "public");
+        $("#to_spectre").toggle(to_type === "private");
 
         $("#to_balance").toggle(!main);
 

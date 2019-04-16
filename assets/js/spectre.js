@@ -4,7 +4,7 @@ function invalid(el, valid) {
     if (valid === true)
         el.css("background", "").css("color", "");
     else
-        el.css("background", "#E51C39").css("color", "white");
+        el.css("background", "#155b9a").css("color", "white");
 
     return (valid == true);
 }
@@ -151,7 +151,7 @@ $(function () {
     receivePageInit();
     transactionPageInit();
     addressBookInit();
-    shadowChatInit();
+    spectreChatInit();
     chainDataPage.init();
     walletManagementPage.init();
 
@@ -227,7 +227,7 @@ var base58 = {
 
         for (var i = 0, len = value.length; i < len; ++i)
             if (base58.base58Chars.indexOf(value[i]) == -1) {
-                el.css("background", "#E51C39").css("color", "white");
+                el.css("background", "#155b9a").css("color", "white");
                 return false;
             }
 
@@ -275,29 +275,29 @@ function networkAlert(alert) {
 
 var unit = {
     type: 0,
-    name: "SDC",
-    display: "SDC",
+    name: "SPEC",
+    display: "SPEC",
     setType: function (type) {
         this.type = (type == undefined ? 0 : type);
 
         switch (type) {
             case 1:
-                this.name = "mSDC",
-                    this.display = "mSDC";
+                this.name = "mSPEC",
+                    this.display = "mSPEC";
                 break;
 
             case 2:
-                this.name = "uSDC",
-                    this.display = "&micro;SDC";
+                this.name = "uSPEC",
+                    this.display = "&micro;SPEC";
                 break;
 
             case 3:
-                this.name = "sSDC",
-                    this.display = "Shadowshi";
+                this.name = "sSPEC",
+                    this.display = "spectoshi";
                 break;
 
             default:
-                this.name = this.display = "SDC";
+                this.name = this.display = "SPEC";
         }
 
         $("td.unit,span.unit,div.unit").html(this.display);
@@ -449,7 +449,7 @@ function openContextMenu(el) {
 var overviewPage = {
     init: function () {
         this.balance = $(".balance"),
-            this.shadowBal = $(".shadow_balance"),
+            this.spectreBal = $(".spectre_balance"),
             this.reserved = $("#reserved"),
             this.stake = $("#stake"),
             this.unconfirmed = $("#unconfirmed"),
@@ -457,26 +457,26 @@ var overviewPage = {
             this.total = $("#total");
     },
 
-    updateBalance: function (balance, shadowBal, stake, unconfirmed, immature) {
+    updateBalance: function (balance, spectreBal, stake, unconfirmed, immature) {
         if (balance == undefined)
             balance = this.balance.data("orig"),
-                shadowBal = this.shadowBal.data("orig"),
+                spectreBal = this.spectreBal.data("orig"),
                 stake = this.stake.data("orig"),
                 unconfirmed = this.unconfirmed.data("orig"),
                 immature = this.immature.data("orig");
         else
             this.balance.data("orig", balance),
-                this.shadowBal.data("orig", shadowBal),
+                this.spectreBal.data("orig", spectreBal),
                 this.stake.data("orig", stake),
                 this.unconfirmed.data("orig", unconfirmed),
                 this.immature.data("orig", immature);
 
         this.formatValue("balance", balance);
-        this.formatValue("shadowBal", shadowBal);
+        this.formatValue("spectreBal", spectreBal);
         this.formatValue("stake", stake);
         this.formatValue("unconfirmed", unconfirmed);
         this.formatValue("immature", immature);
-        this.formatValue("total", balance + stake + unconfirmed + immature + shadowBal);
+        this.formatValue("total", balance + stake + unconfirmed + immature + spectreBal);
     },
 
     updateReserved: function (reserved) {
@@ -1219,9 +1219,9 @@ var contact_book_list;
 var current_key = "";
 
 
-function shadowChatInit() {
+function spectreChatInit() {
     var menu = [{
-        name: 'Send&nbsp;Shadow',
+        name: 'Send&nbsp;Spectre',
         fun: function () {
             clearRecipients();
             $("#pay_to0").val($('#contact-list .selected .contact-address').text());
@@ -1531,53 +1531,53 @@ var verified_list =
     {
         /* TEAM */
         "SdcDevWEbq3CZgZc8UNbST1TaYLA5vLZTS": {
-            "username": "sdcdev-slack",
-            "title": "Shadowteam",
+            "username": "specdev-slack",
+            "title": "Spectreteam",
             "custom_avatar": false
         },
         "SR46wGPK5sGwT9qymRNTVtF9ExHHvVuDXQ": {
             "username": "crz",
-            "title": "Shadowteam",
+            "title": "Spectreteam",
             "custom_avatar": false
         },
         "SVY9s4CySAXjECDUwvMHNM6boAZeYuxgJE": {
             "username": "kewde",
-            "title": "Shadowteam",
+            "title": "Spectreteam",
             "custom_avatar": true
         },
         "dasource": {
             "username": "dasource",
-            "title": "Shadowteam",
+            "title": "Spectreteam",
             "custom_avatar": false
         },
         "SNLYNVwWQNgPqxND5iWyRfnGbEPnvSGVLw": {
             "username": "ffmad",
-            "title": "Shadowteam",
+            "title": "Spectreteam",
             "custom_avatar": false
         },
         "STWYshQBdzk47swrp2S77jHLxjrNAWUNdq": {
             "username": "ludx",
-            "title": "Shadowteam",
+            "title": "Spectreteam",
             "custom_avatar": false
         },
         "edu-online": {
             "username": "edu-online",
-            "title": "Shadowteam",
+            "title": "Spectreteam",
             "custom_avatar": false
         },
         "SU9FqHpVg929arDpT9TjTc5XkSxGgzHvff": {
             "username": "arcanum",
-            "title": "Shadowteam",
+            "title": "Spectreteam",
             "custom_avatar": false
         },
         "STAKEbLd2DecHRadoXyBE5jmZrJztLr9TE": {
             "username": "allien",
-            "title": "Shadowteam",
+            "title": "Spectreteam",
             "custom_avatar": false
         },
         "sebsebastian": {
             "username": "sebsebastian",
-            "title": "Shadowteam",
+            "title": "Spectreteam",
             "custom_avatar": false
         }
         /* Contributors */
@@ -1825,7 +1825,7 @@ function getIconTitle(title) {
         return "fa fa-check ";
     } else if (title == "contributor") {
         return "fa fa-cog ";
-    } else if (title == "shadowteam") {
+    } else if (title == "spectreteam") {
         return "fa fa-code ";
     }
     return "";
@@ -1946,8 +1946,8 @@ function openConversation(key, click) {
     function processMessageForDisplay(message) {
         return micromarkdown.parse(
             emojione.toImage(message)).replace(
-            /<a class="mmd_shadowcash" href="(.+)">(.+)<\/a>/g,
-            '<a class="mmd_shadowcash" onclick="return confirmConversationOpenLink()" target="_blank" href="$1" data-title="$1">$1</a>');
+            /<a class="mmd_spectrecash" href="(.+)">(.+)<\/a>/g,
+            '<a class="mmd_spectrecash" onclick="return confirmConversationOpenLink()" target="_blank" href="$1" data-title="$1">$1</a>');
     }
 
     contact.messages.forEach(function (message, index) {
@@ -2313,7 +2313,7 @@ function openNewConversationModal() {
     result = bridge.newAddress(contact_name, 0, address, true);
     if (result === "")
         if (bridge.lastAddressError() !== 'Duplicate Address.') {
-            $("#new-contact-address").css("background", "#E51C39").css("color", "white");
+            $("#new-contact-address").css("background", "#155b9a").css("color", "white");
             return;
         }
 
@@ -3049,7 +3049,7 @@ function dumpStrings() {
     var strings = '';
 
     function buildStr(str) {
-        return 'QT_TRANSLATE_NOOP("ShadowBridge", "' + str + '"),\n';
+        return 'QT_TRANSLATE_NOOP("SpectreBridge", "' + str + '"),\n';
     }
 
     $(".translate").each(function (el) {

@@ -2,7 +2,7 @@
 
 var showQRCode = (function ($, QRCode) {
     var qrcode = new QRCode("qrcode", {
-            colorDark: '#E51C39',
+            colorDark: '#155b9a',
             colorLight: '#ffffff',
             correctLevel: QRCode.CorrectLevel.H,
             width: 220,
@@ -23,7 +23,7 @@ var showQRCode = (function ($, QRCode) {
 
         qrcode.clear();
 
-        var data = "shadowcoin:"
+        var data = "spectrecoin:"
             + qraddress.val()
             + "?label=" + qrlabel.val()
             + "&narration=" + qrnarration.val()
