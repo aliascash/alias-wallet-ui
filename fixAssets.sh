@@ -14,6 +14,7 @@ assets/plugins/framework/framework.js
 assets/plugins/boostrapv3/js/bootstrap.js
 assets/plugins/boostrapv3/css/bootstrap.css
 assets/plugins/jquery-scrollbar/jquery.scrollbar.js
+assets/plugins/qrcode/qrcode.js
 assets/css/font-awesome-buttons.css
 assets/css/framework-icons.css
 assets/css/framework.css
