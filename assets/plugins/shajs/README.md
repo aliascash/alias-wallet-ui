@@ -1,0 +1,1 @@
+[https://github.com/Caligatio/jsSHA/releases/tag/v2.2.0](https://github.com/Caligatio/jsSHA/releases/tag/v2.2.0)
