@@ -275,29 +275,29 @@ function networkAlert(alert) {
 
 var unit = {
     type: 0,
-    name: "SPEC",
-    display: "SPEC",
+    name: "XSPEC",
+    display: "XSPEC",
     setType: function (type) {
         this.type = (type == undefined ? 0 : type);
 
         switch (type) {
             case 1:
-                this.name = "mSPEC",
-                    this.display = "mSPEC";
+                this.name = "mXSPEC",
+                    this.display = "mXSPEC";
                 break;
 
             case 2:
-                this.name = "uSPEC",
-                    this.display = "&micro;SPEC";
+                this.name = "uXSPEC",
+                    this.display = "&micro;XSPEC";
                 break;
 
             case 3:
-                this.name = "sSPEC",
+                this.name = "sXSPEC",
                     this.display = "spectoshi";
                 break;
 
             default:
-                this.name = this.display = "SPEC";
+                this.name = this.display = "XSPEC";
         }
 
         $("td.unit,span.unit,div.unit").html(this.display);
