@@ -846,6 +846,7 @@ var Name = 'You';
 var initialAddress = true;
 
 function appendAddresses(addresses) {
+    console.log("appending an address: " + e);
     if (typeof addresses == "string") {
         if (addresses == "[]")
             return;
@@ -3078,4 +3079,9 @@ function translateStrings() {
 
         $(this).attr('data-title', str.replace(str, bridge.translateHtmlString(str.trim())));
     });
+}
+
+window.onload = function () {
+    connectSignals();
+    bridge.jsReady();
 }
