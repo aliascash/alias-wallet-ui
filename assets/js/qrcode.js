@@ -1,43 +1,30 @@
-// showQRCode - uses https://github.com/davidshimjs/qrcodejs
+var showQRCode;
 
-var showQRCode = (function ($, QRCode) {
-    var qrcode = new QRCode("qrcode", {
-            colorDark: '#155b9a',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H,
-            width: 220,
-            height: 220,
-        }),
-        qrdata = $("#qrcode-data"),
-        qraddress = $("#qraddress"),
-        qrlabel = $("#qrlabel"),
-        qrnarration = $("#qrnarration");
-
-    function showQRCode(address, label) {
-
-        if (address !== undefined)
-            qraddress.val(address);
-
-        if (label !== undefined)
-            qrlabel.val(label);
-
-        qrcode.clear();
-
-        var data = "spectrecoin:"
-            + qraddress.val()
-            + "?label=" + qrlabel.val()
-            + "&narration=" + qrnarration.val()
-            + "&amount=" + unit.parse($("#qramount").val(), $("#qrunit").val());
-
-        qrdata.text(data);
-
-        qrcode.makeCode(data);
+$(function() {
+  function parse(resp, str) {
+    if (void 0 !== resp) {
+      opts.val(resp);
     }
+    if (void 0 !== str) {
+      txt.val(str);
+    }
+    handler.clear();
+    var e = "spectrecoin:" + opts.val() + "?label=" + txt.val() + "&narration=" + $radio.val() + "&amount=" + unit.parse($("#qramount").val(), $("#qrunit").val());
+    errors.text(e);
+    handler.makeCode(e);
+  }
+  var handler = new QRCode("qrcode", {
+    colorDark: "#E51C39",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H,
+    width: 220,
+    height: 220
+  });
+  var errors = $("#qrcode-data");
+  var opts = $("#qraddress");
+  var txt = $("#qrlabel");
+  var $radio = $("#qrnarration");
+  showQRCode = parse;
 
-    return showQRCode;
-})(jQuery, QRCode);
-
-// jQuery initialized
-jQuery(function () {
-    $("#qramount").on("keydown", unit.keydown).on("paste", unit.paste);
+  $("#qramount").on("keydown", unit.keydown).on("paste", unit.paste);
 });
