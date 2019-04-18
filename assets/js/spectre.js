@@ -70,8 +70,8 @@ function connectSignals() {
   if (typeof(bridge) == "undefined" || typeof(optionsModel) == "undefined" || typeof(walletModel) == "undefined") {
     connectSignalsAttempts += 1;
     if (connectSignalsAttempts < 10) {
-      console.log("retrying connecting signals in 500ms");
-      setTimeout(connectSignals, 500);
+      console.log("retrying connecting signals in 200ms");
+      setTimeout(connectSignals, 200);
     }
     else {
       console.log("giving up on connecting signals.");
@@ -1958,7 +1958,13 @@ var walletManagementPage = {
 };
 
 window.onload = function() {
-  connectSignals();
+  overviewPage.init();
+  receivePageInit();
+  transactionPageInit();
+  addressBookInit();
+  spectreChatInit();
+  chainDataPage.init();
+  walletManagementPage.init();
 
   contactScroll = new IScroll("#contact-list", {
     mouseWheel : true,
@@ -2040,14 +2046,9 @@ window.onload = function() {
       bridge.userAction(["aboutClicked"]);
     });
   }
-  overviewPage.init();
-  receivePageInit();
-  transactionPageInit();
-  addressBookInit();
-  spectreChatInit();
-  chainDataPage.init();
-  walletManagementPage.init();
   $(".footable > tbody tr").selection();
+
+  connectSignals();
 };
 
 $.fn.selection = function(element) {
