@@ -239,7 +239,7 @@ body.dashboard, body.dashboard .page-container {
 */
 .page-sidebar {
     width: 280px;
-    background-color: #131218;
+    background-color: #0f0e12;
     left: -210px;
     position: fixed;
     top: 0;
