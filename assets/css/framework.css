@@ -399,7 +399,6 @@ body.dashboard, body.dashboard .page-container {
 }
 
 .page-sidebar .sidebar-menu .menu-items > li > a {
-    font-family: Arial, sans-serif;
     display: inline-block;
     padding: 0 3px 0 32px;
     min-height: 40px;
@@ -531,7 +530,6 @@ body.dashboard, body.dashboard .page-container {
     display: inline-block;
     padding: 5px 0;
     font-size: 13px;
-    font-family: Arial, sans-serif;
     white-space: normal
 }
 
@@ -2548,7 +2546,6 @@ hr.dotted {
 [Buttons Base Styles]
 */
 .btn {
-    font-family: Arial, sans-serif;
     font-size: 14px;
     font-weight: 400;
     letter-spacing: .01em;
@@ -5424,7 +5421,6 @@ form legend {
     background-color: #F0F1F3;
     background-image: none;
     border: 1px solid rgba(0, 0, 0, .07);
-    font-family: Arial, sans-serif;
     -webkit-appearance: none;
     color: #2c2c2c;
     outline: 0;
@@ -7204,7 +7200,6 @@ div.cs-skin-slide::before {
 
 div.cs-skin-slide {
     width: auto;
-    font-family: Arial, sans-serif;
     color: #5e5e5e
 }
 
