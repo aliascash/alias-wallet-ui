@@ -81,6 +81,7 @@ function connectSignals() {
     }
     return;
   }
+
   bridge.emitPaste.connect(this, pasteValue);
   bridge.emitTransactions.connect(this, appendTransactions);
   bridge.emitAddresses.connect(this, appendAddresses);
@@ -90,16 +91,20 @@ function connectSignals() {
   bridge.triggerElement.connect(this, triggerElement);
   bridge.emitReceipient.connect(sendPage, "addRecipientDetail");
   bridge.networkAlert.connect(this, networkAlert);
+
   optionsModel.displayUnitChanged.connect(unit, "setType");
   optionsModel.reserveBalanceChanged.connect(overviewPage, "updateReserved");
   optionsModel.rowsPerPageChanged.connect(this, "updateRowsPerPage");
   optionsModel.visibleTransactionsChanged.connect(this, "visibleTransactions");
+
   walletModel.encryptionStatusChanged.connect(overviewPage, "encryptionStatusChanged");
   walletModel.balanceChanged.connect(overviewPage, "updateBalance");
+
   overviewPage.clientInfo();
   optionsPage.update();
   chainDataPage.updateAnonOutputs();
   translateStrings();
+
   bridge.jsReady();
 }
 function triggerElement($window, completeEvent) {
@@ -501,7 +506,7 @@ function transactionPageInit() {
   });
 }
 function formatTransaction(o) {
-  return "<tr id='" + o.id + "' data-title='" + o.tt + "'>                    <td data-value='" + o.d + "'>" + o.d_s + "</td>                    <td class='trans-status' data-value='" + o.c + "'><center><i class='fa fa-lg " + o.s + "'></center></td>                    <td class='trans_type'><img height='15' width='15' src='qrc:///assets/icons/tx_" + o.t + ".png' /> " + o.t_l + "</td>                    <td class='address' style='color:" + o.a_c + ";' data-value='" + o.ad + "' data-label='" + o.ad_l + 
+  return "<tr id='" + o.id + "' data-title='" + o.tt + "'>                    <td data-value='" + o.d + "'>" + o.d_s + "</td>                    <td class='trans-status' data-value='" + o.c + "'><center><i class='fa fa-lg " + o.s + "'></center></td>                    <td class='trans_type'><img height='15' width='15' src='qrc:///assets/icons/tx_" + o.t + ".png' /> " + o.t_l + "</td>                    <td class='address' style='color:" + o.a_c + ";' data-value='" + o.ad + "' data-label='" + o.ad_l +
   "'><span class='editable'>" + o.ad_d + "</span></td>                    <td class='trans-nar'>" + o.n + "</td>                    <td class='amount' style='color:" + o.am_c + ";' data-value='" + o.am_d + "'>" + o.am_d + "</td>                 </tr>";
 }
 function visibleTransactions(checkSet) {
@@ -797,7 +802,7 @@ function appendContact(key, v33, recurring) {
         message = opt.messages[0].message;
       }
     }
-    var lineSeparator = "<li id='" + entry + key + "' class='contact' data-title='" + opt.label + "'>                <span class='contact-info'>                    <span class='contact-name'>" + (opt.group && recurring ? "<i class='fa fa-users' style='padding-right: 7px;'></i>" : "") + opt.label + "</span>                    <span class='" + (recurring ? "contact-address" : "contact-message") + "'>" + (recurring ? opt.address : message) + "</span>                </span>                <span class='contact-options'>                        <span class='message-notifications'>0</span> <span class='delete' onclick='deleteMessages(\"" + 
+    var lineSeparator = "<li id='" + entry + key + "' class='contact' data-title='" + opt.label + "'>                <span class='contact-info'>                    <span class='contact-name'>" + (opt.group && recurring ? "<i class='fa fa-users' style='padding-right: 7px;'></i>" : "") + opt.label + "</span>                    <span class='" + (recurring ? "contact-address" : "contact-message") + "'>" + (recurring ? opt.address : message) + "</span>                </span>                <span class='contact-options'>                        <span class='message-notifications'>0</span> <span class='delete' onclick='deleteMessages(\"" +
     key + "\")'><i class='fa fa-minus-circle'></i></span>                        </span></li>";
     if (recurring) {
       contact_book_list.append(lineSeparator);
@@ -928,7 +933,7 @@ function openConversation(key, recurring) {
     var date = new Date(1E3 * opts.received);
     addAvatar(opts.them);
     var failureMessage = opts.label_msg == opts.key_msg ? " data-toggle=\"modal\" data-target=\"#add-address-modal\" onclick=\"clearSendAddress(); $('#add-rcv-address').hide(); $('#add-send-address').show(); $('#new-send-address').val('" + opts.key_msg + "')\" " : "";
-    tagList.append("<li id='" + opts.id + "' class='message-wrapper " + ("S" == opts.type ? "my-message" : "other-message") + "' contact-key='" + self.key + "'>                <span class='message-content'>                    <span class='info'>" + getAvatar("S" == opts.type ? opts.self : opts.them) + "</span>                    <span class='user-name' " + failureMessage + ">" + opts.label_msg + "                    </span>                    <span class='title'>                    </span>                    <span class='timestamp'>" + 
+    tagList.append("<li id='" + opts.id + "' class='message-wrapper " + ("S" == opts.type ? "my-message" : "other-message") + "' contact-key='" + self.key + "'>                <span class='message-content'>                    <span class='info'>" + getAvatar("S" == opts.type ? opts.self : opts.them) + "</span>                    <span class='user-name' " + failureMessage + ">" + opts.label_msg + "                    </span>                    <span class='title'>                    </span>                    <span class='timestamp'>" +
     ((d.getHours() < 10 ? "0" : "") + d.getHours() + ":" + (d.getMinutes() < 10 ? "0" : "") + d.getMinutes() + ":" + (d.getSeconds() < 10 ? "0" : "") + d.getSeconds()) + "</span>                       <span class='delete' onclick='deleteMessages(\"" + self.key + '", "' + opts.id + "\");'><i class='fa fa-minus-circle'></i></span>                       <span class='message-text'>" + convert(opts.message) + "</span>                </span>             </li>");
     $("#" + opts.id + " .timestamp").attr("data-title", "Sent: " + d.toLocaleString() + "\n Received: " + date.toLocaleString()).tooltip().find(".message-text").tooltip();
     insertTitleHTML(opts.id, opts.key_msg);
@@ -1090,7 +1095,7 @@ function scrollMessages() {
 function newConversation() {
   var camelKey = $("#new-contact-address").val();
   var udataCur = $("#new-contact-name").val();
-  return createContact(udataCur, camelKey, false), result = bridge.newAddress($("#new-contact-name").val(), 0, $("#new-contact-address").val(), true), "" === result && "Duplicate Address." !== bridge.lastAddressError() ? void $("#new-contact-address").css("background", "#E51C39").css("color", "white") : ($("#new-contact-address").css("background", "").css("color", ""), bridge.setPubKey($("#new-contact-address").val(), $("#new-contact-pubkey").val()), bridge.updateAddressLabel($("#new-contact-address").val(), 
+  return createContact(udataCur, camelKey, false), result = bridge.newAddress($("#new-contact-name").val(), 0, $("#new-contact-address").val(), true), "" === result && "Duplicate Address." !== bridge.lastAddressError() ? void $("#new-contact-address").css("background", "#E51C39").css("color", "white") : ($("#new-contact-address").css("background", "").css("color", ""), bridge.setPubKey($("#new-contact-address").val(), $("#new-contact-pubkey").val()), bridge.updateAddressLabel($("#new-contact-address").val(),
   $("#new-contact-name").val()), $("#new-contact-modal").modal("hide"), $("#message-to-address").val($("#new-contact-address").val()), $("#message-text").focus(), $("#new-contact-address").val(""), $("#new-contact-name").val(""), $("#new-contact-pubkey").val(""), $("#contact-list ul li").removeClass("selected"), $("#contact-list").addClass("in-conversation"), $("#contact-group-list ul li").removeClass("selected"), $("#contact-group-list").addClass("in-conversation"), void setTimeout(function() {
     openConversation(camelKey, true);
     $(".contact-discussion ul").html("<li id='remove-on-send'>Starting Conversation with " + camelKey + " - " + udataCur + "</li>");
@@ -1271,15 +1276,21 @@ function dumpStrings() {
   });
   console.log(data);
 }
+//TODO: Update the translation function in a way that support QtWebEngine, QtWebEngine does not support calling a function that return results immediatly, it have to be done in a non blocking way using signals and slots
 function translateStrings() {
-  $(".translate").each(function(dataAndEvents) {
-    var template = $(this).text();
-    $(this).text(template.replace(template, bridge.translateHtmlString(template.trim())));
-  });
-  $("[data-title]").each(function(dataAndEvents) {
-    var title = $(this).attr("data-title");
-    $(this).attr("data-title", title.replace(title, bridge.translateHtmlString(title.trim())));
-  });
+//  $(".translate").each(function(dataAndEvents) {
+//    var template = $(this).text();
+//      console.log("template is " + template)
+//      console.log("Translated template is " + bridge.translateHtmlString(template.trim()))
+//    $(this).text(template.replace(template, bridge.translateHtmlString(template.trim())));
+//  });
+//  $("[data-title]").each(function(dataAndEvents) {
+//    var title = $(this).attr("data-title");
+//      console.log("Title is " + title)
+//      console.log("Translated title is " + bridge.translateHtmlString(title.trim()))
+
+//    $(this).attr("data-title", title.replace(title, bridge.translateHtmlString(title.trim())));
+//  });
 }
 var breakpoint = 906;
 var base58 = {
@@ -1492,7 +1503,7 @@ var overviewPage = {
   },
   updateTransaction : function(message) {
     var update = function(data) {
-      return "<tr><td class='text-left' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><center><label style='margin-top:6px;' class='label label-important inline fs-12'>" + ("input" == data.t ? "Received" : "output" == data.t ? "Sent" : "inout" == data.t ? "In-Out" : "Stake") + "</label></center></td><td class='text-left' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><center><a id='" + data.id.substring(0, 17) + "' data-title='" + data.tt + 
+      return "<tr><td class='text-left' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><center><label style='margin-top:6px;' class='label label-important inline fs-12'>" + ("input" == data.t ? "Received" : "output" == data.t ? "Sent" : "inout" == data.t ? "In-Out" : "Stake") + "</label></center></td><td class='text-left' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><center><a id='" + data.id.substring(0, 17) + "' data-title='" + data.tt +
       "' href='#' onclick='$(\"#navitems [href=#transactions]\").click();$(\"#" + data.id + "\").click();'> " + unit.format(data.am) + " " + unit.display + " </a></center></td><td style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><span class='overview_date' data-value='" + data.d + "'><center>" + data.d_s + "</center></span></td></tr>";
     };
     var idfirst = message.id.substring(0, 17);
@@ -1910,7 +1921,7 @@ var walletManagementPage = {
     tagList.html("");
     for (value in walletManagementPage.accountList) {
       var result = walletManagementPage.accountList[value];
-      tagList.append("<tr data-value=" + result.id + " active-flag=" + result.active + ">                         <td>" + result.id + "</td>                         <td>" + result.label + "</td>                         <td>" + result.created_at + '</td>                         <td class="center-margin"><i style="font-size: 1.2em; margin: auto;" ' + ("true" == result.active ? 'class="fa fa-circle green-circle"' : 'class="fa fa-circle red-circle"') + ' ></i></td>                         <td style="font-size: 1em; margin-bottom: 6px;">' + 
+      tagList.append("<tr data-value=" + result.id + " active-flag=" + result.active + ">                         <td>" + result.id + "</td>                         <td>" + result.label + "</td>                         <td>" + result.created_at + '</td>                         <td class="center-margin"><i style="font-size: 1.2em; margin: auto;" ' + ("true" == result.active ? 'class="fa fa-circle green-circle"' : 'class="fa fa-circle red-circle"') + ' ></i></td>                         <td style="font-size: 1em; margin-bottom: 6px;">' +
       (void 0 !== result.default_account ? "<i class='center fa fa-check'></i>" : "") + "</td>                         </tr>");
     }
     walletManagementPage.prepareAccountTable();
@@ -1927,7 +1938,7 @@ var walletManagementPage = {
     tagList.html("");
     for (value in walletManagementPage.keyList) {
       var node = walletManagementPage.keyList[value];
-      tagList.append("<tr data-value=" + node.id + " active-flag=" + node.active + ">                         <td>" + node.id + "</td>                         <td>" + node.label + "</td>                         <td>" + node.path + '</td>                         <td><i style="font-size: 1.2em; margin: auto;" ' + ("true" == node.active ? 'class="fa fa-circle green-circle"' : 'class="fa fa-circle red-circle"') + ' ></i></td>                         <td style="font-size: 1em; margin-bottom: 6px;">' + 
+      tagList.append("<tr data-value=" + node.id + " active-flag=" + node.active + ">                         <td>" + node.id + "</td>                         <td>" + node.label + "</td>                         <td>" + node.path + '</td>                         <td><i style="font-size: 1.2em; margin: auto;" ' + ("true" == node.active ? 'class="fa fa-circle green-circle"' : 'class="fa fa-circle red-circle"') + ' ></i></td>                         <td style="font-size: 1em; margin-bottom: 6px;">' +
       (void 0 !== node.current_master ? "<i class='center fa fa-check'></i>" : "") + "</td>                         </tr>");
     }
     walletManagementPage.prepareKeyTable();
@@ -1952,7 +1963,7 @@ var walletManagementPage = {
     var e = false;
     var add = $("#extkey-account-table tr.selected");
     var $target = $("#extkey-table tr.selected");
-    return add.length || $target.length ? (add.length ? (selected = add.attr("data-value").trim(), active = add.attr("active-flag").trim(), e = true) : (selected = $target.attr("data-value").trim(), active = $target.attr("active-flag").trim()), void 0 === selected || "" === selected ? (alert("Please select an account or key to change the active status."), false) : (result = bridge.extKeySetActive(selected, active), "" !== result.error_msg ? (alert(result.error_msg), false) : void(e ? walletManagementPage.updateAccountList() : 
+    return add.length || $target.length ? (add.length ? (selected = add.attr("data-value").trim(), active = add.attr("active-flag").trim(), e = true) : (selected = $target.attr("data-value").trim(), active = $target.attr("active-flag").trim()), void 0 === selected || "" === selected ? (alert("Please select an account or key to change the active status."), false) : (result = bridge.extKeySetActive(selected, active), "" !== result.error_msg ? (alert(result.error_msg), false) : void(e ? walletManagementPage.updateAccountList() :
     walletManagementPage.updateKeyList()))) : (alert("Please select an account or key to change the active status."), false);
   }
 };
