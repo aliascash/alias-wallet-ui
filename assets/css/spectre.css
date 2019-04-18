@@ -11,49 +11,6 @@
     overflow: hidden
 }
 
-/*------------------------------------------------------------------
-[Fonts]
-*/
-
-@font-face {
-    font-family: "Open Sans";
-    font-weight: 300;
-    src: url("../fonts/OpenSans/OpenSans-Light.ttf");
-}
-
-@font-face {
-    font-family: "Open Sans";
-    font-weight: 300;
-    src: url("../fonts/OpenSans/OpenSans-LightItalic.ttf");
-    font-style: italic
-}
-
-@font-face {
-    font-family: "Open Sans";
-    font-weight: 400;
-    src: url("../fonts/OpenSans/OpenSans-Regular.ttf");
-}
-
-@font-face {
-    font-family: "Open Sans";
-    font-weight: 400;
-    src: url("../fonts/OpenSans/OpenSans-Italic.ttf");
-    font-style: italic
-}
-
-@font-face {
-    font-family: "Open Sans";
-    font-weight: 700;
-    src: url("../fonts/OpenSans/OpenSans-Bold.ttf");
-}
-
-@font-face {
-    font-family: "Open Sans";
-    font-weight: 700;
-    src: url("../fonts/OpenSans/OpenSans-BoldItalic.ttf");
-    font-style: italic;
-}
-
 .uppercase {
     text-transform: uppercase
 }
@@ -226,7 +183,7 @@ table {
 
 button, input, optgroup, select, textarea {
     background: transparant;
-    font-family: "Open Sans", Helvetica, sans-serif;
+    font-family: Helvetica, Verdana, Helvetica, sans-serif;
     font-size: 13px;
     color: #000
 }
@@ -500,7 +457,7 @@ button {
 
 .contact-list ul li .contact-info .contact-name {
     display: block;
-    font-family: "Open Sans", sans-serif;
+    font-family: Helvetica, Verdana, sans-serif;
     color: #5b6a78;
     font-size: 14px;
     white-space: nowrap;
@@ -778,7 +735,7 @@ textarea {
 
 .heading-deselected, .heading-selected {
     font-size: 1em;
-    font-family: "Open Sans", sans-serif;
+    font-family: Helvetica, Verdana, sans-serif;
     text-decoration: none;
     cursor: pointer
 }
@@ -1212,31 +1169,6 @@ progress::-webkit-progress-value {
     padding: 18px
 }
 
-/*------------------------------------------------------------------
-[Paging]
-*/
-
-/*------------------------------------------------------------------
-[Media]
-*/
-
-@font-face {
-    font-family: footable;
-    src: url('../fonts/Footable/footable.eot');
-    src: url('../fonts/Footable/footable.eot?#iefix') format('embedded-opentype'), url('../fonts/Footable/footable.woff') format('woff'), url('../fonts/Footable/Footable/footable.ttf') format('truetype'), url('../fonts/Footable/footable.svg#footable') format('svg');
-    font-weight: 400;
-    font-style: normal
-}
-
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-    @font-face {
-        font-family: footable;
-        src: url('../fonts/Footable/footable.svg#footable') format('svg');
-        font-weight: 400;
-        font-style: normal
-    }
-}
-
 @media (max-width: 700px) {
     .padding-right-forms {
         margin-right: 0
@@ -1271,3 +1203,4 @@ progress::-webkit-progress-value {
 .radio label.form-controlring_size:before {
     display: none
 }
+

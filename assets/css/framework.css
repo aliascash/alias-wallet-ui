@@ -197,7 +197,7 @@ body.dashboard, body.dashboard .page-container {
     color: #626262;
     opacity: .7;
     font-size: 16px;
-    font-family: "Open Sans", sans-serif
+    font-family: Helvetica, Verdana, sans-serif
 }
 
 .header .search-link i {
@@ -574,7 +574,7 @@ body.dashboard, body.dashboard .page-container {
     transition: transform .4s cubic-bezier(.05, .74, .27, .99);
     -webkit-backface-visibility: hidden;
     -webkit-perspective: 1000;
-    font-family: "Open Sans", sans-serif;
+    font-family: Helvetica, Verdana, sans-serif;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     font-weight: 700
@@ -1742,27 +1742,6 @@ address a, body {
     height: 158px
 }
 
-/*------------------------------------------------------------------
-[Typography]
-*/
-/* Standard elements
---------------------------------------------------
-*/
-/* To Load Hinted Fonts for Windows */
-@font-face {
-    font-family: Montserrat;
-    font-style: normal;
-    font-weight: 400;
-    src: local('Montserrat-Regular'), url(../fonts/Montserrat/montserrat-regular-webfont.woff2) format('woff2'), url(../fonts/Montserrat/montserrat-regular-webfont.woff) format('woff'), url('../fonts/Montserrat/Montserrat-Regular.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: Montserrat;
-    font-style: normal;
-    font-weight: 700;
-    src: local('Montserrat-Bold'), url(../fonts/Montserrat/montserrat-bold-webfont.woff2) format('woff2'), url(../fonts/Montserrat/montserrat-bold-webfont.woff) format('woff'), url('../fonts/Montserrat/Montserrat-Bold.ttf') format('truetype');
-}
-
 html {
     font-size: 100%;
     -ms-text-size-adjust: 100%;
@@ -1770,7 +1749,7 @@ html {
 }
 
 body {
-    font-family: "Open Sans", sans-serif;
+    font-family: Helvetica, Verdana, sans-serif;
     font-size: 13px;
     font-weight: 400
 }
@@ -1781,7 +1760,7 @@ option, select {
 
 h1, h2, h3, h4, h5, h6 {
     margin: 10px 0;
-    font-family: "Open Sans", sans-serif;
+    font-family: Helvetica, Verdana, sans-serif;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     font-weight: 300;
@@ -2392,12 +2371,8 @@ hr.dotted {
 /* Font Faces
 ------------------------------------
 */
-.font-arial {
-    font-family: Arial, sans-serif !important
-}
-
 .font-montserrat {
-    font-family: Montserrat !important
+    font-family: Helvetica, Verdana, sans-serif
 }
 
 .font-georgia {
@@ -2405,7 +2380,7 @@ hr.dotted {
 }
 
 .font-heading {
-    font-family: "Open Sans", sans-serif
+    font-family: Helvetica, Verdana, sans-serif
 }
 
 /* Wells
@@ -3379,7 +3354,7 @@ hr.dotted {
 */
 .badge {
     text-spectre: none;
-    font-family: "Open Sans", sans-serif;
+    font-family: Helvetica, Verdana, sans-serif;
     font-weight: 600;
     background-color: #e6e6e6;
     font-size: 11px;
@@ -10172,3 +10147,4 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
 .f-off:before {
     content: "" !important
 }
+
