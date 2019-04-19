@@ -221,6 +221,15 @@ button {
     height: 35px
 }
 
+.unit.select-drop-down {
+    width: 110px;
+    border: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    font-size: 13px;
+    height: 35px
+}
+
 ::-webkit-input-placeholder, :placeholder-shown {
     color: #626262
 }
