@@ -238,7 +238,7 @@ body.dashboard, body.dashboard .page-container {
 ------------------------------------
 */
 .page-sidebar {
-    width: 280px;
+    width: 250px;
     background-color: #0f0e12;
     left: -210px;
     position: fixed;
@@ -284,10 +284,9 @@ body.dashboard, body.dashboard .page-container {
 .sidebar-header-collapsed {
     float: right;
     height: 60px;
-    width: 30px;
+    width: 38px;
     overflow: hidden;
-    margin-right: 18.5px;
-    display: none
+    display: none;
 }
 
 .sidebar-header-collapsed-visible {
@@ -905,7 +904,7 @@ body.dashboard, body.dashboard .page-container {
 .page-container {
     width: 100%;
     height: 100%;
-    padding-left: 70px
+    padding-left: 40px
 }
 
 .page-container .page-content-wrapper {
@@ -1583,7 +1582,7 @@ body, p {
 
 .panel-maximized {
     position: fixed !important;
-    left: 70px;
+    left: 40px;
     top: 59px;
     bottom: 0;
     right: 0;
@@ -3970,11 +3969,11 @@ body.menu-pin > .pgn-wrapper[data-position$='-left'], body.menu-pin > .pgn-wrapp
 
 body > .pgn-wrapper[data-position=top] {
     top: 60px;
-    left: 70px
+    left: 40px
 }
 
 body > .pgn-wrapper[data-position=bottom] {
-    left: 70px
+    left: 40px
 }
 
 body > .pgn-wrapper[data-position$='-left'] {
@@ -4533,7 +4532,7 @@ body > .pgn-wrapper {
 .nav-tabs > li > a {
     padding: 15px 20px;
     margin-right: 0;
-    min-width: 70px;
+    min-width: 40px;
     text-transform: uppercase;
     border-color: transparent;
     font-weight: bolder;
@@ -6823,7 +6822,7 @@ https://github.com/Waxolunist/bootstrap3-wysihtml5-bower
 }
 
 .editor-icon-ol {
-    background-position: -280px 0
+    background-position: -250px 0
 }
 
 .editor-icon-outdent {
@@ -9190,7 +9189,7 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
 }
 
 /*** Desktops & Laptops ***/
-@media only screen and (min-width: 980px) {
+@media only screen and (min-width: 0px) {
     body.ie9.menu-pin .page-sidebar {
         transform: none !important;
         -webkit-transform: none !important;
@@ -9215,6 +9214,14 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
 
     body.menu-pin .page-container .page-content-wrapper .footer {
         left: 250px
+    }
+
+    body .page-container .page-content-wrapper .content {
+        padding-left: 40px
+    }
+
+    body .page-container .page-content-wrapper .footer {
+        left: 40px
     }
 
     body.menu-pin [data-toggle-pin=sidebar] > i:before {
@@ -9302,214 +9309,6 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
     }
 }
 
-/*** General Small Screen Desktops ***/
-/*** General tablets and phones ***/
-@media (max-width: 991px) {
-    .header > .pull-right .sm-action-bar, body.box-layout .header > .container .pull-right .sm-action-bar {
-        right: 0
-    }
-
-    .page-container {
-        padding-left: 0
-    }
-
-    body.sidebar-open .page-container {
-        -webkit-transform: translate3d(250px, 0, 0);
-        transform: translate3d(250px, 0, 0);
-        -ms-transform: translate(250px, 0);
-        overflow: hidden;
-        position: fixed
-    }
-
-    body.box-layout > .container {
-        padding: 0;
-        height: 100%
-    }
-
-    body.box-layout .header > .container {
-        padding: 0
-    }
-
-    .header {
-        padding: 0 10px;
-        width: 100%;
-        border-bottom: 1px solid rgba(0, 0, 0, .07);
-        background: #fff !important
-    }
-
-    .header .header-inner {
-        text-align: center
-    }
-
-    .header .header-inner .toggle-sidebar {
-        display: block;
-        position: absolute;
-        left: 23px
-    }
-
-    .header .header-inner .mark-email {
-        left: 45px;
-        position: absolute;
-        top: 23px
-    }
-
-    .header .header-inner .quickview-link {
-        position: absolute;
-        right: 0;
-        top: 12px
-    }
-
-    .header .brand {
-        width: auto
-    }
-
-    .header .notification-list, .header .search-link {
-        display: none
-    }
-
-    .header > .pull-left, .header > .pull-right {
-        position: relative
-    }
-
-    .sm-action-bar {
-        position: absolute;
-        top: 50%;
-        -webkit-transform: translateY(-50%);
-        transform: translateY(-50%);
-        z-index: 10
-    }
-
-    .sm-action-bar > a {
-        padding: 10px;
-        display: inline-block
-    }
-
-    .pace .pace-activity {
-        top: 60px
-    }
-
-    .page-sidebar .sidebar-menu .menu-items > li ul.sub-menu > li {
-        padding: 0 30px 0 36px
-    }
-
-    .page-container {
-        z-index: 100;
-        position: relative;
-        transition: transform .25s ease;
-        -webkit-transition: -webkit-transform .25s ease
-    }
-
-    .page-container .page-content-wrapper .content {
-        overflow-x: hidden;
-        height: auto
-    }
-
-    .icon-thumbnail {
-        margin-right: 24px
-    }
-
-    .page-sidebar {
-        width: 250px;
-        left: 0 !important;
-        -webkit-transform: translate3d(0, 0, 0) !important;
-        transform: translate3d(0, 0, 0) !important;
-        display: none;
-        z-index: auto
-    }
-
-    .page-sidebar.visible {
-        display: block
-    }
-
-    .page-sidebar .page-sidebar-inner {
-        z-index: 1;
-        left: 0 !important;
-        width: 260px
-    }
-
-    .page-sidebar .page-sidebar-inner .sidebar-slide .sidebar-menu {
-        overflow: scroll;
-        -webkit-overflow-scrolling: touch;
-        top: 40px;
-        bottom: 0
-    }
-
-    .page-sidebar .page-sidebar-inner .sidebar-slide .sidebar-menu ul > li > a > .badge {
-        display: inline-block
-    }
-
-    .breadcrumb, .copyright {
-        padding-left: 15px;
-        padding-right: 15px
-    }
-
-    body > .pgn-wrapper[data-position=top] {
-        top: 48px;
-        left: 0
-    }
-
-    body > .pgn-wrapper[data-position=bottom] {
-        left: 0
-    }
-
-    body > .pgn-wrapper[data-position$='-left'] {
-        left: 20px;
-        right: auto
-    }
-
-    .sm-table {
-        display: table;
-        width: 100%
-    }
-
-    .user-profile-wrapper {
-        position: absolute;
-        right: 50px;
-        top: -9px
-    }
-
-    .sm-b-b, .sm-b-l, .sm-b-r, .sm-b-t {
-        border-width: 0
-    }
-
-    .sm-b-r {
-        border-right-width: 1px
-    }
-
-    .sm-b-l {
-        border-left-width: 1px
-    }
-
-    .sm-b-t {
-        border-top-width: 1px
-    }
-
-    .sm-b-b {
-        border-bottom-width: 1px
-    }
-}
-
-/* Landscape view of all tablet devices */
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
-    .page-sidebar .sidebar-menu .menu-items ul {
-        -webkit-transform: translateZ(0);
-        -webkit-backface-visibility: hidden;
-        -webkit-perspective: 1000
-    }
-
-    .page-container .page-content-wrapper .content {
-        padding-top: 60px
-    }
-
-    body.box-layout > .container {
-        width: 100%
-    }
-
-    .error-page .error-container {
-        width: auto
-    }
-}
-
 @media (min-width: 1200px) {
     .row-same-height {
         overflow: hidden
@@ -9543,7 +9342,6 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
     }
 }
 
-/* Portrait view of all tablet devices */
 @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
     .page-sidebar .sidebar-menu .menu-items > li > a {
         padding-left: 27px
@@ -9580,27 +9378,6 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
     .container-fluid, .jumbotron {
         padding-left: 0;
         padding-right: 0
-    }
-
-    .page-container .page-content-wrapper .content {
-        padding-top: 48px;
-        padding-bottom: 100px
-    }
-
-    .page-sidebar .sidebar-header {
-        padding: 0 12px
-    }
-
-    .page-sidebar .sidebar-menu .menu-items > li > a {
-        padding-left: 20px
-    }
-
-    .page-sidebar .sidebar-menu .menu-items > li ul.sub-menu > li {
-        padding: 0 25px 0 28px
-    }
-
-    .icon-thumbnail {
-        margin-right: 20px
     }
 
     .sm-pull-bottom, .sm-pull-up {
@@ -10080,11 +9857,6 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
         font-size: 48px;
         height: 118px;
         line-height: 46px
-    }
-
-    .page-sidebar .sidebar-header {
-        height: 48px;
-        line-height: 48px
     }
 
     .panel .panel-heading {
