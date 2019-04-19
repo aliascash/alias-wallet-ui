@@ -107,6 +107,7 @@ function connectSignals() {
   bridge.sendCoinsResult.connect(sendCoinsResult);
   bridge.transactionDetailsResult.connect(transactionDetailsResult);
   bridge.sendMessageResult.connect(sendMessageResult);
+  bridge.joinGroupChatResult.connect(joinGroupChatResult);
 
 
   optionsModel.displayUnitChanged.connect(unit_setType);
@@ -927,7 +928,7 @@ function appendContact(key, v33, recurring) {
 function getContactUsername(i) {
   var line;
 //TODO: SIGNAL bridge
-    return "object" == typeof verified_list[i] ? verified_list[i].username : (line = bridge.getAddressLabel(i), "string" == typeof line ? line.replace("group_", "") : i);
+  return "object" == typeof verified_list[i] ? verified_list[i].username : (line = bridge.getAddressLabel(i), "string" == typeof line ? line.replace("group_", "") : i);
 }
 function isStaticVerified(property) {
   return "object" == typeof verified_list[property];
@@ -1130,8 +1131,21 @@ function deleteInvite(keepData, message) {
   $("#invite-" + keepData + "-" + message).html("");
 }
 function acceptInvite(key, data, endpoint) {
+  endpointAcceptInvite = endpoint;
+  dataAcceptInvite = data;
+  bridge.joinGroupChat(key, data)
+  return "false";
+}
+function resetAcceptInviteVariables() {
+  endpointAcceptInvite = null;
+  dataAcceptInvite = null;
+}
+function joinGroupChatResult(result) {
+  var endpoint = endpointAcceptInvite;
+  var data = dataAcceptInvite;
   deleteInvite(key, endpoint);
-  var camelKey = bridge.joinGroupChat(key, data);//TODO: SIGNAL bridge
+  var camelKey = result;
+  resetAcceptInviteVariables();
   return "false" !== camelKey && (updateContact(data, camelKey), createContact(data, camelKey, true), void appendContact(camelKey, true, false));
 }
 function inviteGroupChat(data) {
@@ -1157,7 +1171,7 @@ function inviteGroupChat(data) {
   result.length > 0;
 }
 function leaveGroupChat() {
-//TODO: SIGNAL bridge
+//TODO: SIGNAL bridge ---- not being called anywhere
     var leaveGroupChat = bridge.leaveGroupChat(current_key);
   return leaveGroupChat;
 }
