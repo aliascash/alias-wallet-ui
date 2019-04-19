@@ -871,6 +871,10 @@ progress::-webkit-progress-value {
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
+#transactions > tbody > tr > td.trans-status {
+    width: 1em;
+}
+
 /* Make page-content scrollable with fix header */
 body.fixed-header {
     overflow-y: hidden;
