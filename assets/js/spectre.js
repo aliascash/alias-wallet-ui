@@ -132,26 +132,21 @@ function transactionDetailsResult(result) {
     $("#transaction-info").html(result);
 }
 
-var validateAddressResultBool = undefined;
-var sendCoinsResultBool = undefined;
-var addRecipientResultBool = undefined;
+var numOfRecipients = undefined;
 
 function validateAddressResult(result) {
-    validateAddressResultBool = result
-    sendPage.update(sendCoinsResultBool, validateAddressResultBool, addRecipientResultBool);
+    // not in use currently
 }
 
 function sendCoinsResult(result) {
     console.log('sendCoinsResult')
     console.log(result)
-    sendCoinsResultBool = result
-    sendPage.update(sendCoinsResultBool, validateAddressResultBool, addRecipientResultBool);
+    sendPage.update(result, undefined);
 }
 
 
 function addRecipientResult(result) {
-    addRecipientResultBool = result
-    sendPage.update(sendCoinsResultBool, validateAddressResultBool, addRecipientResultBool);
+    sendPage.update(undefined, result);
 }
 
 
