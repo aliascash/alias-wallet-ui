@@ -275,16 +275,20 @@ body.dashboard, body.dashboard .page-container {
     border-bottom: 1px solid #0f0f13;
     color: #fff;
     width: 100%;
-    padding-left: 30px;
+    padding-left: 0px;
     clear: both;
     z-index: 10;
     position: relative
 }
 
+.sidebar-header-hidden {
+    display: none !important
+}
+
 .sidebar-header-collapsed {
     float: right;
     height: 60px;
-    width: 38px;
+    width: 40px;
     overflow: hidden;
     display: none;
 }
