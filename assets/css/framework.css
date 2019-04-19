@@ -9295,19 +9295,6 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
         position: relative
     }
 
-    .header .user-info-wrapper .user-details .user-name {
-        font-size: 16px
-    }
-
-    .header .user-info-wrapper .user-details .user-other {
-        font-size: 10px
-    }
-
-    .header .user-info-wrapper .user-pic {
-        position: relative;
-        top: -6px
-    }
-
     .notification-panel {
         width: 400px
     }
