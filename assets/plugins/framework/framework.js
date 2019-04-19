@@ -552,8 +552,10 @@ $(function () {
                     $("#sidebar-header-collapsed").removeClass("sidebar-header-collapsed-visible");
                 } else {
                     $('body').removeClass("menu-pin");
-                    $("#sidebar-header").addClass("sidebar-header-hidden");
-                    $("#sidebar-header-collapsed").addClass("sidebar-header-collapsed-visible");
+                    if (!$("body").hasClass("sidebar-visible")) {
+                        $("#sidebar-header").addClass("sidebar-header-hidden");
+                        $("#sidebar-header-collapsed").addClass("sidebar-header-collapsed-visible");
+                    }
                 }
                 ;
             }, 200, fullDateString.getTime());
@@ -561,7 +563,7 @@ $(function () {
 
         var init = function (element, options) {
             function start(ui) {
-                return (!$.Framework.isVisibleXs() && void ($(".close-sidebar").data("clicked") || (that.$body.hasClass("menu-pin") || (that.cssAnimation ? (that.$element.css({
+                return (void ($(".close-sidebar").data("clicked") || (that.$body.hasClass("menu-pin") || (that.cssAnimation ? (that.$element.css({
                     transform: that.menuOpenCSS
                 }), that.$body.addClass("sidebar-visible"), $("#sidebar-header-collapsed").removeClass("sidebar-header-collapsed-visible"), $("#sidebar-header").removeClass("sidebar-header-hidden")) : that.$element.stop().animate({
                     left: "0px"
@@ -573,9 +575,6 @@ $(function () {
             }
 
             function show(ev) {
-                if ($.Framework.isVisibleXs()) {
-                    return false;
-                }
                 if ("undefined" != typeof ev) {
                     var $tabsLinks = $(ev.target);
                     if ($tabsLinks.parent(".page-sidebar").length) {
