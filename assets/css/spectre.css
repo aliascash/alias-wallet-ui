@@ -1204,6 +1204,7 @@ progress::-webkit-progress-value {
     display: none
 }
 
+/* Make tbody scrollable */
 #transactions > thead {
     display: table;
     width: calc(100% - 1.25em);
@@ -1220,4 +1221,27 @@ progress::-webkit-progress-value {
     display: table;
     width: 100%;
     table-layout: fixed; /* even columns width , fix width of table too*/
+}
+
+/* Make page-content scrollable with fix header */
+body.fixed-header {
+    overflow-y: hidden;
+}
+
+.header {
+    position: static !important;
+}
+
+.page-container > .page-content-wrapper > .content {
+    padding-top: 0px !important;
+}
+
+.page-container > .page-content-wrapper {
+    position: absolute !important;
+    min-height: initial !important;
+    top: 60px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow-y: auto;
 }
