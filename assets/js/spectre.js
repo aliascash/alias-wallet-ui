@@ -657,7 +657,7 @@ function appendTransactions(f) {
 }
 function spectreChatInit() {
   var r20 = [{
-    name : "Send&nbsp;Spectrecoin",
+    name : "Send&nbsp;Spectre",
     fun : function() {
       clearRecipients();
       $("#pay_to0").val($("#contact-list .selected .contact-address").text());
