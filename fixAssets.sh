@@ -81,6 +81,7 @@ do
         for filename in $REPLACE
         do
             [[ $filename == "qrc:"* ]] && continue
+            [[ $filename == "data:image"* ]] && continue
 
             if [[ $filename == "../"* ]]
             then
