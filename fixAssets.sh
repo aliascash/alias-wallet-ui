@@ -2,11 +2,11 @@
 shopt -s extglob
 rm -rf build
 mkdir -p build
-cp -rp !(build) build/
+cp -r assets index.html spectre.qrc build/
+find build/ -name README.md -exec rm -f {} \;
 sed -i 's^"assets^"qrc:///assets^g' build/index.html
 minify build/index.html > build/index.min.html
 mv build/index.min.html build/index.html
-#mv build/index.html.min build/index.html
 > build/spectre.qrc
 IFS=$'\n'
 MINIFY="
@@ -104,3 +104,4 @@ do
         echo $file
     fi
 done
+tar czf spectrecoin-ui-assets.tgz build/
