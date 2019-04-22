@@ -1,13 +1,4 @@
-Umbra
-======
-Umbra HTML5 UI
-
-
-Windows usage:
-In C:\ root, `git clone git@github.com:shadowproject/Shadow-UI.git shadow`
-
-Linux / Mac usage:
-in /opt, `git clone git@github.com:shadowproject/Shadow-UI.git shadow`
+## Spectrecoin HTML5 UI
 
 Feel free to customise it :)
 
