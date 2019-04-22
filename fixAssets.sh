@@ -26,15 +26,15 @@ assets/js/tooltip.js
 assets/js/spectre.js
 "
 
-for file in $MINIFY
+for file in ${MINIFY}
 do
-    echo minify $file
+    echo minify ${file}
     filename=${file%.*}
     extension=${file##*.}
 
-    minify "$file" > build/$filename.min.$extension
-    rm build/$file
-    sed -i 's^'$file'^'$filename.min.$extension'^' build/index.html
+    minify "$file" > build/${filename}.min.${extension}
+    rm build/${file}
+    sed -i 's^'${file}'^'${filename}.min.${extension}'^' build/index.html
 done
 
 cd build
@@ -44,12 +44,12 @@ cd ..
 while read line
 do
     echo "$line" >> build/spectre.qrc
-    if [ "$line" == '    <qresource prefix="/">' ]
+    if [[ "$line" == '    <qresource prefix="/">' ]]
     then
-        for asset in $assets
+        for asset in ${assets}
         do
-            [[ $MINIFY =~ $asset ]] && continue
-            echo '        <file alias="'$asset'">src/qt/res/'$asset'</file>' >> build/spectre.qrc
+            [[ ${MINIFY} =~ $asset ]] && continue
+            echo '        <file alias="'${asset}'">src/qt/res/'${asset}'</file>' >> build/spectre.qrc
         done
     fi
 done < spectre.qrc
@@ -59,11 +59,11 @@ FILES=()
 unset IFS
 while read line
 do
-    [ "$line" == '<qresource prefix="/">' ] && RES=true
-    [ "$line" == '</qresource>' ] && break
-    if [ "$RES" = true ]
+    [[ "$line" == '<qresource prefix="/">' ]] && RES=true
+    [[ "$line" == '</qresource>' ]] && break
+    if [[ "$RES" = true ]]
     then
-        line=`echo $line | sed 's^<file alias="\(.*\)">.*</file>^\1^'`
+        line=`echo ${line} | sed 's^<file alias="\(.*\)">.*</file>^\1^'`
         ALIASES+=(${line})
         FILES+=("build/${line}")
     fi
@@ -73,35 +73,35 @@ for index in ${!FILES[*]}
 do
     file=${FILES[$index]}
     alias=${ALIASES[$index]}
-    if [[ $file == *".css" ]] && [ $(fgrep "url(" $file -l) ]
+    if [[ ${file} == *".css" ]] && [[ $(fgrep "url(" ${file} -l) ]]
     then
-        DIR=`dirname $alias`
-        PREVDIR=`dirname $DIR`
-        REPLACE=$(fgrep "url(" $file | grep -o 'url(['\''"]\?\([^'\''")]\+\)["'\'']\?)' | sed 's/url(\|["'\'']\|)//g'|sed 's/&/\\&/g')
-        for filename in $REPLACE
+        DIR=`dirname ${alias}`
+        PREVDIR=`dirname ${DIR}`
+        REPLACE=$(fgrep "url(" ${file} | grep -o 'url(['\''"]\?\([^'\''")]\+\)["'\'']\?)' | sed 's/url(\|["'\'']\|)//g'|sed 's/&/\\&/g')
+        for filename in ${REPLACE}
         do
-            [[ $filename == "qrc:"* ]] && continue
-            [[ $filename == "data:image"* ]] && continue
+            [[ ${filename} == "qrc:"* ]] && continue
+            [[ ${filename} == "data:image"* ]] && continue
 
-            if [[ $filename == "../"* ]]
+            if [[ ${filename} == "../"* ]]
             then
-              replacement=`echo $filename|sed 's!^..!qrc:///'$PREVDIR'!'`
-              sed -i 's^url(['\''"]\?'$filename'['\''"]\?)^url('$replacement')^g' $file
+              replacement=`echo ${filename}|sed 's!^..!qrc:///'${PREVDIR}'!'`
+              sed -i 's^url(['\''"]\?'${filename}'['\''"]\?)^url('${replacement}')^g' ${file}
             else
               replacement="qrc:///$DIR/$filename"
-              sed -i 's^url(['\''"]\?'$filename'['\''"]\?)^url('$replacement')^g' $file
+              sed -i 's^url(['\''"]\?'${filename}'['\''"]\?)^url('${replacement}')^g' ${file}
               #sed -i '
             fi
         done
-        echo $file
+        echo ${file}
     fi
 
-    if [[ $file == *".js" ]] && [ $(fgrep "assets" $file -l) ]
+    if [[ ${file} == *".js" ]] && [[ $(fgrep "assets" ${file} -l) ]]
     then
-        sed -i 's^\(assets/\(js\|icons\|img\|plugins\)\)^qrc:///\1^g' $file
-        sed -i 's^\./qrc:///^qrc:///^g' $file
+        sed -i 's^\(assets/\(js\|icons\|img\|plugins\)\)^qrc:///\1^g' ${file}
+        sed -i 's^\./qrc:///^qrc:///^g' ${file}
 
-        echo $file
+        echo ${file}
     fi
 done
 cd build
