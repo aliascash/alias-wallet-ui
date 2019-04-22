@@ -104,4 +104,6 @@ do
         echo $file
     fi
 done
-tar czf spectrecoin-ui-assets.tgz build/
+cd build
+tar czf ../spectrecoin-ui-assets.tgz .
+cd -
