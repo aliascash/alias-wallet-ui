@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta http-equiv=content-type content="text/html;charset=UTF-8">
-<meta charset=utf-8><title>Spectre GUIv2 alpha</title>
+<meta charset=utf-8><title>Spectre GUIv1 alpha</title>
 <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <script>function preventDefault(e) {
     e = e || event, e.preventDefault()
@@ -48,8 +48,7 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                     <li><a href=#addressbook class=translate>Address Book <span class=icon-thumbnail><i
                             class="fa fa-bars"></i></span></a>
                 </ul>
-            <li><a href=#market><span class=title class=translate>Market</span> <span class=icon-thumbnail><i
-                    class="fa fa-shopping-cart"></i></span></a>
+                <!-- <li><a href=#market><span class=title class=translate>Market</span> <span class=icon-thumbnail><i class="fa fa-shopping-cart"></i></span></a> -->
             <li><a href=#messages id=chat-menu-link onclick=scrollMessages()><span class="title translate">Chat</span>
                 <span class=icon-thumbnail><i class="fa fa-comment"></i> </span><span class=details><span
                         class=user-notifications><span id=message-count>0</span> </span><span class=translate>Notifications</span></span></a>
@@ -133,9 +132,8 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                                 <progress id=syncProgressBar max=100 value=1 data-title="Catching up...
                                 downloaded 0 blocks of history..."></progress>
                             <li class="inline p-l-10">
-                                <div id=tor class=no-tor data-title="Tor connection offline"></div>
-                            <li class="inline p-l-10">
-                                <div id=i2p class=no-i2p data-title="i2p connection offline"></div>
+                                <div id=tor class=tor data-title="Tor connection online"></div>
+                                <!-- <li class="inline p-l-10"><div id=i2p class=no-i2p data-title="i2p connection offline"></div> -->
                             <li class="inline p-l-10">
                                 <div id=encryptionIcon class="no-encryption f-off"
                                      onclick='bridge.userAction(["toggleLock"])'
@@ -220,9 +218,9 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                                             </div>
                                             <select id=qrunit class="unit select-drop-down" style=width:167px
                                                     onchange='unit.format("#qramount",$(this).val()),showQRCode()'>
-                                                <option value=0 title=Spectre>SPEC
-                                                <option value=1 title="Milli-Spectre (1 / 1000)">mSPEC
-                                                <option value=2 title="Micro-Spectre (1 / 1000000)">&micro;SPEC
+                                                <option value=0 title=Spectre>XSPEC
+                                                <option value=1 title="Milli-Spectre (1 / 1000)">mXSPEC
+                                                <option value=2 title="Micro-Spectre (1 / 1000000)">&micro;XSPEC
                                                 <option value=3 title="spectoshi (1 / 100000000)">spectoshi
                                             </select></div>
                                     </div>
@@ -664,7 +662,7 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                                                     <div class=total-balance style=text-align:center><h3
                                                             class=semi-bold><span id=total-big><span>0</span> <span
                                                             class=light-red>.</span> <span class=cents>00</span> <span
-                                                            class="units unit">SPEC</span></span></h3>
+                                                            class="units unit">XSPEC</span></span></h3>
                                                         <div class=clearfix></div>
                                                     </div>
                                                 </div>
@@ -772,18 +770,12 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                                         src=qrc:///assets/img/shoppingcart.png>
                                     <h1>SPECTRE MARKETPLACE</h1>
                                     <p>under development</div>
-                                <div class="col-sm-6 bg-white" style=text-align:right;padding-top:100px><h5>GET IN TOUCH
-                                    AND CONTRIBUTE</h5>
+                                <div class="col-sm-6 col-sm-offset-3 bg-white"
+                                     style=text-align:center;padding-top:100px><h5>GET IN TOUCH AND CONTRIBUTE</h5>
                                     <p style=opacity:6>Join us on <a href=https://spectreproject.slack.com
                                                                      target=_blank>Slack</a> (get <a
                                             href=https://slack.spectreproject.io target=_blank>invite here</a>)</div>
-                                <div class="col-sm-6 bg-white m-t-130" style=padding-top:100px><h5>DONATE AND SUPPORT
-                                    DEVELOPMENT</h5>
-                                    <p style=opacity:6><a
-                                            href="javascript:sendPage.addRecipientDetail('SpecDevWEbq3CZgZc8UNbST1TaYLA5vLZTS', 'SPEC Dev Fund', 'keep up the work!', 5)">SpecDevWEbq3CZgZc8UNbST1TaYLA5vLZTS</a>
-                                    <p style=opacity:6><a
-                                            href="bitcoin:1GiosBkSpN8RS9pm1kgZU8AZUBEnLKYFem&label=SPEC%20Dev%20Fund">1GiosBkSpN8RS9pm1kgZU8AZUBEnLKYFem</a>
-                                </div>
+                                <!--<div class="col-sm-6 bg-white m-t-130" style=padding-top:100px><h5>DONATE AND SUPPORT DEVELOPMENT</h5><p style=opacity:6><a href="javascript:sendPage.addRecipientDetail('SpecDevWEbq3CZgZc8UNbST1TaYLA5vLZTS', 'XSPEC Dev Fund', 'keep up the work!', 5)">SpecDevWEbq3CZgZc8UNbST1TaYLA5vLZTS</a><p style=opacity:6><a href="bitcoin:1GiosBkSpN8RS9pm1kgZU8AZUBEnLKYFem&label=XSPEC%20Dev%20Fund">1GiosBkSpN8RS9pm1kgZU8AZUBEnLKYFem</a></div>-->
                             </div>
                         </div>
                     </div>
@@ -923,9 +915,9 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                                                             data-title="Current spendable send payment balance"><b
                                                             class=translate>Balance:</b> <span id=spend_spec><span
                                                             class=balance>0.00</span> <span
-                                                            class=unit>SPEC</span> </span><span id=spend_spectre><span
+                                                            class=unit>XSPEC</span> </span><span id=spend_spectre><span
                                                             class=spectre_balance>0.00</span> <span
-                                                            class=unit>SPEC</span> </span></span><span
+                                                            class=unit>XSPEC</span> </span></span><span
                                                             id=tx_ringsize><label
                                                             class="form-controlring_size m-r-10 translate"
                                                             for=ring_size>Ring Size:</label><input
@@ -953,9 +945,9 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                                                             data-title="Current spendable balance to account"><b
                                                             class=translate>Balance:</b> <span id=to_spectre><span
                                                             class=spectre_balance>0.00</span> <span
-                                                            class=unit>SPEC</span> </span><span id=to_spec><span
+                                                            class=unit>XSPEC</span> </span><span id=to_spec><span
                                                             class=balance>0.00</span> <span
-                                                            class=unit>SPEC</span></span></span></div>
+                                                            class=unit>XSPEC</span></span></span></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1040,11 +1032,11 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                                                                 <select class="unit select-drop-down"
                                                                         style=margin-left:7px
                                                                         onchange='unit.format("#recipient-template .amount",$(this).val())'>
-                                                                    <option value=0 title=Spectre>SPEC
+                                                                    <option value=0 title=Spectre>XSPEC
                                                                     <option value=1 title="Milli-Spectre (1 / 1000)">
-                                                                        mSPEC
+                                                                        mXSPEC
                                                                     <option value=2 title="Micro-Spectre (1 / 1000000)">
-                                                                        &micro;SPEC
+                                                                        &micro;XSPEC
                                                                     <option value=3 title="spectoshi (1 / 100000000)">
                                                                         spectoshi
                                                                 </select></div>
@@ -1106,10 +1098,10 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                                                             </div>
                                                             <select class="unit select-drop-down" style=margin-left:7px
                                                                     onchange='unit.format("#send-balance .amount",$(this).val())'>
-                                                                <option value=0 title=Spectre>SPEC
-                                                                <option value=1 title="Milli-Spectre (1 / 1000)">mSPEC
+                                                                <option value=0 title=Spectre>XSPEC
+                                                                <option value=1 title="Milli-Spectre (1 / 1000)">mXSPEC
                                                                 <option value=2 title="Micro-Spectre (1 / 1000000)">
-                                                                    &micro;SPEC
+                                                                    &micro;XSPEC
                                                                 <option value=3 title="spectoshi (1 / 100000000)">
                                                                     spectoshi
                                                             </select></div>
@@ -1677,8 +1669,7 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                                         <li style=font-weight:bolder;color:#333><a data-toggle=tab href=#tab1network>Network</a>
                                         <li style=font-weight:bolder;color:#333><a data-toggle=tab href=#tab1window>Window</a>
                                         <li style=font-weight:bolder;color:#333><a data-toggle=tab href=#tab1display>Display</a>
-                                        <li style=font-weight:bolder;color:#333><a data-toggle=tab href=#tab1i2p>I2P</a>
-                                        <li style=font-weight:bolder;color:#333><a data-toggle=tab href=#tab1tor>Tor</a>
+                                            <!-- <li style=font-weight:bolder;color:#333><a data-toggle=tab href=#tab1i2p>I2P</a>  <li style=font-weight:bolder;color:#333><a data-toggle=tab href=#tab1tor>Tor</a> -->
                                     </ul>
                                     <div class=tab-content>
                                         <div class="tab-pane active" id=tab1main>
@@ -1723,11 +1714,11 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                                                                                                     value=0.00000000><select
                                                                         class=select-drop-down id=optFeeunit
                                                                         onchange='unit.format("#optFee",$(this).val())'>
-                                                                    <option title=Spectre value=0>SPEC
+                                                                    <option title=Spectre value=0>XSPEC
                                                                     <option title="Milli-Spectre (1 / 1000)" value=1>
-                                                                        mSPEC
+                                                                        mXSPEC
                                                                     <option title="Micro-Spectre (1 / 1000000)" value=2>
-                                                                        &micro;SPEC
+                                                                        &micro;XSPEC
                                                                     <option title="spectoshi (1 / 100000000)" value=3>
                                                                         spectoshi
                                                                 </select></div>
@@ -1756,10 +1747,10 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                                                                                                  value=0.00000000><select
                                                                     class=select-drop-down id=optReserveBalanceunit
                                                                     onchange='unit.format("#optReserveBalance",$(this).val())'>
-                                                                <option title=Spectre value=0>SPEC
-                                                                <option title="Milli-Spectre (1 / 1000)" value=1>mSPEC
+                                                                <option title=Spectre value=0>XSPEC
+                                                                <option title="Milli-Spectre (1 / 1000)" value=1>mXSPEC
                                                                 <option title="Micro-Spectre (1 / 1000000)" value=2>
-                                                                    &micro;SPEC
+                                                                    &micro;XSPEC
                                                                 <option title="spectoshi (1 / 100000000)" value=3>
                                                                     spectoshi
                                                             </select></div>
@@ -1959,11 +1950,11 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                                                             <div class=col-sm-9>
                                                                 <div class=option><select class=select-drop-down
                                                                                           id=optDisplayUnit>
-                                                                    <option title=Spectre value=0>SPEC
+                                                                    <option title=Spectre value=0>XSPEC
                                                                     <option title="Milli-Spectre (1 / 1000)" value=1>
-                                                                        mSPEC
+                                                                        mXSPEC
                                                                     <option title="Micro-Spectre (1 / 1000000)" value=2>
-                                                                        &micro;SPEC
+                                                                        &micro;XSPEC
                                                                     <option title="spectoshi (1 / 100000000)" value=3>
                                                                         spectoshi
                                                                 </select></div>
@@ -2025,7 +2016,7 @@ window.addEventListener("dragover", preventDefault, !1), window.addEventListener
                                         <div class=tab-pane id=tab1tor>
                                             <div class=row>
                                                 <div class=col-md-12>
-                                                    <div id=options-display>TOR (coming soon)</div>
+                                                    <div id=options-display>TOR (Active)</div>
                                                 </div>
                                             </div>
                                         </div>
