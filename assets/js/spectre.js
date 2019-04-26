@@ -1167,13 +1167,30 @@ var chainDataPage = {
   updateAnonOutputs : function() {
       bridge.listAnonOutputs();
   },
+  /*Available fields in anonOutputs:
+  owned_mature
+  owned_outputs
+  system_mature
+  system_compromised
+  system_outputs
+  system_spends
+  system_unspent
+  system_unspent_mature
+  system_mixins
+  system_mixins_mature
+  system_mixins_staking */
   listAnonOutputsResult : function(result) {
       chainDataPage.anonOutputs = result;
       var tagList = $("#chaindata .footable tbody");
       tagList.html("");
       for (value in chainDataPage.anonOutputs) {
         var state = chainDataPage.anonOutputs[value];
-        tagList.append("<tr>                    <td data-value=" + value + ">" + state.value_s + "</td>                    <td>" + state.owned_outputs + (state.owned_outputs == state.owned_mature ? "" : " (<b>" + state.owned_mature + "</b>)") + "</td>                    <td>" + state.system_outputs + " (" + state.system_mature + ")</td>                    <td>" + state.system_spends + "</td>                    <td>" + state.least_depth + "</td>                </tr>");
+        tagList.append("<tr>                    <td data-value=" + value + ">" + state.value_s + "</td>                    <td>"
+          + state.owned_outputs + (state.owned_outputs == state.owned_mature ? "" : " (<b>" + state.owned_mature + "</b>)") + "</td>                    <td>"
+          + state.system_unspent + (state.system_unspent == state.system_unspent_mature ? "" : " (<b>" + state.system_unspent_mature + "</b>)") + "</td>                    <td>"
+          + state.system_mixins + (state.system_mixins == state.system_mixins_mature ? "" : " (<b>" + state.system_mixins_mature + "</b>)") + "</td>                    <td>"
+          + state.system_outputs + (state.system_compromised == 0 ? "" : " (<b>" + state.system_compromised + "</b>)") + "</td>                    <td>"
+          + state.least_depth + "</td>                </tr>");
       }
       $("#chaindata .footable").trigger("footable_initialize");
   }
