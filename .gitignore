@@ -3,3 +3,5 @@
 build/
 *.iml
 spectrecoin-ui-assets.tgz
+
+*.DS_Store
