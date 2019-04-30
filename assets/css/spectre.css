@@ -869,25 +869,25 @@ progress::-webkit-progress-value {
 }
 
 /* Make tbody scrollable */
-#transactions > thead {
+#transactions-table > thead {
     display: table;
     width: calc(100% - 1.25em);
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
-#transactions > tbody {
+#transactions-table > tbody {
     display: block;
     height: 50vh;
     overflow: auto;
 }
 
-#transactions > tbody > tr {
+#transactions-table > tbody > tr {
     display: table;
     width: 100%;
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
-#transactions > tbody > tr > td.trans-status {
+#transactions-table > tbody > tr > td.trans-status {
     width: 1em;
 }
 
@@ -945,5 +945,24 @@ body.fixed-header {
     width: 82%;
     padding: 0;
     margin: 0
+}
+
+/* Make tbody scrollable */
+#chaindata-table > thead {
+    display: table;
+    width: calc(100% - 1.25em);
+    table-layout: fixed; /* even columns width , fix width of table too*/
+}
+
+#chaindata-table > tbody {
+    display: block;
+    height: 50vh;
+    overflow: auto;
+}
+
+#chaindata-table > tbody > tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed; /* even columns width , fix width of table too*/
 }
 

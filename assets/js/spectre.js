@@ -1453,6 +1453,14 @@ var walletManagementPage = {
   }
 };
 
+function resizeTableBodies() {
+  var newHeightTransactionTable = $(window).height() - $('#transactions-table > tbody').offset().top - $('#transactions-table > tfoot').height() - 21;
+  $("#transactions-table > tbody").height(newHeightTransactionTable);  
+
+  var newHeighChaindataTable = $(window).height() - $('#chaindata-table > tbody').offset().top - $('#transactions-table > tfoot').height() - 21;
+  $("#chaindata-table > tbody").height(newHeighChaindataTable);   
+}
+
 window.onload = function() {
   overviewPage.init();
   receivePageInit();
@@ -1486,6 +1494,7 @@ window.onload = function() {
     if (window.innerWidth > breakpoint) {
       $("#layout").removeClass("active");
     }
+    resizeTableBodies();
   };
   if (bridge) {
     $("[href='#about']").on("click", function() {
@@ -1495,6 +1504,8 @@ window.onload = function() {
   $(".footable > tbody tr").selection();
 
   connectSignals();
+
+  resizeTableBodies();
 };
 
 $.fn.selection = function(element) {

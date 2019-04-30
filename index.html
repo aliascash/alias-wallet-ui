@@ -1345,7 +1345,7 @@ downloaded 0 blocks of history..."></progress>
                     <div class="row m-t-45 m-b-0 m-l-35 m-r-35">
                         <div class="panel full-width">
                             <table class="footable spectre table table-hover" data-page-size=20
-                                   data-limit-navigation=5 id=transactions data-filter=#filter-transaction
+                                   data-limit-navigation=5 id=transactions-table data-filter=#filter-transaction
                                    data-manual=true width=100%
                                    style="border-bottom:1px solid rgba(230,230,230,.7)">
                                 <thead>
@@ -1448,30 +1448,25 @@ downloaded 0 blocks of history..."></progress>
                         </div>
                     </nav>
                     <div class="row m-t-45 m-b-0 m-l-35 m-r-35">
-                        <div class="panel full-width bg-transparent">
-                            <div class="panel full-width" style=padding:0>
-                                <table cellspacing=0 class="footable spectre table"
-                                       data-filter=#filter-outputs data-page=false width=100%>
-                                    <thead>
-                                    <tr>
-                                        <th class=sorting data-sort-initial=ascending data-toggle=true
-                                            data-type=numeric title="Coin Value">Coin Value
-                                        <th class=sorting data-type=numeric
-                                            title="No. Owned (Mature)">Owned (Mature)
-                                        <th class=sorting data-type=numeric
-                                            title="No. System Unspent (Mature)">Unspent (Mature)
-                                        <th class=sorting data-hide=phone data-type=numeric title="No. available Mixins (Mature)">Mixins (Mature)
-                                        <th class=sorting data-hide=phone,tablet data-type=numeric 
-                                            title="No. System (Compromised)">System (Compromised)
-                                        <th class=sorting data-hide=phone,tablet data-type=numeric
-                                            title="Chain Least Depth">Least Depth
-                                    <tbody>
-                                    <tfoot>
-                                    <tr>
-                                        <td colspan=5>
-                                            <div class="pagination pager hide-if-no-paging"></div>
-                                </table>
-                            </div>
+                        <div class="panel full-width">
+                            <table id=chaindata-table cellspacing=0 class="footable spectre table"
+                                   data-filter=#filter-outputs data-page=false width=100%>
+                                <thead>
+                                <tr>
+                                    <th class=sorting data-sort-initial=ascending data-toggle=true
+                                        data-type=numeric title="Coin Value">Coin Value
+                                    <th class=sorting data-type=numeric
+                                        title="No. Owned (Mature)">Owned (Mature)
+                                    <th class=sorting data-type=numeric
+                                        title="No. System Unspent (Mature)">Unspent (Mature)
+                                    <th class=sorting data-hide=phone data-type=numeric title="No. available Mixins (Mature)">Mixins (Mature)
+                                    <th class=sorting data-hide=phone,tablet data-type=numeric 
+                                        title="No. System (Compromised)">System (Compromised)
+                                    <th class=sorting data-hide=phone,tablet data-type=numeric
+                                        title="Chain Least Depth">Least Depth
+                                <tbody>
+                                <tfoot>
+                            </table>
                         </div>
                     </div>
                 </div>
