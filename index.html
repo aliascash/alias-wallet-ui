@@ -1334,22 +1334,26 @@ downloaded 0 blocks of history..."></progress>
                         <div class=pull-left>
                             <h4 style=font-weight:bolder>TRANSACTIONS</h4>
                         </div>
-                        <div class="p-t-10 pull-right">
+                        <div class="p-t-10 m-l-15 pull-right">
                             <div class=form-group><input class=form-control id=filter-transaction style=width:200px
                                                          placeholder="Search transactions.."></div>
                         </div>
-                          <div class="p-t-10 m-r-15 pull-right">
-                            <div class="form-group">
-                                <label class="col-xs-6 control-label p-t-10 p-l-20 text-right" for=optGroupStakes>Group Stakes:</label>
-                                <div class="col-xs-6" >
-                                    <div class=option><select class=select-drop-down id=optGroupStakes onchange="prepareTransactions()">
-                                        <option value=0>Off</option>
-                                        <option value=1>Day</option>
-                                        <option value=2>Month</option>
-                                        <option value=3>Year</option>
-                                        <option value=4>All-Time</option>
-                                    </select></div>
-                                </div>
+                        <div class="p-t-10 pull-right">
+                            <div class="option">
+                                <label class="control-label p-l-20 text-right" for=optGroupStakes>
+                                    Group: <a href=#><i class="p-b-5 fa fa-question-circle"
+                                                                 data-title="Grouping will consolidate transactions of chosen <b>type</b> / <b>time-frame</b> and by their <b>state</b>. The date shown is the very latest entry in the group." style=color:#626262></i></a></label>
+                                <select class=select-drop-down style="width: 100px" id=optGroupTxType onchange="prepareTransactions()">
+                                    <option value=0>Stakes</option>
+                                    <option value=1>All</option>
+                                </select>
+                                 <select class=select-drop-down style="width: 100px" id=optGroupTxTime onchange="prepareTransactions()">
+                                    <option value=0>Off</option>
+                                    <option value=1>Day</option>
+                                    <option value=2>Month</option>
+                                    <option value=3>Year</option>
+                                    <option value=4>All-Time</option>
+                                </select>
                             </div>
                         </div>
                         <div class=container-fluid>

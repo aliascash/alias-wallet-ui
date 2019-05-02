@@ -510,31 +510,73 @@ function transactionPageInit() {
       }
     }
   }).on("footable_filtering", function(options) {
-    return!!options.clear || void(filteredTransactions = Transactions.filter(function(tx) {
-      var txToFilter = (Array.isArray(tx)) ? tx[0] : tx;
-      var i;
-      for (i in txToFilter) {
-        if (txToFilter[i].toString().toLowerCase().indexOf(options.filter.toLowerCase()) !== -1) {
-          return true;
+    if (!!options.clear) {
+        return;
+    }
+    filteredTransactions = [];
+    Transactions.forEach(function(tx) {
+        if (Array.isArray(tx)) {
+            var filteredTransactionArray = tx.filter(function(e) {
+                return filterTransaction(e, options.filter);
+            });
+            if (filteredTransactionArray.length === 1) {
+                filteredTransactions.push(filteredTransactionArray[0]);
+            }
+            else if (filteredTransactionArray.length > 0) {
+                filteredTransactions.push(filteredTransactionArray);
+            }
         }
-      }
-      return false;
-    }));
+        else if (filterTransaction(tx, options.filter)) {
+            filteredTransactions.push(tx);
+        }
+    });
   });
+}
+function filterTransaction(tx, filter) {
+    var i;
+    for (i in tx) {
+        if (tx[i].toString().toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
+            return true;
+        }
+    }
+    return false;
 }
 function formatTransaction(tx) {
     if (Array.isArray(tx)) {
-        var totalAmount = tx.reduce(function(total, tx) {
-            return total + tx.am;
-        }, 0);
+        var tooltipStatus = tx[0].tt;
+        if (tx.length > 1 && tx[0].tt !== tx[tx.length-1].tt) {
+            tooltipStatus = "Tx.No. 1:\n" + tooltipStatus;
+            tooltipStatus += "\n-\n" + "Tx.No. " + tx.length + ":\n" + tx[tx.length-1].tt;
+        }
+        var totalAmount = 0;
+        var narrCons = "";
+        var addresses = new Set();
+        tx.forEach(function(txElement) {
+            addresses.add(txElement.ad_d.trim());
+            if (txElement.n) {
+                if (narrCons) {
+                    narrCons += "; "
+                }
+                narrCons += txElement.n.trim();
+            }
+            totalAmount += txElement.am;
+        });
+        var addrCons = "";
+        addresses.forEach(function(a) {
+            if (addrCons) {
+                addrCons += "; "
+            }
+            addrCons += a;
+        });
+
         var o = tx[0];
-        return "<tr id='" + o.id + "' data-title='" + o.tt + "'>"+
-            "<td class='trans-status' data-value='" + o.c + "'><center><i class='fa fa-lg " + o.s + "'></center></td>"+
-            "<td data-value='" + o.d + "'>" + o.d_s + "</td>"+
-            "<td class='amount' style='color:" + o.am_c + ";' data-value='" + totalAmount + "'>" + unit.format(totalAmount) + "</td>"+
-            "<td class='trans_type'><img height='15' width='15' src='qrc:///assets/icons/tx_" + o.t + ".png' /> " + o.t_l + ((tx.length > 1) ? " <b>(x" + tx.length + ")</b>" : "") + "</td>"+
-            "<td class='address' style='color:" + o.a_c + ";' data-value='" + o.ad + "' data-label='" + o.ad_l + "'><span "+ ( o.ad ? "class='editable'" : "") +">" + o.ad_d + "</span></td>"+
-            "<td class='trans-nar'>" + o.n + "</td>" +
+        return "<tr id='" + o.id + "'"+ ((tx.length === 1) ? " data-title='" + o.tt + "'" : "") + ">"+
+            "<td class='trans-status' data-value='" + o.c + "'" + ((tx.length > 1) ? " data-title='" + tooltipStatus + "'" : "") + "><center><i class='fa fa-lg " + o.s + "'></center></td>"+
+            "<td data-value='" + o.d + "'" + ((tx.length > 1) ? " data-title='" + tx[0].d_s + " - "+ tx[tx.length-1].d_s + "'" : "") + ">" + o.d_s + "</td>"+
+            "<td class='amount' style='color:" + o.am_c + ";' data-value='" + unit.format(totalAmount) + "'>" + unit.format(totalAmount) + "</td>"+
+            "<td class='trans_type'" + ((tx.length > 1) ? " data-title='" + tooltipStatus + "'" : "") + "><img height='15' width='15' src='qrc:///assets/icons/tx_" + o.t + ".png' /> " + o.t_l + " <b>(x" + tx.length + ")</b></td>"+
+            "<td class='address' style='color:" + o.a_c + ";' data-value='" + addrCons + "' data-label='" + addrCons + "' data-title='" + addrCons + "' ><span>" + addrCons + "</span></td>"+
+            "<td class='trans-nar' data-title='" + narrCons + "'>" + narrCons + "</td>" +
             "</tr>";
     }
     else {
@@ -559,7 +601,9 @@ function visibleTransactions(checkSet) {
   }
 }
 function bindTransactionTableEvents() {
-  $("#transactions .footable tbody tr").tooltip().on("click", function() {
+  $("#transactions .footable tbody td[data-title]").tooltip();
+  $("#transactions .footable tbody tr[data-title]").tooltip();
+  $("#transactions .footable tbody tr").on("click", function() {
     $(this).addClass("selected").siblings("tr").removeClass("selected");
   }).on("dblclick", function(dataAndEvents) {
     $(this).attr("href", "#transaction-info-modal");
@@ -599,21 +643,26 @@ function appendTransactions(f) {
 }
 
 function prepareTransactions() {
-    var optGroupStakes = $('select[id=optGroupStakes]').val()
-    if (optGroupStakes === "0") {
+    var optGroupTxType = $('select[id=optGroupTxType]').val()
+    var optGroupTxTime = $('select[id=optGroupTxTime]').val()
+    if (optGroupTxTime === "0") {
         Transactions = RawTransactions;
     }
     else {
         var groups = { };
         Transactions = [];
         RawTransactions.forEach(function(tx){
-            if ((tx.s_i !== 0 && tx.s_i !== 9 ) || tx.t_i < 1 || tx.t_i > 6) {
+            if (optGroupTxType === "0" && (tx.t_i < 1 || tx.t_i > 6)) {
                 Transactions.push(tx);
             }
             else {
                 var txDate = new Date(tx.d * 1000);
-                var key = tx.t_i + "-" + tx.s_i;
-                switch (optGroupStakes) {
+
+                // Generated = 1 / GeneratedDonation = 3 / GeneratedContribution = 5
+                // GeneratedSPECTRE = 2 / GeneratedSPECTREDonation = 4 / GeneratedSPECTREContribution = 6
+                var txType = (tx.s_i !== 9) ? tx.t_i : (tx.t_i === 3 || tx.t_i === 5) ? 1 : (tx.t_i === 4 || tx.t_i === 6) ? 2 : tx.t_i;
+                var key = txType + "-" + tx.s_i;
+                switch (optGroupTxTime) {
                     case "1":
                         key = txDate.getDate() + "-" + key;
                     case "2":
