@@ -1245,9 +1245,9 @@ var chainDataPage = {
       for (value in chainDataPage.anonOutputs) {
         var state = chainDataPage.anonOutputs[value];
         tagList.append("<tr>                    <td data-value=" + value + ">" + state.value_s + "</td>                    <td>"
-          + state.owned_outputs + (state.owned_outputs == state.owned_mature ? "" : " (<b>" + state.owned_mature + "</b>)") + "</td>                    <td>"
-          + state.system_unspent + (state.system_unspent == state.system_unspent_mature ? "" : " (<b>" + state.system_unspent_mature + "</b>)") + "</td>                    <td>"
-          + state.system_mixins + (state.system_mixins == state.system_mixins_mature ? "" : " (<b>" + state.system_mixins_mature + "</b>)") + "</td>                    <td>"
+          + state.owned_outputs + (state.owned_outputs == state.owned_mature ? "" : " (<b>" + (state.owned_outputs - state.owned_mature) + "</b>)") + "</td>                    <td>"
+          + state.system_unspent + (state.system_unspent == state.system_unspent_mature ? "" : " (<b>" + (state.system_unspent - state.system_unspent_mature)+ "</b>)") + "</td>                    <td>"
+          + state.system_mixins + (state.system_mixins == state.system_mixins_mature ? "" : " (<b>" + (state.system_mixins - state.system_mixins_mature)+ "</b>)") + "</td>                    <td>"
           + state.system_outputs + (state.system_compromised == 0 ? "" : " (<b>" + state.system_compromised + "</b>)") + "</td>                    <td>"
           + state.least_depth + "</td>                </tr>");
       }
