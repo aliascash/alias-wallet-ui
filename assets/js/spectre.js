@@ -454,7 +454,8 @@ function transactionPageInit() {
     doc.html("");
     delete data.ft.pageInfo.pages[data.page];
     data.ft.pageInfo.pages[data.page] = self.map(function(result) {
-      return result.html = formatTransaction(result), doc.append(result.html), $("#" + result.id)[0];
+      var id = (Array.isArray(result)) ? result[0].id : result.id;
+      return result.html = formatTransaction(result), doc.append(result.html), $("#" + id)[0];
     });
     data.result = true;
     bindTransactionTableEvents();
@@ -489,8 +490,10 @@ function transactionPageInit() {
         i = "c";
     }
     callback = e.ft.options.sorters[callback];
-    filteredTransactions.sort(function(replies, rows) {
-      return err ? callback(replies[i], rows[i]) : callback(rows[i], replies[i]);
+    filteredTransactions.sort(function(a, b) {
+        var txA = (Array.isArray(a)) ? a[0] : a; 
+        var txB = (Array.isArray(b)) ? b[0] : b; 
+      return err ? callback(txA[i], txB[i]) : callback(txB[i], txA[i]);
     });
     delete e.ft.pageInfo.pages;
     e.ft.pageInfo.pages = [];
@@ -507,10 +510,11 @@ function transactionPageInit() {
       }
     }
   }).on("footable_filtering", function(options) {
-    return!!options.clear || void(filteredTransactions = Transactions.filter(function(save) {
+    return!!options.clear || void(filteredTransactions = Transactions.filter(function(tx) {
+      var txToFilter = (Array.isArray(tx)) ? tx[0] : tx;
       var i;
-      for (i in save) {
-        if (save[i].toString().toLowerCase().indexOf(options.filter.toLowerCase()) !== -1) {
+      for (i in txToFilter) {
+        if (txToFilter[i].toString().toLowerCase().indexOf(options.filter.toLowerCase()) !== -1) {
           return true;
         }
       }
@@ -518,15 +522,32 @@ function transactionPageInit() {
     }));
   });
 }
-function formatTransaction(o) {
-  return "<tr id='" + o.id + "' data-title='" + o.tt + "'>"+
+function formatTransaction(tx) {
+    if (Array.isArray(tx)) {
+        var totalAmount = tx.reduce(function(total, tx) {
+            return total + tx.am;
+        }, 0);
+        var o = tx[0];
+        return "<tr id='" + o.id + "' data-title='" + o.tt + "'>"+
+            "<td class='trans-status' data-value='" + o.c + "'><center><i class='fa fa-lg " + o.s + "'></center></td>"+
+            "<td data-value='" + o.d + "'>" + o.d_s + "</td>"+
+            "<td class='amount' style='color:" + o.am_c + ";' data-value='" + totalAmount + "'>" + unit.format(totalAmount) + "</td>"+
+            "<td class='trans_type'><img height='15' width='15' src='qrc:///assets/icons/tx_" + o.t + ".png' /> " + o.t_l + ((tx.length > 1) ? " <b>(x" + tx.length + ")</b>" : "") + "</td>"+
+            "<td class='address' style='color:" + o.a_c + ";' data-value='" + o.ad + "' data-label='" + o.ad_l + "'><span "+ ( o.ad ? "class='editable'" : "") +">" + o.ad_d + "</span></td>"+
+            "<td class='trans-nar'>" + o.n + "</td>" +
+            "</tr>";
+    }
+    else {
+        var o = tx;
+        return "<tr id='" + o.id + "' data-title='" + o.tt + "'>"+
             "<td class='trans-status' data-value='" + o.c + "'><center><i class='fa fa-lg " + o.s + "'></center></td>"+
             "<td data-value='" + o.d + "'>" + o.d_s + "</td>"+
             "<td class='amount' style='color:" + o.am_c + ";' data-value='" + o.am_d + "'>" + o.am_d + "</td>"+
             "<td class='trans_type'><img height='15' width='15' src='qrc:///assets/icons/tx_" + o.t + ".png' /> " + o.t_l + "</td>"+
             "<td class='address' style='color:" + o.a_c + ";' data-value='" + o.ad + "' data-label='" + o.ad_l + "'><span "+ ( o.ad ? "class='editable'" : "") +">" + o.ad_d + "</span></td>"+
             "<td class='trans-nar'>" + o.n + "</td>" +
-        "</tr>";
+            "</tr>";
+    }
 }
 function visibleTransactions(checkSet) {
   if ("*" !== checkSet[0]) {
@@ -567,15 +588,52 @@ function appendTransactions(f) {
     f.sort(function(a, b) {
       return a.d = parseInt(a.d), b.d = parseInt(b.d), b.d - a.d;
     });
-    Transactions = Transactions.filter(function(deepDataAndEvents) {
+    RawTransactions = RawTransactions.filter(function(deepDataAndEvents) {
       return 0 == this.some(function(finger) {
         return finger.id == this.id;
       }, deepDataAndEvents);
     }, f).concat(f);
     overviewPage.recent(f.slice(0, 7));
-    $("#transactions .footable").trigger("footable_redraw");
   }
+  prepareTransactions();
 }
+
+function prepareTransactions() {
+    var optGroupStakes = $('select[id=optGroupStakes]').val()
+    if (optGroupStakes === "0") {
+        Transactions = RawTransactions;
+    }
+    else {
+        var groups = { };
+        Transactions = [];
+        RawTransactions.forEach(function(tx){
+            if ((tx.s_i !== 0 && tx.s_i !== 9 ) || tx.t_i < 1 || tx.t_i > 6) {
+                Transactions.push(tx);
+            }
+            else {
+                var txDate = new Date(tx.d * 1000);
+                var key = tx.t_i + "-" + tx.s_i;
+                switch (optGroupStakes) {
+                    case "1":
+                        key = txDate.getDate() + "-" + key;
+                    case "2":
+                        key = txDate.getMonth() + "-" + key;
+                    case "3":
+                        key = txDate.getFullYear() + "-" + key;
+                }           
+                var list = groups[key];
+                if(list) {
+                    list.push(tx);
+                } else {
+                    groups[key] = [tx];
+                    Transactions.push(groups[key]);
+                }
+            }
+        });
+    }
+    $("#transactions .footable").trigger("footable_redraw");
+}
+
 function getIconTitle(value) {
   return "unverified" == value ? "fa fa-cross " : "verified" == value ? "fa fa-check " : "contributor" == value ? "fa fa-cog " : "spectreteam" == value ? "fa fa-code " : "";
 }
@@ -1139,6 +1197,7 @@ var optionsPage = {
     }
   }
 };
+var RawTransactions = [];
 var Transactions = [];
 var filteredTransactions = [];
 var current_key = "";

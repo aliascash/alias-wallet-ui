@@ -1335,8 +1335,22 @@ downloaded 0 blocks of history..."></progress>
                             <h4 style=font-weight:bolder>TRANSACTIONS</h4>
                         </div>
                         <div class="p-t-10 pull-right">
-                            <div class=form-group><input class=form-control id=filter-transaction
+                            <div class=form-group><input class=form-control id=filter-transaction style=width:200px
                                                          placeholder="Search transactions.."></div>
+                        </div>
+                          <div class="p-t-10 m-r-15 pull-right">
+                            <div class="form-group">
+                                <label class="col-xs-6 control-label p-t-10 p-l-20 text-right" for=optGroupStakes>Group Stakes:</label>
+                                <div class="col-xs-6" >
+                                    <div class=option><select class=select-drop-down id=optGroupStakes onchange="prepareTransactions()">
+                                        <option value=0>Off</option>
+                                        <option value=1>Day</option>
+                                        <option value=2>Month</option>
+                                        <option value=3>Year</option>
+                                        <option value=4>All-Time</option>
+                                    </select></div>
+                                </div>
+                            </div>
                         </div>
                         <div class=container-fluid>
                             <div class=navbar-header></div>
