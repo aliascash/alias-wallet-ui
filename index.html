@@ -1167,14 +1167,14 @@ downloaded 0 blocks of history..."></progress>
                                                 <div class="form-group"><label
                                                         class="col-sm-3 p-l-20 control-label translate">Pay to
                                                     <a href=#><i class="p-b-5 fa fa-question-circle"
-                                                                 data-title="The address transfer the balance to"
+                                                                 data-title="The stealth address to transfer the balance to.<br>Only <b>owned</b> stealth addresses can be used for XSPEC-SPECTRE transfers.<br>SPECTRE to XSPEC transfers create <b>new one-time</b> XSPEC addresses (visible in <b>Coin Control</b> dialog)."
                                                                  style=color:#626262></i></a></label>
                                                     <div class=col-sm-9>
                                                         <div class=row>
                                                             <div class=col-sm-6><input
                                                                     class="form-control pay_to"
-                                                                    data-title="The address to transfer the balance to"
-                                                                    placeholder="The address to transfer the balance to"
+                                                                    data-title="The stealth address to transfer the balance to"
+                                                                    placeholder="The stealth address to transfer the balance to"
                                                                     maxlength=128 oninput=base58.check(this)
                                                                     onchange='bridge.getAddressLabelForSelectorAsync(this.value, "#send-balance .pay_to_label", "(no label)")'>
                                                             </div>
