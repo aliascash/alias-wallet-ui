@@ -1167,14 +1167,14 @@ downloaded 0 blocks of history..."></progress>
                                                 <div class="form-group"><label
                                                         class="col-sm-3 p-l-20 control-label translate">Pay to
                                                     <a href=#><i class="p-b-5 fa fa-question-circle"
-                                                                 data-title="The address transfer the balance to"
+                                                                 data-title="The stealth address to transfer the balance to.<br>Only <b>owned</b> stealth addresses can be used for XSPEC-SPECTRE transfers.<br>SPECTRE to XSPEC transfers create <b>new one-time</b> XSPEC addresses (visible in <b>Coin Control</b> dialog)."
                                                                  style=color:#626262></i></a></label>
                                                     <div class=col-sm-9>
                                                         <div class=row>
                                                             <div class=col-sm-6><input
                                                                     class="form-control pay_to"
-                                                                    data-title="The address to transfer the balance to"
-                                                                    placeholder="The address to transfer the balance to"
+                                                                    data-title="The stealth address to transfer the balance to"
+                                                                    placeholder="The stealth address to transfer the balance to"
                                                                     maxlength=128 oninput=base58.check(this)
                                                                     onchange='bridge.getAddressLabelForSelectorAsync(this.value, "#send-balance .pay_to_label", "(no label)")'>
                                                             </div>
@@ -1334,9 +1334,27 @@ downloaded 0 blocks of history..."></progress>
                         <div class=pull-left>
                             <h4 style=font-weight:bolder>TRANSACTIONS</h4>
                         </div>
-                        <div class="p-t-10 pull-right">
-                            <div class=form-group><input class=form-control id=filter-transaction
+                        <div class="p-t-10 m-l-15 pull-right">
+                            <div class=form-group><input class=form-control id=filter-transaction style=width:200px
                                                          placeholder="Search transactions.."></div>
+                        </div>
+                        <div class="p-t-10 pull-right">
+                            <div class="option">
+                                <label class="control-label p-l-20 text-right" for=optGroupStakes>
+                                    Group: <a href=#><i class="p-b-5 fa fa-question-circle"
+                                                                 data-title="Grouping will consolidate transactions of chosen <b>type</b> / <b>time-frame</b> and by their <b>state</b>. The date shown is the very latest entry in the group." style=color:#626262></i></a></label>
+                                <select class=select-drop-down style="width: 100px" id=optGroupTxType onchange="prepareTransactions()">
+                                    <option value=0>Stakes</option>
+                                    <option value=1>All</option>
+                                </select>
+                                 <select class=select-drop-down style="width: 100px" id=optGroupTxTime onchange="prepareTransactions()">
+                                    <option value=0>Off</option>
+                                    <option value=1>Day</option>
+                                    <option value=2>Month</option>
+                                    <option value=3>Year</option>
+                                    <option value=4>All-Time</option>
+                                </select>
+                            </div>
                         </div>
                         <div class=container-fluid>
                             <div class=navbar-header></div>
@@ -1456,12 +1474,12 @@ downloaded 0 blocks of history..."></progress>
                                     <th class=sorting data-sort-initial=ascending data-toggle=true
                                         data-type=numeric title="Coin Value">Coin Value
                                     <th class=sorting data-type=numeric
-                                        title="No. Owned (Mature)">Owned (Mature)
+                                        title="No. Owned (* = Immature)">Owned (*)
                                     <th class=sorting data-type=numeric
-                                        title="No. System Unspent (Mature)">Unspent (Mature)
-                                    <th class=sorting data-hide=phone data-type=numeric title="No. available Mixins (Mature)">Mixins (Mature)
+                                        title="No. System Unspent (* = Immature)">Unspent (*)
+                                    <th class=sorting data-hide=phone data-type=numeric title="No. available Mixins (* = Immature)">Mixins (*)
                                     <th class=sorting data-hide=phone,tablet data-type=numeric 
-                                        title="No. System (Compromised)">System (Compromised)
+                                        title="No. System (** = Compromised)">System (**)
                                     <th class=sorting data-hide=phone,tablet data-type=numeric
                                         title="Chain Least Depth">Least Depth
                                 <tbody>
