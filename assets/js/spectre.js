@@ -593,11 +593,12 @@ function formatTransaction(tx) {
 }
 function visibleTransactions(checkSet) {
   if ("*" !== checkSet[0]) {
-    Transactions = Transactions.filter(function(dataAndEvents) {
+    RawTransactions = RawTransactions.filter(function(dataAndEvents) {
       return this.some(function(dataAndEvents) {
         return dataAndEvents == this;
       }, dataAndEvents.t_l);
     }, checkSet);
+    prepareTransactions();
   }
 }
 function bindTransactionTableEvents() {
@@ -620,25 +621,28 @@ function bindTransactionTableEvents() {
     updateValue($(this));
   }).attr("data-title", "Double click to edit").tooltip();
 }
-function appendTransactions(f) {
+function appendTransactions(f, reset) {
     console.log(f);
   if ("string" == typeof f) {
-    if ("[]" == f) {
+    if ("[]" == f && !reset) {
       return;
     }
     f = JSON.parse(f.replace(/,\]$/, "]"));
-  }
-  if (!(1 == f.length && f[0].id == -1)) {
-    f.sort(function(a, b) {
+  } 
+  f.sort(function(a, b) {
       return a.d = parseInt(a.d), b.d = parseInt(b.d), b.d - a.d;
-    });
+  });
+  if (reset) {
+    RawTransactions = f;
+  }
+  else if (!(1 == f.length && f[0].id == -1)) {
     RawTransactions = RawTransactions.filter(function(deepDataAndEvents) {
       return 0 == this.some(function(finger) {
         return finger.id == this.id;
       }, deepDataAndEvents);
     }, f).concat(f);
-    overviewPage.recent(f.slice(0, 7));
   }
+  overviewPage.recent(f.slice(0, 7));
   prepareTransactions();
 }
 
