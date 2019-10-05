@@ -2,7 +2,7 @@
     text-align: center
 }
 
-#network-alert, .label, .label:empty, .transaction-overview {
+.label, .label:empty, .transaction-overview {
     display: block
 }
 
@@ -900,6 +900,14 @@ body.fixed-header {
     position: static !important;
 }
 
+#network-alert {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    color: rgb(200,0,0);
+    font-weight: bold;
+}
+
 .page-container > .page-content-wrapper > .content {
     padding-top: 0px !important;
 }
@@ -907,7 +915,7 @@ body.fixed-header {
 .page-container > .page-content-wrapper {
     position: absolute !important;
     min-height: initial !important;
-    top: 60px;
+    top: 0px;
     left: 0px;
     right: 0px;
     bottom: 0px;
@@ -918,7 +926,7 @@ body.fixed-header {
     .page-container > .page-content-wrapper {
         position: absolute !important;
         min-height: initial !important;
-        top: 48px;
+        top: 0px;
         left: 0px;
         right: 0px;
         bottom: 0px;
@@ -964,5 +972,18 @@ body.fixed-header {
     display: table;
     width: 100%;
     table-layout: fixed; /* even columns width , fix width of table too*/
+}
+
+/* Fix sidebar padding on MacOS (without jquery-scrollbar ) */
+.page-sidebar .sidebar-menu > .menu-items > li > ul.sub-menu li > a > .arrow:before {
+    margin-right: 3px !important;
+}
+
+.page-sidebar .sidebar-menu > .menu-items > li ul.sub-menu > li {
+    padding: 0 5px 0 40px !important;
+}
+
+.page-sidebar .sidebar-menu > *:not(.scroll-wrapper) .icon-thumbnail {
+    margin-right: 0px !important; 
 }
 
