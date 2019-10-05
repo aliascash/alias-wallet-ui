@@ -904,7 +904,7 @@ body.fixed-header {
     display: flex;
     height: 100%;
     align-items: center;
-    color: rgb(235,149,50);
+    color: rgb(200,0,0);
     font-weight: bold;
 }
 
