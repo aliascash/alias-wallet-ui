@@ -974,3 +974,16 @@ body.fixed-header {
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
+/* Fix sidebar padding on MacOS (without jquery-scrollbar ) */
+.page-sidebar .sidebar-menu > .menu-items > li > ul.sub-menu li > a > .arrow:before {
+    margin-right: 3px !important;
+}
+
+.page-sidebar .sidebar-menu > .menu-items > li ul.sub-menu > li {
+    padding: 0 5px 0 40px !important;
+}
+
+.page-sidebar .sidebar-menu > *:not(.scroll-wrapper) .icon-thumbnail {
+    margin-right: 0px !important; 
+}
+
