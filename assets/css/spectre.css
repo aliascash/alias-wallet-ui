@@ -2,7 +2,7 @@
     text-align: center
 }
 
-#network-alert, .label, .label:empty, .transaction-overview {
+.label, .label:empty, .transaction-overview {
     display: block
 }
 
@@ -900,6 +900,14 @@ body.fixed-header {
     position: static !important;
 }
 
+#network-alert {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    color: rgb(235,149,50);
+    font-weight: bold;
+}
+
 .page-container > .page-content-wrapper > .content {
     padding-top: 0px !important;
 }
@@ -907,7 +915,7 @@ body.fixed-header {
 .page-container > .page-content-wrapper {
     position: absolute !important;
     min-height: initial !important;
-    top: 60px;
+    top: 0px;
     left: 0px;
     right: 0px;
     bottom: 0px;
@@ -918,7 +926,7 @@ body.fixed-header {
     .page-container > .page-content-wrapper {
         position: absolute !important;
         min-height: initial !important;
-        top: 48px;
+        top: 0px;
         left: 0px;
         right: 0px;
         bottom: 0px;

@@ -153,39 +153,40 @@
     </div>
 </div>
 <div class=page-container>
-    <div class=header>
-        <div class=pull-right>
-            <div class="visible-lg visible-md visible-sm visible-xs m-t-10">
-                <div class="dropdown pull-right">
-                    <div id=status class=b-grey>
-                        <ul class="no-margin no-style p-l-10 p-r-10 p-b-10">
-                            <li class="inline p-l-10">
-                                <progress id=syncProgressBar max=100 value=1 data-title="Catching up...
-downloaded 0 blocks of history..."></progress>
-                            <li class="inline p-l-10">
-                                <div id=tor class=tor data-title="Tor+OBFS4 connection online"></div>
-                            <li class="inline p-l-10">
-                                <div id=encryptionIcon class="no-encryption f-off"
-                                     onclick='bridge.userAction(["toggleLock"])'
-                                     data-title="Wallet is encrypted and currently locked"></div>
-                            <li class="inline p-l-10">
-                                <div id=stakingIcon class=not-staking
-                                     data-title="Not staking because wallet is locked"></div>
-                            <li class="inline p-l-10">
-                                <div id=connectionsIcon class=connect-0
-                                     data-title="0 active connection(s) to Spectrecoin network"></div>
-                            <li class="inline p-l-10">
-                                <div id=syncingIcon class=syncing-spinner
-                                     data-title="Wallet is syncing"></div>
-                                <div id=blocksIcon class="no-syncing none"
-                                     data-title="Wallet is syncing"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class=page-content-wrapper>
         <div class=content>
+            <div class=header>
+                <div class=pull-right>
+                    <div class="visible-lg visible-md visible-sm visible-xs m-t-10">
+                        <div class="dropdown pull-right">
+                            <div id=status class=b-grey>
+                                <ul class="no-margin no-style p-l-10 p-r-10 p-b-10">
+                                    <li class="inline p-l-10">
+                                        <progress id=syncProgressBar max=100 value=1 data-title="Catching up...
+        downloaded 0 blocks of history..."></progress>
+                                    <li class="inline p-l-10">
+                                        <div id=tor class=tor data-title="Tor+OBFS4 connection online"></div>
+                                    <li class="inline p-l-10">
+                                        <div id=encryptionIcon class="no-encryption f-off"
+                                             onclick='bridge.userAction(["toggleLock"])'
+                                             data-title="Wallet is encrypted and currently locked"></div>
+                                    <li class="inline p-l-10">
+                                        <div id=stakingIcon class=not-staking
+                                             data-title="Not staking because wallet is locked"></div>
+                                    <li class="inline p-l-10">
+                                        <div id=connectionsIcon class=connect-0
+                                             data-title="0 active connection(s) to Spectrecoin network"></div>
+                                    <li class="inline p-l-10">
+                                        <div id=syncingIcon class=syncing-spinner
+                                             data-title="Wallet is syncing"></div>
+                                        <div id=blocksIcon class="no-syncing none"
+                                             data-title="Wallet is syncing"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="network-alert" class="p-l-35 p-t-5" style="overflow:hidden;"><span>test skdfj asjdf kjg fasjfg   asdkfgas kdfg  sdjkf ads</span></div>
+            </div>
             <div class="container-fluid no-padding">
                 <div class="modal fade stick-up" id=qrcode-modal tabindex=-1 role=dialog aria-hidden=true>
                     <div class=modal-dialog>
