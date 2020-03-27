@@ -36,9 +36,9 @@ function connectSignals() {
     }
     else {
       console.log("giving up on connecting signals.");
-      console.log("bridge: "+bridge);
-      console.log("optionsModel: "+optionsModel);
-      console.log("walletModel: "+walletModel);
+      console.log("bridge avalaible: "+ (typeof bridge !== "undefined"));
+      console.log("optionsModel avalaible: "+ (typeof optionsModel !== "undefined"));
+      console.log("walletModel avalaible: "+ (typeof walletModel !== "undefined"));
     }
     return;
   }
@@ -77,8 +77,10 @@ function connectSignals() {
   overviewPage.clientInfo();
   optionsPage.update();
   chainDataPage.updateAnonOutputs();
-  translateStrings();
 
+  sendPage.init();
+
+  translateStrings();
 
   bridge.jsReady();
 }
@@ -1608,16 +1610,42 @@ window.onload = function() {
     }
     resizeTableBodies();
   };
-  if (bridge) {
+  
+
     $("[href='#about']").on("click", function() {
       bridge.userAction(["aboutClicked"]);
     });
-  }
+
   $(".footable > tbody tr").selection();
 
-  connectSignals();
+  var baseUrl = "ws://127.0.0.1:52471";
+  console.log("Connecting to WebSocket server at " + baseUrl + ".");
+  var socket = new WebSocket(baseUrl);
+  socket.onopen = function()
+  {
+      new QWebChannel(socket, function(channel) {
+          // all published objects are available in channel.objects under
+          // the identifier set in their attached WebChannel.id property
+          // window.core = channel.objects.core;
+          // core.receiveText("Text from JS client");
+          window.bridge = channel.objects.bridge;
+          window.walletModel = channel.objects.walletModel;
+          window.optionsModel = channel.objects.optionsModel;
 
-  resizeTableBodies();
+          connectSignals();
+          resizeTableBodies();
+      });
+  };
+
+  socket.onerror = function(evt) {
+      console.log("WebSocket connection error: " + evt);
+  }
+
+  socket.onclose = function(evt)
+  {
+      // websocket is closed.
+      console.log("WebSocket connection is closed: " + evt.code + " - " + evt.reason);
+  };
 };
 
 $.fn.selection = function(element) {
