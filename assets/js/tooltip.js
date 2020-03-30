@@ -84,7 +84,10 @@
             "pointer" != r.css("cursor") && "A" != r.prop("tagName") && r.css("cursor", "help"),
                 o(),
                 t(window).resize(o),
-                r.on("contextmenu mouseleave", i)                
+                r.on("contextmenu mouseleave", i)
+                r.on("remove", function () {
+                    clearInterval(timerId);
+                })                   
             
             timerId = setInterval(update, 500, this);      
         }
