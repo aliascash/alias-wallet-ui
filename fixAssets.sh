@@ -88,10 +88,12 @@ for index in ${!FILES[*]} ; do
 
             if [[ ${filename} == "../"* ]] ; then
                 replacement=`echo ${filename} | sed 's!^..!qrc:///'${PREVDIR}'!'`
-                sed -i ${backupFileSuffix} 's^url(['\''"]\?'${filename}'['\''"]\?)^url('${replacement}')^g' ${file}
+#               sed -i ${backupFileSuffix} 's^url(['\''"]\?'${filename}'['\''"]\?)^url('${replacement}')^g' ${file}
+                sed -i ${backupFileSuffix} "s^url(['\"]\?${filename}['\"]\?)^url(${replacement})^g" ${file}
             else
                 replacement="qrc:///$DIR/$filename"
-                sed -i ${backupFileSuffix} 's^url(['\''"]\?'${filename}'['\''"]\?)^url('${replacement}')^g' ${file}
+#               sed -i ${backupFileSuffix} 's^url(['\''"]\?'${filename}'['\''"]\?)^url('${replacement}')^g' ${file}
+                sed -i ${backupFileSuffix} "s^url(['\"]\?${filename}['\"]\?)^url(${replacement})^g" ${file}
             fi
         done
         echo ${file}
