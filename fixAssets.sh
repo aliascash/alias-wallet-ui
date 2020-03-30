@@ -5,6 +5,7 @@ mkdir -p build
 cp -r assets index.html spectre.qrc build/
 find build/ -name README.md -exec rm -f {} \;
 sed -i 's^"assets^"qrc:///assets^g' build/index.html
+sed -i 's^"qtwebchannel^"qrc:///qtwebchannel^g' build/index.html
 minify build/index.html > build/index.min.html
 mv build/index.min.html build/index.html
 > build/spectre.qrc
