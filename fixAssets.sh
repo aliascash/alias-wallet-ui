@@ -4,7 +4,7 @@ rm -rf build
 mkdir -p build
 cp -r assets index.html spectre.qrc build/
 find build/ -name README.md -exec rm -f {} \;
-sed -i 's^"assets^"qrc:///assets^g' build/index.html
+sed -i '' 's^"assets^"qrc:///assets^g' build/index.html
 minify build/index.html > build/index.min.html
 mv build/index.min.html build/index.html
 > build/spectre.qrc
@@ -34,7 +34,7 @@ do
 
     minify "$file" > build/${filename}.min.${extension}
     rm build/${file}
-    sed -i 's^'${file}'^'${filename}.min.${extension}'^' build/index.html
+    sed -i '' 's^'${file}'^'${filename}.min.${extension}'^' build/index.html
 done
 
 cd build
@@ -77,7 +77,7 @@ do
     then
         DIR=`dirname ${alias}`
         PREVDIR=`dirname ${DIR}`
-        REPLACE=$(fgrep "url(" ${file} | grep -o 'url(['\''"]\?\([^'\''")]\+\)["'\'']\?)' | sed 's/url(\|["'\'']\|)//g'|sed 's/&/\\&/g')
+        REPLACE=$(fgrep "url(" ${file} | grep -o 'url(['\''"]\?\([^'\''")]\+\)["'\'']\?)' | sed 's/url(\|["'\'']\|)//g' | sed 's/&/\\&/g')
         for filename in ${REPLACE}
         do
             [[ ${filename} == "qrc:"* ]] && continue
@@ -85,12 +85,11 @@ do
 
             if [[ ${filename} == "../"* ]]
             then
-              replacement=`echo ${filename}|sed 's!^..!qrc:///'${PREVDIR}'!'`
-              sed -i 's^url(['\''"]\?'${filename}'['\''"]\?)^url('${replacement}')^g' ${file}
+              replacement=`echo ${filename} | sed 's!^..!qrc:///'${PREVDIR}'!'`
+              sed -i '' 's^url(['\''"]\?'${filename}'['\''"]\?)^url('${replacement}')^g' ${file}
             else
               replacement="qrc:///$DIR/$filename"
-              sed -i 's^url(['\''"]\?'${filename}'['\''"]\?)^url('${replacement}')^g' ${file}
-              #sed -i '
+              sed -i '' 's^url(['\''"]\?'${filename}'['\''"]\?)^url('${replacement}')^g' ${file}
             fi
         done
         echo ${file}
@@ -98,8 +97,8 @@ do
 
     if [[ ${file} == *".js" ]] && [[ $(fgrep "assets" ${file} -l) ]]
     then
-        sed -i 's^\(assets/\(js\|icons\|img\|plugins\)\)^qrc:///\1^g' ${file}
-        sed -i 's^\./qrc:///^qrc:///^g' ${file}
+        sed -i '' 's^\(assets/\(js\|icons\|img\|plugins\)\)^qrc:///\1^g' ${file}
+        sed -i '' 's^\./qrc:///^qrc:///^g' ${file}
 
         echo ${file}
     fi
