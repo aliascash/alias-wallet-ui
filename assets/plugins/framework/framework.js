@@ -542,7 +542,8 @@ $(function () {
                 b[a] = setTimeout(c, d)
             }
         }();
-        var fullDateString = new Date();
+        $(window).load(function() {
+            var fullDateString = new Date();
             $(window).resize(function () {
                 if (!document.hidden) {
                     waitForFinalEvent(function () {
@@ -561,6 +562,8 @@ $(function () {
                     }, 200, fullDateString.getTime());
                 }
             });
+        });
+           
 
 
         var init = function (element, options) {
