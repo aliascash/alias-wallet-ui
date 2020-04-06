@@ -5,6 +5,7 @@ $(function() {
       callback(false);
       initialize();
       toggle();
+      $(".advanced_controls").toggle(false);
       $("#send [name^=transaction_type]").on("change", toggle);
       $("#send [data-toggle=tab]").on("shown.bs.tab", toggle);
     }
@@ -60,7 +61,9 @@ $(function() {
       $("#recipients").append(((0 == parent() ? "" : "<hr />") + s.replace(/recipient-template/g, "recipient[count]")).replace(/\[count\]/g, ++num));
       $("#recipient" + num.toString() + " [data-title]").tooltip();
       $("#amount" + num.toString()).on("keydown", unit.keydown).on("paste", unit.paste);
-      bridge.userAction(["clearRecipients"]);
+      if (typeof(bridge) != "undefined") {
+        bridge.userAction(["clearRecipients"]);
+      }
       // show public or private unit depending on transaction_type_to
       var trxTypeTo = $("[name=transaction_type_to]:checked").val();
       $(".to_unit_public").css('display', 'public' === trxTypeTo ? 'block': 'none');
@@ -202,5 +205,4 @@ $(function() {
       changeTransactionType: toggle
     };
   }();
-  sendPage.init();
 });
