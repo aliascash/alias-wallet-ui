@@ -36,9 +36,9 @@ function connectSignals() {
     }
     else {
       console.log("giving up on connecting signals.");
-      console.log("bridge avalaible: "+ (typeof bridge !== "undefined"));
-      console.log("optionsModel avalaible: "+ (typeof optionsModel !== "undefined"));
-      console.log("walletModel avalaible: "+ (typeof walletModel !== "undefined"));
+      console.log("bridge available: "+ (typeof bridge !== "undefined"));
+      console.log("optionsModel available: "+ (typeof optionsModel !== "undefined"));
+      console.log("walletModel available: "+ (typeof walletModel !== "undefined"));
     }
     return;
   }
