@@ -355,8 +355,8 @@ button {
 
 #transaction-info {
     padding-bottom: 25px;
-    -webkit-user-select: all;
-    user-select: all
+    -webkit-user-select: text;
+    user-select: text
 }
 
 .verified-mark {

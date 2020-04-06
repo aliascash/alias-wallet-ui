@@ -543,22 +543,25 @@ $(function () {
             }
         }();
         var fullDateString = new Date();
-        $(window).resize(function () {
-            waitForFinalEvent(function () {
-                if ($.Framework.isVisibleLg()) {
-                    $('body').addClass("menu-pin");
-                    $("#sidebar-header").removeClass("sidebar-header-hidden");
-                    $("#sidebar-header-collapsed").removeClass("sidebar-header-collapsed-visible");
-                } else {
-                    $('body').removeClass("menu-pin");
-                    if (!$("body").hasClass("sidebar-visible")) {
-                        $("#sidebar-header").addClass("sidebar-header-hidden");
-                        $("#sidebar-header-collapsed").addClass("sidebar-header-collapsed-visible");
-                    }
+            $(window).resize(function () {
+                if (!document.hidden) {
+                    waitForFinalEvent(function () {
+                        if ($.Framework.isVisibleLg()) {
+                            $('body').addClass("menu-pin");
+                            $("#sidebar-header").removeClass("sidebar-header-hidden");
+                            $("#sidebar-header-collapsed").removeClass("sidebar-header-collapsed-visible");
+                        } else {
+                            $('body').removeClass("menu-pin");
+                            if (!$("body").hasClass("sidebar-visible")) {
+                                $("#sidebar-header").addClass("sidebar-header-hidden");
+                                $("#sidebar-header-collapsed").addClass("sidebar-header-collapsed-visible");
+                            }
+                        }
+                        ;
+                    }, 200, fullDateString.getTime());
                 }
-                ;
-            }, 200, fullDateString.getTime());
-        });
+            });
+
 
         var init = function (element, options) {
             function start(ui) {
