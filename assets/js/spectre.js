@@ -1618,7 +1618,9 @@ window.onload = function() {
 
   $(".footable > tbody tr").selection();
 
-  var baseUrl = "ws://127.0.0.1:52471";
+  var urlParams = new URLSearchParams(window.location.search);
+
+  var baseUrl = "ws://127.0.0.1:" + (urlParams.has('websocketport') ? urlParams.get('websocketport') : 52471);
   console.log("Connecting to WebSocket server at " + baseUrl + ".");
   var socket = new WebSocket(baseUrl);
   socket.onopen = function()
