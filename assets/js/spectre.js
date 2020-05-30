@@ -71,7 +71,7 @@ function connectSignals() {
   optionsModel.rowsPerPageChanged.connect(updateRowsPerPage);
   optionsModel.visibleTransactionsChanged.connect(visibleTransactions);
 
-  walletModel.encryptionStatusChanged.connect(encryptionStatusChanged);
+  walletModel.encryptionInfoChanged.connect(encryptionStatusChanged);
   walletModel.balanceChanged.connect(updateBalance);
 
   overviewPage.clientInfo();
@@ -1123,7 +1123,7 @@ var overviewPage = {
     $("#clientinfo").attr("data-title", "Build Desc: " + bridge.info.build + "\nBuild Date: " + bridge.info.date).tooltip();
   },
   encryptionStatusChanged : function(dataAndEvents) {
-    switch(dataAndEvents) {
+    switch(dataAndEvents.status) {
       case 0:
       ;
       case 1:
