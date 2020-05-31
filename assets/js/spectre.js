@@ -43,12 +43,9 @@ function connectSignals() {
     return;
   }
 
-  bridge.emitPaste.connect(pasteValue);
   bridge.emitTransactions.connect(appendTransactions);
   bridge.emitAddresses.connect(appendAddresses);
-  bridge.emitCoinControlUpdate.connect(updateCoinControlInfo);
   bridge.triggerElement.connect(triggerElement);
-  bridge.emitReceipient.connect(addRecipientDetail);
   bridge.networkAlert.connect(networkAlert);
   bridge.getAddressLabelResult.connect(getAddressLabelResult);
   bridge.newAddressResult.connect(newAddressResult);
@@ -62,8 +59,6 @@ function connectSignals() {
 
 
   bridge.validateAddressResult.connect(validateAddressResult);
-  bridge.addRecipientResult.connect(addRecipientResult);
-  bridge.sendCoinsResult.connect(sendCoinsResult);
   bridge.transactionDetailsResult.connect(transactionDetailsResult);
 
   optionsModel.displayUnitChanged.connect(unit_setType);
@@ -78,11 +73,36 @@ function connectSignals() {
   optionsPage.update();
   chainDataPage.updateAnonOutputs();
 
-  sendPage.init();
-
   translateStrings();
 
   bridge.jsReady();
+}
+
+var connectClientSignalsAttempts = 0;
+function connectClientSignals() {
+  if (typeof(clientBridge) == "undefined") {
+    connectClientSignalsAttempts += 1;
+    if (connectClientSignalsAttempts < 50) {
+      console.log("retrying connecting client signals in 200ms");
+      setTimeout(connectClientSignals, 200);
+    }
+    else {
+      console.log("giving up on connecting client signals.");
+      console.log("clientBridge available: "+ (typeof clientBridge !== "undefined"));
+    }
+    return;
+  }
+
+  clientBridge.emitPaste.connect(pasteValue);
+  clientBridge.emitCoinControlUpdate.connect(updateCoinControlInfo);
+  clientBridge.triggerElement.connect(triggerElement);
+  clientBridge.networkAlert.connect(networkAlert);
+  clientBridge.emitReceipient.connect(addRecipientDetail);
+
+  clientBridge.addRecipientResult.connect(addRecipientResult);
+  clientBridge.sendCoinsResult.connect(sendCoinsResult);
+
+  sendPage.init();
 }
 
 function transactionDetailsResult(result) {
@@ -1620,16 +1640,14 @@ window.onload = function() {
 
   var urlParams = new URLSearchParams(window.location.search);
 
-  var baseUrl = "ws://127.0.0.1:" + (urlParams.has('websocketport') ? urlParams.get('websocketport') : 52471);
-  console.log("Connecting to WebSocket server at " + baseUrl + ".");
-  var socket = new WebSocket(baseUrl);
-  socket.onopen = function()
+  var coreBaseUrl = "ws://127.0.0.1:" + (urlParams.has('websocketport') ? urlParams.get('websocketport') : 52471);
+  console.log("Connecting to Core WebSocket server at " + coreBaseUrl + ".");
+  var coreSocket = new WebSocket(coreBaseUrl);
+  coreSocket.onopen = function()
   {
-      new QWebChannel(socket, function(channel) {
+      new QWebChannel(coreSocket, function(channel) {
           // all published objects are available in channel.objects under
           // the identifier set in their attached WebChannel.id property
-          // window.core = channel.objects.core;
-          // core.receiveText("Text from JS client");
           window.bridge = channel.objects.bridge;
           window.walletModel = channel.objects.walletModel;
           window.optionsModel = channel.objects.optionsModel;
@@ -1638,15 +1656,32 @@ window.onload = function() {
           resizeTableBodies();
       });
   };
-
-  socket.onerror = function(evt) {
-      console.log("WebSocket connection error: " + evt);
+  coreSocket.onerror = function(evt) {
+      console.log("Core WebSocket connection error: " + evt);
   }
-
-  socket.onclose = function(evt)
-  {
+  coreSocket.onclose = function(evt) {
       // websocket is closed.
-      console.log("WebSocket connection is closed: " + evt.code + " - " + evt.reason);
+      console.log("Core WebSocket connection is closed: " + evt.code + " - " + evt.reason);
+  };
+
+  var clientBaseUrl = "ws://127.0.0.1:" + ((urlParams.has('websocketport') ? urlParams.get('websocketport') : 52471) + 1);
+  console.log("Connecting to Client WebSocket server at " + clientBaseUrl + ".");
+  var clientSocket = new WebSocket(clientBaseUrl);
+  clientSocket.onopen = function()
+  {
+      new QWebChannel(clientSocket, function(channel) {
+          // all published objects are available in channel.objects under
+          // the identifier set in their attached WebChannel.id property
+          window.clientBridge = channel.objects.clientBridge;
+          connectClientSignals();
+      });
+  };
+  clientSocket.onerror = function(evt) {
+      console.log("Client WebSocket connection error: " + evt);
+  }
+  clientSocket.onclose = function(evt) {
+      // websocket is closed.
+      console.log("Client WebSocket connection is closed: " + evt.code + " - " + evt.reason);
   };
 };
 

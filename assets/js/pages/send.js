@@ -25,7 +25,7 @@ $(function() {
         for (;errorClass < recipients;errorClass++) {
           r20 += unit.parse($("#amount" + errorClass).val());
         }
-        bridge.updateCoinControlAmount(r20);
+        clientBridge.updateCoinControlAmount(r20);
       }
     }
     function color(source, type, data, name, to, text, el, key) {
@@ -61,8 +61,8 @@ $(function() {
       $("#recipients").append(((0 == parent() ? "" : "<hr />") + s.replace(/recipient-template/g, "recipient[count]")).replace(/\[count\]/g, ++num));
       $("#recipient" + num.toString() + " [data-title]").tooltip();
       $("#amount" + num.toString()).on("keydown", unit.keydown).on("paste", unit.paste);
-      if (typeof(bridge) != "undefined") {
-        bridge.userAction(["clearRecipients"]);
+      if (typeof(clientBridge) != "undefined") {
+        clientBridge.userAction(["clearRecipients"]);
       }
       // show public or private unit depending on transaction_type_to
       var trxTypeTo = $("[name=transaction_type_to]:checked").val();
@@ -117,7 +117,7 @@ $(function() {
             if (typeof narration === 'undefined') {
                 narration = "";
             }
-            bridge.addRecipient(context.val(), $(this).find(".pay_to_label").val(), narration, unit.parse(jElm.val(), $(this).find(".unit").val()), datas, $("#ring_size").val());
+            clientBridge.addRecipient(context.val(), $(this).find(".pay_to_label").val(), narration, unit.parse(jElm.val(), $(this).find(".unit").val()), datas, $("#ring_size").val());
         }
 
         if (typeof sendCoinsResult !== 'undefined') {
@@ -129,14 +129,14 @@ $(function() {
             if (addRecipientResult) {
                 numOfRecipients--;
                 if (numOfRecipients == 0) {
-                    bridge.sendCoins($("#coincontrol").is(":visible"), $("#change_address").val())
+                    clientBridge.sendCoins($("#coincontrol").is(":visible"), $("#change_address").val())
                 }
             }
         }
         else {
             var datas = load();
 
-            bridge.userAction(["clearRecipients"]);
+            clientBridge.userAction(["clearRecipients"]);
 
             if ($("#send-balance").is(":visible")) {
                 $("#send-balance").each(addRecipient);
