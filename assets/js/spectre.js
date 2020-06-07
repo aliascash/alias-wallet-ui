@@ -48,8 +48,6 @@ function connectSignals() {
   bridge.triggerElement.connect(triggerElement);
   bridge.networkAlert.connect(networkAlert);
   bridge.getAddressLabelResult.connect(getAddressLabelResult);
-  bridge.newAddressResult.connect(newAddressResult);
-  bridge.lastAddressErrorResult.connect(lastAddressErrorResult);
   bridge.getAddressLabelForSelectorResult.connect(getAddressLabelForSelectorResult);
 
   blockExplorerPage.connectSignals();
@@ -101,6 +99,8 @@ function connectClientSignals() {
 
   clientBridge.addRecipientResult.connect(addRecipientResult);
   clientBridge.sendCoinsResult.connect(sendCoinsResult);
+
+  clientBridge.newAddressResult.connect(newAddressResult);
 
   sendPage.init();
 }
@@ -256,12 +256,13 @@ function receivePageInit() {
 function clearRecvAddress() {
   $("#new-address-label").val("");
   $("#new-addresstype").val(1);
+  $("#new-recv-address-error").text("");
 }
 function addAddress() {
     console.log('addAddress');
   var throughArgs = $("#new-addresstype").val();
   var r20 = $("#new-address-label").val();
-  bridge.newAddress(r20, throughArgs, '', false);
+  clientBridge.newAddress(r20, throughArgs, '', false);
 }
 
 function clearSendAddress() {
@@ -293,14 +294,18 @@ function getAddressLabelResult(result) {
       return $("#new-send-address-error").text('Error: address already in addressbook under "' + g + '"'), void $("#new-send-address").addClass("inputError");
     }
     var camelKey = 0;
-    bridge.newAddressAsync(name, camelKey, udataCur, true);
+    clientBridge.newAddress(name, camelKey, udataCur, true);
 }
-function newAddressResult(result) {
-    var udataCur = result;
-    if (data = result, "" === data) {
-      bridge.lastAddressError();
-    } else {
+function newAddressResult(success, errorMsg, address, send) {
+    if (success) {
       $("#add-address-modal").modal("hide");
+    } else {
+      if (send) {
+        lastAddressErrorResult(errorMsg);
+      }
+      else {
+        $("#new-recv-address-error").text("Error: " + errorMsg);
+      }
     }
 }
 
