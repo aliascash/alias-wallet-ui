@@ -97,13 +97,13 @@
                 <a href=#><span class="title translate">Wallet Encryption</span> <span class=arrow></span>
                     <span class=icon-thumbnail><i class="fa fa-floppy-o"></i></span></a>
                 <ul class=sub-menu>
-                    <li class=encryptWallet><a href=# onclick='bridge.userAction(["encryptWallet"])'><span
+                    <li class=encryptWallet><a href=# onclick='clientBridge.userAction(["encryptWallet"])'><span
                             class=translate>Encrypt Wallet</span> <span class=icon-thumbnail><i
                             id=encryptWallet class="fa fa-lock"></i></span></a></li>
-                    <li id=changePassphrase><a href=# onclick='bridge.userAction(["changePassphrase"])'><span
+                    <li id=changePassphrase><a href=# onclick='clientBridge.userAction(["changePassphrase"])'><span
                             class=translate>Change Passphrase</span> <span class=icon-thumbnail><i
                             class="fa fa-user-secret"></i></span></a></li>
-                    <li id=toggleLock><a href=# onclick='bridge.userAction(["toggleLock"])'><span
+                    <li id=toggleLock><a href=# onclick='clientBridge.userAction(["toggleLock"])'><span
                             class=translate>(Un)lock Wallet</span> <span class=icon-thumbnail><i
                             class="fa fa-unlock-alt"></i></span></a></li>
                 </ul>
@@ -143,12 +143,12 @@
                     <li><a href=# data-target=#verify-sign-message-modal data-toggle=modal
                            onclick='$("#verify-href").click(),$("#verify-address")'><span class=translate>Verify Message</span>
                         <span class=icon-thumbnail><i class="fa fa-check-square-o"></i></span></a></li>
-                    <li><a href=# onclick='bridge.userAction(["debugClicked"])'><span
+                    <li><a href=# onclick='clientBridge.userAction(["debugClicked"])'><span
                             class=translate>Debug</span> <span class=icon-thumbnail><i class="fa fa-bug"></i></span></a>
                     </li>
-                    <li><a href=#b onclick='bridge.userAction(["aboutClicked"])'><span class=translate>About Spectrecoin</span>
+                    <li><a href=#b onclick='clientBridge.userAction(["aboutClicked"])'><span class=translate>About Spectrecoin</span>
                         <span class=icon-thumbnail><i class="fa fa-info-circle"></i></span></a></li>
-                    <li><a href=# onclick='bridge.userAction(["aboutQtClicked"])'><span class=translate>About QT</span>
+                    <li><a href=# onclick='clientBridge.userAction(["aboutQtClicked"])'><span class=translate>About QT</span>
                         <span class=icon-thumbnail><i class="fa fa-info-circle"></i></span></a></li>
                 </ul>
             </li>
@@ -172,7 +172,7 @@
                                         <div id=tor class=tor data-title="Tor+OBFS4 connection online"></div>
                                     <li class="inline p-l-10">
                                         <div id=encryptionIcon class="no-encryption f-off"
-                                             onclick='bridge.userAction(["toggleLock"])'
+                                             onclick='clientBridge.userAction(["toggleLock"])'
                                              data-title="Wallet is encrypted and currently locked"></div>
                                     <li class="inline p-l-10">
                                         <div id=stakingIcon class=not-staking
