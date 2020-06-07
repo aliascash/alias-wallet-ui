@@ -722,7 +722,7 @@ function signMessage() {
   message = $("#sign-address").val().trim();
   callback = $("#sign-message").val().trim();
     //TODO: SIGNAL bridge
-  var result = bridge.signMessage(message, callback);
+  var result = clientBridge.signMessage(message, callback);
   return msg = result.error_msg, length = result.signed_signature, "" !== msg ? ($("#sign-result").removeClass("green"), $("#sign-result").addClass("red"), $("#sign-result").html(msg), false) : ($("#sign-signature").val(result.signed_signature), $("#sign-result").removeClass("red"), $("#sign-result").addClass("green"), $("#sign-result").html("Message signed successfully"), void 0);
 }
 function verifyMessage() {
