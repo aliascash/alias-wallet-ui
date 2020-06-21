@@ -1601,13 +1601,6 @@ function resizeTableBodies() {
 }
 
 window.onload = function() {
-  overviewPage.init();
-  receivePageInit();
-  transactionPageInit();
-  addressBookInit();
-  chainDataPage.init();
-  walletManagementPage.init();
-
   $(".footable,.footable-lookup").footable({
     breakpoints : {
       phone : 480,
@@ -1657,7 +1650,15 @@ window.onload = function() {
           window.walletModel = channel.objects.walletModel;
           window.optionsModel = channel.objects.optionsModel;
 
+          overviewPage.init();
+          receivePageInit();
+          transactionPageInit();
+          addressBookInit();
+          chainDataPage.init();
+          walletManagementPage.init();
+
           connectSignals();
+
           resizeTableBodies();
       });
   };
