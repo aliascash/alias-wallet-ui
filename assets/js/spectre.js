@@ -1593,7 +1593,7 @@ var walletManagementPage = {
 };
 
 function resizeTableBodies() {
-  var newHeightTransactionTable = $(window).height() - $('#transactions-table > tbody').offset().top - $('#transactions-table > tfoot').height() - 21;
+  var newHeightTransactionTable = $(window).height() - $('#transactions-table > tbody').offset().top - $('#transactions-table > tfoot').height() - 1;
   $("#transactions-table > tbody").height(newHeightTransactionTable);  
 
   var newHeighChaindataTable = $(window).height() - $('#chaindata-table > tbody').offset().top - $('#transactions-table > tfoot').height() - 21;

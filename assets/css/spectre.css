@@ -140,7 +140,7 @@
 }
 
 @media (max-width: 600px) {
-    .trans-nar, .trans-status, .trans-type {
+    .trans-nar, .trans-type {
         display: none
     }
 }
@@ -938,6 +938,14 @@ progress::-webkit-progress-value {
 
 #transactions-table > tbody > tr > td.trans-status {
     width: 2em;
+}
+
+#transactions-table {
+   margin-bottom: 0px !important;
+}
+
+.footable > tfoot > tr > td{
+    padding-bottom: 0px !important;
 }
 
 /* Make page-content scrollable with fix header */
