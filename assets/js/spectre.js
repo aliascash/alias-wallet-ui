@@ -1628,7 +1628,22 @@ window.onload = function() {
     }
     resizeTableBodies();
   };
-  
+
+  // Enhance sidebar on link click behavior
+  $('.sidebar-menu a[href]').on({
+    click: function (event) {
+      if ($(this).attr('href').length > 1) {
+        if ($("body").hasClass("sidebar-visible")) {
+          $('.content').mouseover();
+        }
+      } else if (!$("body").hasClass("sidebar-visible")) {
+        $('.page-sidebar').mouseenter();
+        if ($(this).closest("li").hasClass("open")) {
+          event.stopImmediatePropagation();
+        }
+      }
+    }
+  });
 
     $("[href='#about']").on("click", function() {
       bridge.userAction(["aboutClicked"]);
