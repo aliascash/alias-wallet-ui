@@ -53,7 +53,7 @@ body.mobile .sidebar-menu > ul {
     -webkit-overflow-scrolling: touch !important
 }
 
-body.mobile .page-sidebar .sidebar-menu .menu-items li:hover a {
+/*body.mobile .page-sidebar .sidebar-menu .menu-items li:hover a {
     color: #4c4a55
 }
 
@@ -63,7 +63,7 @@ body.mobile .page-sidebar .sidebar-menu .menu-items li:hover .icon-thumbnail {
 
 body.mobile .page-sidebar .sidebar-menu .menu-items li.active > a, body.mobile .page-sidebar .sidebar-menu .menu-items li.active > a .icon-thumbnail, body.mobile .page-sidebar .sidebar-menu .menu-items li.open > a, body.mobile .page-sidebar .sidebar-menu .menu-items li.open > a .icon-thumbnail {
     color: #fff
-}
+}*/
 
 body.mobile .drager {
     overflow: auto;
