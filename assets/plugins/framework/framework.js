@@ -615,7 +615,7 @@ $(function () {
                 }
             }
 
-            if (this.$element = $(element), this.options = $.extend(true, {}, $.fn.sidebar.defaults, options), this.bezierEasing = [0.05, 0.74, 0.27, 0.99], this.cssAnimation = true, this.menuClosedCSS, this.menuOpenCSS, this.css3d = true, this.sideBarWidth = 280, this.sideBarWidthCondensed = 210, this.$sidebarMenu = this.$element.find(".sidebar-menu > ul"), this.$pageContainer = $(this.options.pageContainer), this.$body = $("body"), this.$sidebarMenu.length) {
+            if (this.$element = $(element), this.options = $.extend(true, {}, $.fn.sidebar.defaults, options), this.bezierEasing = [0.05, 0.74, 0.27, 0.99], this.cssAnimation = true, this.menuClosedCSS, this.menuOpenCSS, this.css3d = true, this.sideBarWidth = 280, this.sideBarWidthCondensed = 210, this.$sidebarMenu = this.$element.find(".sidebar-menu > ul"), this.$pageContainer = $(this.options.pageContainer), this.$body = $("body"), this.$sidebarHeader = $(".sidebar-header"), this.$sidebarHeaderCollapsed = $(".sidebar-header-collapsed"), this.$sidebarMenu.length) {
                 if ("desktop" == $.Framework.getUserAgent()) {
                     this.$sidebarMenu.scrollbar({
                         ignoreOverlay: false
@@ -663,6 +663,8 @@ $(function () {
                 var that = this;
                 this.$element.bind("mouseenter mouseleave", start);
                 this.$pageContainer.bind("mouseover", show);
+                this.$sidebarHeaderCollapsed.bind("click", start);
+                this.$sidebarHeader.bind("click", show);
             }
         };
         init.prototype.toggleSidebar = function (e) {
