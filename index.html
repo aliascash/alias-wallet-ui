@@ -679,17 +679,13 @@
                 </div>
                 <article id=overview>
                     <div class=page-content-wrapper>
-                        <nav class="navbar navbar-default nav-sub-menu"
+                        <nav class="navbar navbar-default nav-sub-menu" style="width: 100%"
                              role=navigation>
-                            <div class=pull-left>
+                            <div>
                                 <h4 class="translate uppercase" style=font-weight:bolder>Overview</h4>
                             </div>
-                            <div class="p-t-10 pull-right">
-                                <div class=navigate><a href=#send class="btn-danger btn btn-cons">Send Payment
-                                    <i class="fa fa-arrow-right"></i></a></div>
-                            </div>
-                            <div class=container-fluid>
-                                <div class=navbar-header></div>
+                            <div class=><a href=#send class="btn-danger btn btn-cons">Send Payment
+                                <i class="fa fa-arrow-right"></i></a>
                             </div>
                         </nav>
                         <div class="row">
@@ -872,19 +868,17 @@
                 <div class=page-content-wrapper>
                     <nav class="navbar navbar-default nav-sub-menu"
                          role=navigation>
-                        <div class=pull-left>
+                        <div>
                             <h4 class="translate uppercase" style=font-weight:bolder>Send</h4>
                         </div>
-                        <div class="p-t-10 pull-right show-advanced-controls">
-                            <div class="p-t-10 pull-right show-coin-control">
+                        <div class="show-advanced-controls">
+                            <div class="show-coin-control">
                                 <button class="btn btn-default btn-cons translate"
                                         onclick='$(this).toggleClass("active"),sendPage.toggleCoinControl()'>
                                     <i class="fa fa-repeat"></i> Coin Control
                                 </button>
                             </div>
-                            <div class=container-fluid>
-                                <div class=navbar-header></div>
-                            </div>
+                        </div>
                     </nav>
                     <div class="row">
                         <div class="panel full-width">
@@ -1275,26 +1269,19 @@
                 <div class=page-content-wrapper>
                     <nav class="navbar navbar-default nav-sub-menu"
                          role=navigation>
-                        <div class=pull-left>
+                        <div>
                             <h4 style=font-weight:bolder>RECEIVE</h4>
                         </div>
-                        <div class="p-t-10 pull-right">
-                            <div class=form-group><select class="select-drop-down m-l-10"
-                                                          id=filter-addresstype>
-                                <option selected title=Type.. value="">Filter by type..
-                                <option title=Normal value=Normal>Normal
-                                <option title=Stealth value=Stealth>Stealth
-                                <option title=BIP32 value=BIP32>BIP32
-                            </select></div>
-                        </div>
-                        <div class="p-t-10 pull-right">
-                            <div class=form-group><input id=receive-filter style=display:none> <input
-                                    class=form-control style=width:200px id=filter-address
-                                    placeholder="Search by label or address..."></div>
-                        </div>
-                        <div class=container-fluid>
-                            <div class=navbar-header></div>
-                        </div>
+                        <div class=form-group><select class="select-drop-down m-l-10"
+                                                      id=filter-addresstype>
+                            <option selected title=Type.. value="">Filter by type..
+                            <option title=Normal value=Normal>Normal
+                            <option title=Stealth value=Stealth>Stealth
+                            <option title=BIP32 value=BIP32>BIP32
+                        </select></div>
+                        <div class=form-group><input id=receive-filter style=display:none> <input
+                                class=form-control style=width:200px id=filter-address
+                                placeholder="Search by label or address..."></div>
                     </nav>
                     <div class="row">
                         <div class="panel full-width">
@@ -1336,35 +1323,27 @@
             </article>
             <article id=transactions>
                 <div class=page-content-wrapper>
-                    <nav class="navbar navbar-default nav-sub-menu"
-                         role=navigation>
-                        <div class=pull-left>
-                            <h4 style="font-weight:bolder; margin-top: 0px">TRANSACTIONS</h4>
+                    <nav class="navbar navbar-default nav-sub-menu" role=navigation>
+                        <div>
+                            <h4 style="font-weight:bolder;">TRANSACTIONS</h4>
                         </div>
-                        <div class="m-l-15 pull-right">
-                            <div class=form-group><input class=form-control id=filter-transaction style=width:140px
-                                                         placeholder="Search ..."></div>
-                        </div>
-                        <div class="pull-right p-b-10">
-                            <div class="option">
-                                <label class="control-label p-l-20 text-right" for=optGroupStakes>
-                                    Group: <a href=#><i class="p-b-5 fa fa-question-circle"
-                                                                 data-title="Grouping will consolidate transactions of chosen <b>type</b> / <b>time-frame</b> and by their <b>state</b>. The date shown is the very latest entry in the group." style=color:#626262></i></a></label>
-                                <select class=select-drop-down style="width: 100px" id=optGroupTxType onchange="prepareTransactions()">
-                                    <option value=0>Stakes</option>
-                                    <option value=1>All</option>
-                                </select>
-                                 <select class=select-drop-down style="width: 100px" id=optGroupTxTime onchange="prepareTransactions()">
-                                    <option value=0>Off</option>
-                                    <option value=1>Day</option>
-                                    <option value=2>Month</option>
-                                    <option value=3>Year</option>
-                                    <option value=4>All-Time</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class=container-fluid>
-                            <div class=navbar-header></div>
+                        <div class=form-group><input class=form-control id=filter-transaction style=width:140px
+                                                     placeholder="Search ..."></div>
+                        <div class="option form-group">
+                            <label class="control-label text-right" for=optGroupStakes>
+                                Group: <a href=#><i class="p-b-5 fa fa-question-circle"
+                                                             data-title="Grouping will consolidate transactions of chosen <b>type</b> / <b>time-frame</b> and by their <b>state</b>. The date shown is the very latest entry in the group." style=color:#626262></i></a></label>
+                            <select class=select-drop-down style="width: 80px" id=optGroupTxType onchange="prepareTransactions()">
+                                <option value=0>Stakes</option>
+                                <option value=1>All</option>
+                            </select>
+                             <select class=select-drop-down style="width: 80px" id=optGroupTxTime onchange="prepareTransactions()">
+                                <option value=0>Off</option>
+                                <option value=1>Day</option>
+                                <option value=2>Month</option>
+                                <option value=3>Year</option>
+                                <option value=4>All-Time</option>
+                            </select>
                         </div>
                     </nav>
                     <div class="row">
@@ -1401,16 +1380,12 @@
                 <div class=page-content-wrapper>
                     <nav class="navbar navbar-default nav-sub-menu"
                          role=navigation>
-                        <div class=pull-left>
+                        <div>
                             <h4 style=font-weight:bolder>ADDRESSBOOK</h4>
                         </div>
-                        <div class="p-t-10 pull-right">
-                            <div class=form-group><input class=form-control style=width:200px
-                                                         id=filter-addressbook
-                                                         placeholder="Search by label or address."></div>
-                        </div>
-                        <div class=container-fluid>
-                            <div class=navbar-header></div>
+                        <div class=form-group><input class=form-control style=width:200px
+                                                     id=filter-addressbook
+                                                     placeholder="Search by label or address.">
                         </div>
                     </nav>
                     <div class="row">
@@ -1461,15 +1436,11 @@
                 <div class=page-content-wrapper>
                     <nav class="navbar navbar-default nav-sub-menu"
                          role=navigation>
-                        <div class=pull-left>
+                        <div>
                             <h4 style=font-weight:bolder>CHAIN DATA</h4>
                         </div>
-                        <div class="p-t-10 pull-right">
-                            <div class=form-group><input class=form-control id=filter-outputs
-                                                         placeholder="Filter outputs..."></div>
-                        </div>
-                        <div class=container-fluid>
-                            <div class=navbar-header></div>
+                        <div class=form-group><input class=form-control id=filter-outputs
+                                                     placeholder="Filter outputs...">
                         </div>
                     </nav>
                     <div class="row">
@@ -1500,20 +1471,17 @@
                 <div class=page-content-wrapper>
                     <nav class="navbar navbar-default nav-sub-menu"
                          role=navigation>
-                        <div class=pull-left>
+                        <div>
                             <h4 style=font-weight:bolder>BLOCK EXPLORER</h4>
                         </div>
-                        <div class="p-t-10 pull-right"><a href=#
-                                                          onclick='$("#filter-blocks").val(""),blockExplorerPage.updateLatestBlocks()'
-                                                          class="btn btn-danger btn-cons btn-animated from-left fa fa-refresh"><span>Refresh</span></a>
+                        <div class="form-group"><a href=#
+                                onclick='$("#filter-blocks").val(""),blockExplorerPage.updateLatestBlocks()'
+                                class="btn btn-danger btn-animated from-left fa fa-refresh"><span>Refresh</span></a>
                         </div>
-                        <div class="p-t-10 m-r-15 pull-right"><input class=form-control style=width:270px
-                                                                     id=filter-blocks
-                                                                     onblur=blockExplorerPage.findBlock(this.value)
-                                                                     placeholder="Find Block by hash/height/transaction">
-                        </div>
-                        <div class=container-fluid>
-                            <div class=navbar-header></div>
+                        <div class="form-group"><input class=form-control style=width:270px
+                                    id=filter-blocks
+                                    onblur=blockExplorerPage.findBlock(this.value)
+                                    placeholder="Find Block by hash/height/transaction">
                         </div>
                     </nav>
                     <div class="row">
@@ -1555,12 +1523,8 @@
                 <div class=page-content-wrapper>
                     <nav class="navbar navbar-default nav-sub-menu"
                          role=navigation>
-                        <div class=pull-left>
+                        <div>
                             <h4 style=font-weight:bolder>OPTIONS</h4>
-                        </div>
-                        <div class="p-t-15 pull-right"></div>
-                        <div class=container-fluid>
-                            <div class=navbar-header></div>
                         </div>
                     </nav>
                     <div class="row">
@@ -1914,12 +1878,8 @@
                 <div class=page-content-wrapper>
                     <nav class="navbar navbar-default nav-sub-menu p-t-10 p-b-10 p-r-35 p-l-35"
                          role=navigation>
-                        <div class=pull-left>
+                        <div>
                             <h4 style=font-weight:bolder>WALLET MANAGEMENT</h4>
-                        </div>
-                        <div class="p-t-10 pull-right"></div>
-                        <div class=container-fluid>
-                            <div class=navbar-header></div>
                         </div>
                     </nav>
                     <div class=page-content-wrapper>

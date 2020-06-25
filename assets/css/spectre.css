@@ -84,19 +84,6 @@
     padding-right: 5px;
 }
 
-.navbar {
-    padding-top: 5px;
-    padding-bottom: 10px;
-    padding-left: 35px;
-    padding-right: 35px;
-}
-nav.navbar + div.row {
-    margin-top: 5px;
-    margin-bottom: 0px;
-    margin-left: 35px;
-    margin-right: 35px;
-}
-
 @media (max-width: 767px) {
     .page-container > .page-content-wrapper {
         position: absolute !important;
@@ -107,35 +94,12 @@ nav.navbar + div.row {
         bottom: 0px;
         overflow-y: auto;
     }
-    .nav-tabs ~ .tab-content {
-        padding: 5px !important;
-    }
-
-    .navbar {
-        padding-top: 5px;
-        padding-bottom: 5px;
-        padding-left: 20px;
-        padding-right: 20px;
-        margin-bottom: 0px;
-    }
-    nav.navbar + div.row {
-        margin-left: 5px;
-        margin-right: 0px;
-    }
 }
 
 @media (max-width: 400px) {
     .table.table-condensed thead tr th {
         padding-left: 5px !important;
         padding-right: 5px !important;
-    }
-    .nav-tabs > li > a {
-        padding-left: 5px !important;
-    }
-
-    .navbar {
-        padding-left: 10px;
-        padding-right: 5px;
     }
 }
 
@@ -147,15 +111,16 @@ nav.navbar + div.row {
         padding-top: 0px !important;
         padding-bottom: 0px !important;
     }
-    .navbar {
-        margin-bottom: 5px !important;
-    }
 }
 
 @media (max-height: 600px) {
     .table tbody tr td, .table thead tr th {
         padding-top: 12px !important;
         padding-bottom: 12px !important;
+    }
+
+    .header {
+        height: 49px !important;
     }
 }
 
@@ -169,11 +134,11 @@ nav.navbar + div.row {
     }
 }
 
-@media (max-width: 600px) {
+/*@media (max-width: 600px) {
     .trans-nar, .trans-type {
         display: none
     }
-}
+}*/
 
 /*------------------------------------------------------------------
 [Nav]
@@ -185,6 +150,75 @@ nav.navbar + div.row {
     -webkit-border-radius: 0 !important;
     -moz-border-radius: 0 !important;
     border-radius: 0 !important
+}
+
+nav.navbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: baseline;
+    flex-wrap: wrap;
+    align-content: center;
+}
+nav.navbar > div:first-child {
+    flex-grow: 1;
+}
+nav.navbar > div:not(:first-child) {
+    padding-left: 15px;
+}
+
+nav.navbar {
+    padding-top: 5px;
+    padding-bottom: 10px;
+    padding-left: 35px;
+    padding-right: 35px;
+}
+nav.navbar + div.row {
+    margin-top: 5px;
+    margin-bottom: 0px;
+    margin-left: 35px;
+    margin-right: 35px;
+}
+
+@media (max-width: 767px) {
+    .nav-tabs ~ .tab-content {
+        padding: 5px !important;
+    }
+
+    nav.navbar {
+        padding-top: 0px;
+        padding-bottom: 0px;
+        padding-left: 20px;
+        padding-right: 20px;
+        margin-bottom: 0px;
+    }
+    nav.navbar + div.row {
+        margin-left: 5px;
+        margin-right: 0px;
+    }
+}
+
+@media (max-width: 400px) {
+    .nav-tabs > li > a {
+        padding-left: 5px !important;
+    }
+
+    nav.navbar {
+        padding-left: 10px;
+        padding-right: 5px;
+    }
+}
+
+@media (max-height: 920px) {
+    nav.navbar {
+        margin-bottom: 5px !important;
+    }
+}
+
+@media (max-height: 600px) {
+    nav.navbar {
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
 }
 
 
