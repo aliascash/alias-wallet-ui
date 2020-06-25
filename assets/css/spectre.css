@@ -84,6 +84,19 @@
     padding-right: 5px;
 }
 
+.navbar {
+    padding-top: 5px;
+    padding-bottom: 10px;
+    padding-left: 35px;
+    padding-right: 35px;
+}
+nav.navbar + div.row {
+    margin-top: 5px;
+    margin-bottom: 0px;
+    margin-left: 35px;
+    margin-right: 35px;
+}
+
 @media (max-width: 767px) {
     .page-container > .page-content-wrapper {
         position: absolute !important;
@@ -97,6 +110,18 @@
     .nav-tabs ~ .tab-content {
         padding: 5px !important;
     }
+
+    .navbar {
+        padding-top: 5px;
+        padding-bottom: 5px;
+        padding-left: 20px;
+        padding-right: 20px;
+        margin-bottom: 0px;
+    }
+    nav.navbar + div.row {
+        margin-left: 5px;
+        margin-right: 0px;
+    }
 }
 
 @media (max-width: 400px) {
@@ -106,6 +131,11 @@
     }
     .nav-tabs > li > a {
         padding-left: 5px !important;
+    }
+
+    .navbar {
+        padding-left: 10px;
+        padding-right: 5px;
     }
 }
 
