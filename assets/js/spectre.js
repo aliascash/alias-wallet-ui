@@ -1634,7 +1634,7 @@ window.onload = function() {
     click: function (event) {
       if ($(this).attr('href').length > 1) {
         if ($("body").hasClass("sidebar-visible")) {
-          $('.content').mouseover();
+          $('.page-sidebar').mouseleave();
         }
       } else if (!$("body").hasClass("sidebar-visible")) {
         $('.page-sidebar').mouseenter();

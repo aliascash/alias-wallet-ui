@@ -567,7 +567,7 @@ $(function () {
 
 
         var init = function (element, options) {
-            function start(ui) {
+            function showSidebar(ui) {
                 return (void ($(".close-sidebar").data("clicked") || (that.$body.hasClass("menu-pin") || (that.cssAnimation ? (that.$element.css({
                     transform: that.menuOpenCSS
                 }), that.$body.addClass("sidebar-visible"), $("#sidebar-header-collapsed").removeClass("sidebar-header-collapsed-visible"), $("#sidebar-header").removeClass("sidebar-header-hidden")) : that.$element.stop().animate({
@@ -579,7 +579,7 @@ $(function () {
                 })))));
             }
 
-            function show(ev) {
+            function hideSidebar(ev) {
                 if ("undefined" != typeof ev) {
                     var $tabsLinks = $(ev.target);
                     if ($tabsLinks.parent(".page-sidebar").length) {
@@ -661,10 +661,11 @@ $(function () {
                     }
                 });
                 var that = this;
-                this.$element.bind("mouseenter mouseleave", start);
-                this.$pageContainer.bind("mouseover", show);
-                this.$sidebarHeaderCollapsed.bind("click", start);
-                this.$sidebarHeader.bind("click", show);
+                this.$element.bind("mouseenter", showSidebar);
+                this.$element.bind("mouseleave", hideSidebar);
+                //this.$pageContainer.bind("mouseenter", show); Not needed, re-enable if necessary
+                this.$sidebarHeaderCollapsed.bind("click", showSidebar);
+                this.$sidebarHeader.bind("click", hideSidebar);
             }
         };
         init.prototype.toggleSidebar = function (e) {
