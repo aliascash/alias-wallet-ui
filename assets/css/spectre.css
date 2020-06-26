@@ -134,11 +134,6 @@
     }
 }
 
-/*@media (max-width: 600px) {
-    .trans-nar, .trans-type {
-        display: none
-    }
-}*/
 
 /*------------------------------------------------------------------
 [Nav]
@@ -1020,6 +1015,12 @@ progress::-webkit-progress-value {
 
 #transactions-table {
    margin-bottom: 0px !important;
+}
+
+@media (max-width: 530px) {
+    .trans-nar, .trans-type {
+        display: none
+    }
 }
 
 .footable > tfoot > tr > td{
