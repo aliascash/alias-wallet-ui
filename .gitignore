@@ -7,3 +7,5 @@ spectrecoin-ui-assets.tgz
 *.DS_Store
 
 .idea/
+
+android_rcc_bundle.rcc
