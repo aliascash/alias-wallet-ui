@@ -433,6 +433,20 @@ button {
     transition: background .2s linear 0s
 }
 
+/*------------------------------------------------------------------
+[Receive]
+*/
+#receive .center-div {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#receive .center-div > a.btn {
+    width: 145px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
 
 /*------------------------------------------------------------------
 [Modals]
