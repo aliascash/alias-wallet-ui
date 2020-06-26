@@ -428,6 +428,7 @@ button {
     transition: background .2s linear 0s
 }
 
+
 /*------------------------------------------------------------------
 [Receive]
 */
@@ -436,10 +437,29 @@ button {
     margin-bottom: 10px;
 }
 
-#receive .center-div > a.btn {
-    width: 145px;
-    margin-top: 5px;
-    margin-bottom: 5px;
+@media (max-width: 767px) {
+    #receive .center-div > a.btn {
+        width: 145px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Addressbook]
+*/
+#addressbook .center-div {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 767px) {
+    #addressbook .center-div > a.btn {
+        width: 145px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
 }
 
 
