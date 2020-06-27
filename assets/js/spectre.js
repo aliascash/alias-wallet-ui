@@ -397,6 +397,7 @@ function appendAddresses(err) {
     var common = "n/a" !== item.pubkey;
     if (0 == revisionCheckbox.length) {
       $(target + " .footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "'>                 <td style='padding-left:18px;' class='label2 editable' data-value='" + item.label_value + "'>" + item.label + "</td>                 <td class='address'>" + item.address + "</td>                 <td class='pubkey'>" + item.pubkey + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? "Stealth" : "Normal") + "</td></tr>");
+      $("#address-lookup-table.footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "' class='addressType"+ item.type +"'>                 <td style='padding-left:18px;' class='label2' data-value='" + item.label_value + "'>" + item.label + "</td>                 <td class='address'>" + item.address + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? "Stealth" : "Normal") + "</td></tr>");
       $("#" + item.address).selection("tr").find(".editable").on("dblclick", function(event) {
         event.stopPropagation();
         updateValue($(this));
@@ -415,9 +416,8 @@ function addressLookup(pair, dataAndEvents, coords) {
       filter : $("#address-lookup-filter").val()
     });
   }
-  var distanceToUserValue = $((dataAndEvents ? "#receive" : "#addressbook") + " table.footable > tbody").html();
+
   var $table = $("#address-lookup-table");
-  $table.children("tbody").html(distanceToUserValue);
   $table.trigger("footable_initialize");
   $table.data("footable-filter").clearFilter();
   $("#address-lookup-table > tbody tr").selection().on("dblclick", function() {
@@ -443,6 +443,12 @@ function addressLookup(pair, dataAndEvents, coords) {
   if (coords) {
     $("#address-lookup-address-type").val(coords);
     clear();
+  }
+  if (dataAndEvents) {
+    $("tr.addressTypeS", $table).hide();
+  }
+  else {
+    $("tr.addressTypeR", $table).hide();
   }
 }
 function transactionPageInit() {
