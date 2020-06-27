@@ -364,7 +364,7 @@
                                                 id=address-lookup-address-filter class=form-control
                                                 placeholder="Filter by label or address..."></div>
                                         <div class="form-group">
-                                            <select id=address-lookup-address-type
+                                            <select id=address-lookup-address-type disabled="true"
                                                     class="recipient select-drop-down" style=width:120px>
                                                 <option value="" title="Filter Address Type" selected
                                                         class=translate>Address Type
@@ -973,7 +973,7 @@
                                                                 data-title="Choose from address book"
                                                                 data-toggle=modal
                                                                 data-target=#address-lookup-modal href=#
-                                                                onclick='addressLookup("change_address",!0)'
+                                                                onclick='addressLookup("change_address",!0, "Normal")'
                                                                 class="btn btn-default"><i
                                                                 class="fa fa-book"></i> </a><a
                                                                 data-title="Paste address from clipboard"
@@ -1084,7 +1084,8 @@
                                                                         data-toggle=modal
                                                                         data-target=#address-lookup-modal
                                                                         href=#
-                                                                        onclick='addressLookup("recipient-template .pay_to,recipient-template .pay_to_label",!1)'
+                                                                        onclick='addressLookup("recipient-template .pay_to,recipient-template .pay_to_label",!1,
+                                                                         $("[name=transaction_type_from]:checked").val() === "private" ? "Stealth" : "Normal")'
                                                                         class="btn btn-default"><i
                                                                         class="fa fa-book"></i> </a><a
                                                                         data-title="Paste address from clipboard"
