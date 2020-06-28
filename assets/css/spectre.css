@@ -902,7 +902,7 @@ progress::-webkit-progress-value {
 /* Make tbody scrollable */
 #transactions-table > thead {
     display: table;
-    width: calc(100% - 1.25em);
+    width: 100%;
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
@@ -918,29 +918,42 @@ progress::-webkit-progress-value {
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
-#transactions-table > tbody > tr > td.trans-status {
-    width: 2em;
+#transactions-table > thead > tr > th:first-child {
+    width:16px !important;
+    padding-left:1px !important;
+}
+
+#transactions-table > tbody > tr > td:first-child {
+    width: 16px !important;
+    padding-left: 2px !important;
+    overflow: visible;
 }
 
 #transactions-table {
    margin-bottom: 0px !important;
 }
 
-@media (max-width: 530px) {
-    .trans-nar, .trans-type {
-        display: none
-    }
-}
-
-@media (max-width: 480px) {
+@media (max-width: 767px) {
     #transactions-table > tbody > tr > td {
         white-space: normal !important;
         overflow-wrap: break-word;
     }
 
     #transactions-table > tbody > tr > td, #transactions-table > thead > tr > th {
-        padding-top: 8px !important;
-        padding-bottom: 8px !important;
+        padding-top: 7px !important;
+        padding-bottom: 7px !important;
+    }
+}
+
+@media (max-width: 530px) {
+    .trans-nar {
+        display: none
+    }
+}
+
+@media (max-width: 480px) {
+    #transactions-table > thead > tr > th:nth-child(2), #transactions-table > tbody > tr > td:nth-child(2){
+        width: 62px !important;
     }
 }
 
@@ -991,7 +1004,7 @@ body.fixed-header {
 /* Make tbody scrollable */
 #chaindata-table > thead {
     display: table;
-    width: calc(100% - 1.25em);
+    width: 100%;
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
