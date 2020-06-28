@@ -133,8 +133,8 @@
 
 @media (max-height: 600px) {
     .table > tbody > tr > td, .table > thead > tr > th {
-        padding-top: 12px !important;
-        padding-bottom: 12px !important;
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
     }
 
     .header {
@@ -340,6 +340,11 @@ nav.navbar + div.row {
     padding-bottom: 0px !important;
 }
 
+.footable-row-detail-value {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 @media (max-width: 480px) {
     .footable > tbody > tr > td, .footable > thead > tr > th {
         padding-left: 5px !important;
@@ -493,6 +498,10 @@ button {
 /*------------------------------------------------------------------
 [Addressbook]
 */
+.address {
+    overflow-wrap: anywhere;
+}
+
 #addressbook .center-div {
     margin-top: 10px;
     margin-bottom: 10px;
@@ -885,6 +894,11 @@ progress::-webkit-progress-value {
     display: none
 }
 
+
+/*------------------------------------------------------------------
+[Transactions]
+*/
+
 /* Make tbody scrollable */
 #transactions-table > thead {
     display: table;
@@ -918,6 +932,19 @@ progress::-webkit-progress-value {
     }
 }
 
+@media (max-width: 480px) {
+    #transactions-table > tbody > tr > td {
+        white-space: normal !important;
+        overflow-wrap: break-word;
+    }
+
+    #transactions-table > tbody > tr > td, #transactions-table > thead > tr > th {
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+    }
+}
+
+
 /* Make page-content scrollable with fix header */
 body.fixed-header {
     overflow-y: hidden;
@@ -950,10 +977,15 @@ body.fixed-header {
 }
 
 #transaction-info dd {
+    overflow-wrap: anywhere;
     float: left;
     width: 82%;
     padding: 0;
     margin: 0
+}
+
+#transaction-info a {
+    overflow-wrap: anywhere;
 }
 
 /* Make tbody scrollable */
