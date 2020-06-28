@@ -78,7 +78,7 @@ function connectSignals() {
 
 var connectClientSignalsAttempts = 0;
 function connectClientSignals() {
-  if (typeof(clientBridge) == "undefined") {
+  if (typeof(clientBridge) == "undefined" || typeof(bridge) == "undefined") { // bridge is indirectly required by sendPage.init()
     connectClientSignalsAttempts += 1;
     if (connectClientSignalsAttempts < 50) {
       console.log("retrying connecting client signals in 200ms");
@@ -87,6 +87,7 @@ function connectClientSignals() {
     else {
       console.log("giving up on connecting client signals.");
       console.log("clientBridge available: "+ (typeof clientBridge !== "undefined"));
+      console.log("bridge available: "+ (typeof bridge !== "undefined"));
     }
     return;
   }
