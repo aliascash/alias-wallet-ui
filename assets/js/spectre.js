@@ -1600,11 +1600,15 @@ var walletManagementPage = {
 };
 
 function resizeTableBodies() {
-  var newHeightTransactionTable = $(window).height() - $('#transactions-table > tbody').offset().top - $('#transactions-table > tfoot').height() - 1;
-  $("#transactions-table > tbody").height(newHeightTransactionTable);  
+  var newHeightTransactionTable = $(window).height() < 480 ?
+      ($(window).height() - $("#transactions nav.navbar").height() - $('#transactions-table > thead').height() - $('#transactions-table > tfoot').height() - 10 ) :
+      ($(window).height() - $('#transactions-table > tbody').offset().top - $('#transactions-table > tfoot').height() - 10);
+  $("#transactions-table > tbody").height(newHeightTransactionTable);
 
-  var newHeighChaindataTable = $(window).height() - $('#chaindata-table > tbody').offset().top - $('#transactions-table > tfoot').height() - 21;
-  $("#chaindata-table > tbody").height(newHeighChaindataTable);   
+  var newHeighChaindataTable = $(window).height() < 480 ?
+      ($(window).height() - $("#chaindata nav.navbar").height() - $('#chaindata-table > thead').height() - $('#chaindata-table > tfoot').height() - 10 ) :
+      ($(window).height() - $('#chaindata-table > tbody').offset().top - $('#chaindata-table > tfoot').height() - 10);
+  $("#chaindata-table > tbody").height(newHeighChaindataTable);
 }
 
 window.onload = function() {
@@ -1633,7 +1637,7 @@ window.onload = function() {
     if (window.innerWidth > breakpoint) {
       $("#layout").removeClass("active");
     }
-    resizeTableBodies();
+    setTimeout(resizeTableBodies, 50);
   };
 
   // Enhance sidebar on link click behavior
@@ -1642,6 +1646,13 @@ window.onload = function() {
       if ($(this).attr('href').length > 1) {
         if ($("body").hasClass("sidebar-visible")) {
           $('.page-sidebar').mouseleave();
+        }
+        if ($(window).height() < 480) {
+          if ($(this).attr('href') === '#transactions') {
+            document.querySelector("#transactions").scrollIntoView({behavior: 'smooth'});
+          } else if ($(this).attr('href') === '#chaindata') {
+            document.querySelector("#chaindata").scrollIntoView({behavior: 'smooth'});
+          }
         }
       } else if (!$("body").hasClass("sidebar-visible")) {
         $('.page-sidebar').mouseenter();
