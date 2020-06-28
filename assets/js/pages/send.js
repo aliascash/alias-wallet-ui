@@ -117,7 +117,7 @@ $(function() {
             if (typeof narration === 'undefined') {
                 narration = "";
             }
-            clientBridge.addRecipient(context.val(), $(this).find(".pay_to_label").val(), narration, unit.parse(jElm.val(), $(this).find(".unit").val()), datas, $("#ring_size").val());
+            clientBridge.addRecipient(context.val(), $(this).find(".pay_to_label").val(), narration, unit.parse(jElm.val(), $(this).find(".unit").val()), datas);
         }
 
         if (typeof sendCoinsResult !== 'undefined') {
