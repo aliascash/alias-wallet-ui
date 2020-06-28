@@ -933,15 +933,15 @@ progress::-webkit-progress-value {
    margin-bottom: 0px !important;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767px) and (min-height: 600px) {
     #transactions-table > tbody > tr > td {
         white-space: normal !important;
         overflow-wrap: break-word;
     }
 
     #transactions-table > tbody > tr > td, #transactions-table > thead > tr > th {
-        padding-top: 7px !important;
-        padding-bottom: 7px !important;
+        padding-top: 6px !important;
+        padding-bottom: 6px !important;
     }
 }
 
