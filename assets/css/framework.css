@@ -281,6 +281,15 @@ body.dashboard, body.dashboard .page-container {
     position: relative
 }
 
+.page-sidebar .sidebar-header .brand {
+    margin-left: 25px;
+    margin-right: 25px;
+}
+
+.page-sidebar .sidebar-header-collapsed .brand {
+    margin-top: 20px;
+}
+
 .sidebar-header-hidden {
     display: none !important
 }
