@@ -102,7 +102,7 @@ body.dashboard, body.dashboard .page-container {
 ------------------------------------
 */
 .pace .pace-progress {
-    background: #1481c3;
+    background: #f28321;
     height: 3px
 }
 
@@ -194,7 +194,7 @@ body.dashboard, body.dashboard .page-container {
 
 .header .search-link {
     margin-left: 15px;
-    color: #626262;
+    color: #8a8c8e;
     opacity: .7;
     font-size: 16px;
     font-family: Montserrat, sans-serif;
@@ -239,7 +239,7 @@ body.dashboard, body.dashboard .page-container {
 */
 .page-sidebar {
     width: 250px;
-    background-color: #0f0e12;
+    background-color: #382b3f;
     left: -210px;
     position: fixed;
     top: 0;
@@ -271,8 +271,8 @@ body.dashboard, body.dashboard .page-container {
     display: block;
     height: 60px;
     line-height: 60px;
-    background-color: #111016;
-    border-bottom: 1px solid #0f0f13;
+    background-color: #382b3f;
+    border-bottom: 1px solid #382b3f;
     color: #fff;
     width: 100%;
     padding-left: 0px;
@@ -339,7 +339,7 @@ body.dashboard, body.dashboard .page-container {
 .page-sidebar .sidebar-overlay-slide {
     width: 100%;
     height: 100%;
-    background-color: #111016;
+    background-color: #382b3f;
     display: block;
     z-index: 9;
     padding: 80px 20px 20px
@@ -384,7 +384,7 @@ body.dashboard, body.dashboard .page-container {
 }
 
 .page-sidebar .sidebar-menu .menu-items li.active > a .icon-thumbnail, .page-sidebar .sidebar-menu .menu-items li.open > a .icon-thumbnail, .page-sidebar .sidebar-menu .menu-items li:hover > a .icon-thumbnail {
-    color: #1481c3
+    color: #f28321
 }
 
 .page-sidebar .sidebar-menu .menu-items li.active > a, .page-sidebar .sidebar-menu .menu-items li.open > a, .page-sidebar .sidebar-menu .menu-items li:hover > a {
@@ -523,7 +523,7 @@ body.dashboard, body.dashboard .page-container {
     display: none;
     list-style: none;
     clear: both;
-    background-color: #0f0e12;
+    background-color: #382b3f;
     padding: 0 0 10px
 }
 
@@ -534,7 +534,7 @@ body.dashboard, body.dashboard .page-container {
 }
 
 .page-sidebar .sidebar-menu .menu-items > li ul.sub-menu > li:hover > .icon-thumbnail {
-    color: #1481c3
+    color: #f28321
 }
 
 .page-sidebar .sidebar-menu .menu-items > li ul.sub-menu > li > a {
@@ -550,7 +550,7 @@ body.dashboard, body.dashboard .page-container {
     height: 30px;
     line-height: 30px;
     margin: 0;
-    background-color: #131218;
+    background-color: #382b3f;
     font-size: 14px
 }
 
@@ -572,7 +572,7 @@ body.dashboard, body.dashboard .page-container {
 */
 .icon-thumbnail {
     display: inline-block;
-    background: #0f0e12;
+    background: #382b3f;
     height: 40px;
     width: 40px;
     line-height: 40px;
@@ -635,7 +635,7 @@ body.dashboard, body.dashboard .page-container {
 }
 
 .quickview-wrapper .nav-tabs {
-    background-color: #131218;
+    background-color: #382b3f;
     position: relative;
     padding: 0 15px;
     height: 40px
@@ -652,14 +652,14 @@ body.dashboard, body.dashboard .page-container {
 }
 
 .quickview-wrapper .nav-tabs > li > a:hover {
-    color: #1481c3;
+    color: #f28321;
     opacity: 1
 }
 
 .quickview-wrapper .nav-tabs > li.active > a, .quickview-wrapper .nav-tabs > li.active > a:focus, .quickview-wrapper .nav-tabs > li.active > a:hover {
     background-color: transparent;
     border: 0;
-    color: #1481c3;
+    color: #f28321;
     opacity: 1
 }
 
@@ -1511,7 +1511,7 @@ body, p {
 }
 
 .panel.panel-featured .footer .buttons .comment {
-    color: #626262
+    color: #8a8c8e
 }
 
 .panel.panel-featured .ribbon {
@@ -1523,7 +1523,7 @@ body, p {
 }
 
 .panel.panel-featured .ribbon.blue, .panel.panel-featured .ribbon.green {
-    background: #1481c3
+    background: #f28321
 }
 
 .panel.hover-fill:hover {
@@ -1614,12 +1614,12 @@ body, p {
 }
 
 .panel-heading a {
-    color: #626262 !important;
+    color: #8a8c8e !important;
     opacity: .4
 }
 
 address a, body {
-    color: #626262
+    color: #8a8c8e
 }
 
 .panel-heading a.portlet-refresh {
@@ -1826,7 +1826,7 @@ a {
 }
 
 a:active, a:focus, a:hover {
-    color: #1481c3
+    color: #f28321
 }
 
 a, a:active, a:focus, a:hover {
@@ -2006,7 +2006,7 @@ hr.dotted {
 ------------------------------------
  */
 .bg-master {
-    background-color: #626262
+    background-color: #8a8c8e
 }
 
 .bg-master-light {
@@ -2040,7 +2040,7 @@ hr.dotted {
 ------------------------------------
 */
 .bg-primary {
-    background-color: #1481c3
+    background-color: #f28321
 }
 
 .bg-primary-dark {
@@ -2063,7 +2063,7 @@ hr.dotted {
 ------------------------------------
 */
 .bg-complete {
-    background-color: #1481c3
+    background-color: #f28321
 }
 
 .bg-complete-dark {
@@ -2086,7 +2086,7 @@ hr.dotted {
 ------------------------------------
 */
 .bg-success {
-    background-color: #1481c3
+    background-color: #f28321
 }
 
 .bg-success-dark {
@@ -2181,11 +2181,11 @@ hr.dotted {
 ------------------------------------
 */
 .bg-menu-dark {
-    background-color: #0f0e12
+    background-color: #382b3f
 }
 
 .bg-menu {
-    background-color: #131218
+    background-color: #382b3f
 }
 
 .bg-menu-light {
@@ -2218,7 +2218,7 @@ hr.dotted {
 }
 */
 .text-master {
-    color: #626262 !important
+    color: #8a8c8e !important
 }
 
 .text-master-light {
@@ -2234,7 +2234,7 @@ hr.dotted {
 }
 
 .text-complete, .text-success {
-    color: #1481c3 !important
+    color: #f28321 !important
 }
 
 .text-info {
@@ -2254,7 +2254,7 @@ hr.dotted {
 }
 
 .text-primary {
-    color: #1481c3 !important
+    color: #f28321 !important
 }
 
 /* Text Aligngments
@@ -2281,11 +2281,11 @@ hr.dotted {
     text-spectre: none;
     background-color: #e6e6e6;
     font-weight: 600;
-    color: #626262
+    color: #8a8c8e
 }
 
 .label-success {
-    background-color: #1481c3;
+    background-color: #f28321;
     color: #fff
 }
 
@@ -2295,12 +2295,12 @@ hr.dotted {
 }
 
 .label-danger, .label-important {
-    background-color: #1481c3;
+    background-color: #f28321;
     color: #fff
 }
 
 .label-info {
-    background-color: #1481c3;
+    background-color: #f28321;
     color: #fff
 }
 
@@ -2311,7 +2311,7 @@ hr.dotted {
 
 .label-white {
     background-color: #fff;
-    color: #626262
+    color: #8a8c8e
 }
 
 /* Font Sizes
@@ -2423,7 +2423,7 @@ hr.dotted {
 }
 
 .well.green {
-    background-color: #1481c3;
+    background-color: #f28321;
     color: #fff;
     border: none
 }
@@ -2544,7 +2544,7 @@ hr.dotted {
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     background-image: none !important;
-    color: #626262;
+    color: #8a8c8e;
     background-color: #fff;
     text-spectre: none;
     line-height: 21px;
@@ -2572,8 +2572,8 @@ hr.dotted {
 
 .btn-primary, .btn-primary:focus {
     color: #fff;
-    background-color: #1481c3;
-    border-color: #1481c3
+    background-color: #f28321;
+    border-color: #f28321
 }
 
 .btn-primary.active, .btn-primary.active:focus, .btn-primary:active, .btn-primary:active:focus, .btn-primary:active:hover, .open .dropdown-toggle.btn-primary {
@@ -2583,9 +2583,9 @@ hr.dotted {
 }
 
 .btn-primary.hover, .btn-primary:hover, .open .dropdown-toggle.btn-primary {
-    background-color: #e94e63;
-    border-color: #e94e63;
-    color: #fff
+    background-color: #382b3f;
+    border-color: #382b3f;
+    color: #fbaa26
 }
 
 .btn-primary.active:hover {
@@ -2594,19 +2594,19 @@ hr.dotted {
 }
 
 .btn-primary.disabled, .btn-primary.disabled.active, .btn-primary.disabled:active, .btn-primary.disabled:focus, .btn-primary.disabled:hover, .btn-primary[disabled], .btn-primary[disabled].active, .btn-primary[disabled]:active, .btn-primary[disabled]:focus, .btn-primary[disabled]:hover, fieldset[disabled] .btn-primary, fieldset[disabled] .btn-primary.active, fieldset[disabled] .btn-primary:active, fieldset[disabled] .btn-primary:focus, fieldset[disabled] .btn-primary:hover {
-    background-color: #1481c3;
-    border-color: #1481c3
+    background-color: #f28321;
+    border-color: #f28321
 }
 
 .btn-primary .badge {
-    color: #1481c3;
+    color: #f28321;
     background-color: #fff
 }
 
 .btn-success, .btn-success:focus {
     color: #fff;
-    background-color: #1481c3;
-    border-color: #1481c3
+    background-color: #f28321;
+    border-color: #f28321
 }
 
 .btn-success.active, .btn-success.active:focus, .btn-success:active, .btn-success:active:focus, .btn-success:active:hover, .open .dropdown-toggle.btn-success {
@@ -2627,19 +2627,19 @@ hr.dotted {
 }
 
 .btn-success.disabled, .btn-success.disabled.active, .btn-success.disabled:active, .btn-success.disabled:focus, .btn-success.disabled:hover, .btn-success[disabled], .btn-success[disabled].active, .btn-success[disabled]:active, .btn-success[disabled]:focus, .btn-success[disabled]:hover, fieldset[disabled] .btn-success, fieldset[disabled] .btn-success.active, fieldset[disabled] .btn-success:active, fieldset[disabled] .btn-success:focus, fieldset[disabled] .btn-success:hover {
-    background-color: #1481c3;
-    border-color: #1481c3
+    background-color: #f28321;
+    border-color: #f28321
 }
 
 .btn-success .badge {
-    color: #1481c3;
+    color: #f28321;
     background-color: #fff
 }
 
 .btn-complete, .btn-complete:focus {
     color: #fff;
-    background-color: #1481c3;
-    border-color: #1481c3
+    background-color: #f28321;
+    border-color: #f28321
 }
 
 .btn-complete.active, .btn-complete.active:focus, .btn-complete:active, .btn-complete:active:focus, .btn-complete:active:hover, .open .dropdown-toggle.btn-complete {
@@ -2660,12 +2660,12 @@ hr.dotted {
 }
 
 .btn-complete.disabled, .btn-complete.disabled.active, .btn-complete.disabled:active, .btn-complete.disabled:focus, .btn-complete.disabled:hover, .btn-complete[disabled], .btn-complete[disabled].active, .btn-complete[disabled]:active, .btn-complete[disabled]:focus, .btn-complete[disabled]:hover, fieldset[disabled] .btn-complete, fieldset[disabled] .btn-complete.active, fieldset[disabled] .btn-complete:active, fieldset[disabled] .btn-complete:focus, fieldset[disabled] .btn-complete:hover {
-    background-color: #1481c3;
-    border-color: #1481c3
+    background-color: #f28321;
+    border-color: #f28321
 }
 
 .btn-complete .badge {
-    color: #1481c3;
+    color: #f28321;
     background-color: #fff
 }
 
@@ -2731,14 +2731,14 @@ hr.dotted {
 }
 
 .btn-warning .badge {
-    color: #1481c3;
+    color: #f28321;
     background-color: #fff
 }
 
 .btn-danger, .btn-danger:focus {
     color: #fff;
-    background-color: #1481c3;
-    border-color: #1481c3
+    background-color: #f28321;
+    border-color: #f28321
 }
 
 .btn-danger.active, .btn-danger.active:focus, .btn-danger:active, .btn-danger:active:focus, .btn-danger:active:hover, .open .dropdown-toggle.btn-danger {
@@ -2748,9 +2748,9 @@ hr.dotted {
 }
 
 .btn-danger.hover, .btn-danger:hover, .open .dropdown-toggle.btn-danger {
-    background-color: #f77975;
-    border-color: #f77975;
-    color: #fff
+    background-color: #382b3f;
+    border-color: #382b3f;
+    color: #fbaa26
 }
 
 .btn-danger.active:hover {
@@ -2759,12 +2759,12 @@ hr.dotted {
 }
 
 .btn-danger.disabled, .btn-danger.disabled.active, .btn-danger.disabled:active, .btn-danger.disabled:focus, .btn-danger.disabled:hover, .btn-danger[disabled], .btn-danger[disabled].active, .btn-danger[disabled]:active, .btn-danger[disabled]:focus, .btn-danger[disabled]:hover, fieldset[disabled] .btn-danger, fieldset[disabled] .btn-danger.active, fieldset[disabled] .btn-danger:active, fieldset[disabled] .btn-danger:focus, fieldset[disabled] .btn-danger:hover {
-    background-color: #1481c3;
-    border-color: #1481c3
+    background-color: #f28321;
+    border-color: #f28321
 }
 
 .btn-danger .badge {
-    color: #1481c3;
+    color: #f28321;
     background-color: #fff
 }
 
@@ -2891,7 +2891,7 @@ hr.dotted {
 }
 
 .dropdown-default.open > .btn-complete + .dropdown-menu:after, .dropdown-default.open > .btn-primary + .dropdown-menu:after, .dropdown-default.open > .btn-success + .dropdown-menu:after {
-    background-color: #1481c3
+    background-color: #f28321
 }
 
 .dropdown-default.open > .btn-warning + .dropdown-menu:after {
@@ -3112,7 +3112,7 @@ hr.dotted {
 
 .dropdown-menu > li > a {
     line-height: 35px;
-    color: #626262;
+    color: #8a8c8e;
     padding: 0 20px;
     border-radius: 3px;
     text-align: left
@@ -3234,7 +3234,7 @@ hr.dotted {
 
 .btn-tag.btn-tag-dark {
     background: #e6e6e6;
-    color: #626262
+    color: #8a8c8e
 }
 
 .btn-tag.btn-tag-dark:hover {
@@ -3350,7 +3350,7 @@ hr.dotted {
 
 .alert-default {
     background-color: #fff;
-    color: #626262;
+    color: #8a8c8e;
     border-color: #e6e6e6
 }
 
@@ -3366,18 +3366,18 @@ hr.dotted {
 */
 .badge {
     text-spectre: none;
-    font-family: Helvetica, Verdana, sans-serif;
+    font-family: Montserrat, sans-serif;
     font-weight: 600;
     background-color: #e6e6e6;
     font-size: 11px;
     padding-left: 6px;
     padding-right: 6px;
     padding-bottom: 4px;
-    color: #626262
+    color: #8a8c8e
 }
 
 .badge-success {
-    background-color: #1481c3;
+    background-color: #f28321;
     color: #fff
 }
 
@@ -3403,12 +3403,12 @@ hr.dotted {
 
 .badge-white {
     background-color: #fff;
-    color: #626262
+    color: #8a8c8e
 }
 
 .badge-disable {
     background-color: #2c2c2c;
-    color: #626262
+    color: #8a8c8e
 }
 
 /* Notification popup
@@ -3589,7 +3589,7 @@ hr.dotted {
 }
 
 .notification-panel .notification-footer a {
-    color: #626262;
+    color: #8a8c8e;
     opacity: .54
 }
 
@@ -4124,7 +4124,7 @@ body > .pgn-wrapper {
 ------------------------------------
 */
 .progress-bar {
-    background-color: #626262;
+    background-color: #8a8c8e;
     background-image: none;
     -webkit-transition: all 1s cubic-bezier(.785, .135, .15, .86);
     transition: all 1s cubic-bezier(.785, .135, .15, .86);
@@ -4136,7 +4136,7 @@ body > .pgn-wrapper {
 }
 
 .progress-bar-complete, .progress-bar-primary, .progress-bar-success {
-    background-color: #1481c3;
+    background-color: #f28321;
     background-image: none
 }
 
@@ -4186,7 +4186,7 @@ body > .pgn-wrapper {
 }
 
 .progress-striped .bar-success, .progress-success.progress-striped .bar {
-    background-color: #1481c3
+    background-color: #f28321
 }
 
 .progress-info.progress-striped .bar, .progress-striped .bar-info {
@@ -4252,7 +4252,7 @@ body > .pgn-wrapper {
 }
 
 .progress-circle.progress-circle-complete .pie .half-circle, .progress-circle.progress-circle-primary .pie .half-circle, .progress-circle.progress-circle-success .pie .half-circle {
-    border-color: #1481c3
+    border-color: #f28321
 }
 
 .progress-circle.progress-circle-thick .pie .half-circle, .progress-circle.progress-circle-thick .spectre {
@@ -4267,7 +4267,7 @@ body > .pgn-wrapper {
 }
 
 .progress-circle .pie .half-circle {
-    border: 3px solid #626262;
+    border: 3px solid #8a8c8e;
     border-radius: 50%;
     clip: rect(0, 22.5px, 45px, 0);
     height: 45px;
@@ -4538,7 +4538,7 @@ body > .pgn-wrapper {
 
 .nav-tabs > li.active > a, .nav-tabs > li.active > a:focus, .nav-tabs > li.active > a:hover {
     border-color: #e6e6e6;
-    color: #626262;
+    color: #8a8c8e;
     background-color: #e6e6e6
 }
 
@@ -4644,7 +4644,7 @@ body > .pgn-wrapper {
 }
 
 .nav-tabs-complete.nav-tabs-simple > li:after, .nav-tabs-primary.nav-tabs-simple > li:after, .nav-tabs-success.nav-tabs-simple > li:after {
-    background-color: #1481c3
+    background-color: #f28321
 }
 
 .nav-tabs-danger.nav-tabs-simple > li:after {
@@ -4836,8 +4836,8 @@ body > .pgn-wrapper {
 }
 
 .nav-tabs-complete.nav-tabs-fillup > li > a:after, .nav-tabs-fillup > li > a:after, .nav-tabs-primary.nav-tabs-fillup > li > a:after, .nav-tabs-success.nav-tabs-fillup > li > a:after {
-    background: #1481c3;
-    border: 1px solid #1481c3
+    background: #f28321;
+    border: 1px solid #f28321
 }
 
 .nav-tabs-fillup > li > a:after {
@@ -4998,7 +4998,7 @@ body > .pgn-wrapper {
 }
 
 .panel-group .panel-heading .panel-title > a {
-    color: #626262;
+    color: #8a8c8e;
     font-size: 13px;
     font-weight: 400;
     display: block;
@@ -5006,7 +5006,7 @@ body > .pgn-wrapper {
 }
 
 .panel-group .panel-heading .panel-title > a:hover, .panel-group .panel-heading .panel-title > a:hover:after {
-    color: #626262 !important
+    color: #8a8c8e !important
 }
 
 .panel-group .panel-heading .panel-title > a:after {
@@ -5015,7 +5015,7 @@ body > .pgn-wrapper {
     position: absolute;
     right: 13px;
     top: 36%;
-    color: #626262
+    color: #8a8c8e
 }
 
 .dd-item > button:before, .dd3-handle:before {
@@ -5042,11 +5042,11 @@ body > .pgn-wrapper {
 
 .nav-pills > li > a {
     border-radius: 0;
-    color: #626262
+    color: #8a8c8e
 }
 
 .nav-pills > li.active > a, .nav-pills > li.active > a:focus, .nav-pills > li.active > a:hover {
-    color: #626262;
+    color: #8a8c8e;
     background-color: #e6e6e6
 }
 
@@ -5096,11 +5096,11 @@ body > .pgn-wrapper {
 }
 
 .irs-wrapper.primary .irs-from, .irs-wrapper.primary .irs-single, .irs-wrapper.primary .irs-to, .irs-wrapper.success .irs-from, .irs-wrapper.success .irs-single, .irs-wrapper.success .irs-to {
-    background: #1481c3
+    background: #f28321
 }
 
 .irs-wrapper.primary .irs-bar, .irs-wrapper.primary .irs-diapason, .irs-wrapper.primary .irs-slider.from:before, .irs-wrapper.primary .irs-slider.single:before, .irs-wrapper.primary .irs-slider.to:before, .irs-wrapper.success .irs-bar, .irs-wrapper.success .irs-diapason, .irs-wrapper.success .irs-slider.from:before, .irs-wrapper.success .irs-slider.single:before, .irs-wrapper.success .irs-slider.to:before {
-    background-color: #1481c3
+    background-color: #f28321
 }
 
 .irs-wrapper .irs-from:after, .irs-wrapper .irs-single:after, .irs-wrapper .irs-to:after {
@@ -5108,7 +5108,7 @@ body > .pgn-wrapper {
 }
 
 .irs-wrapper.primary .irs-from:after, .irs-wrapper.primary .irs-single:after, .irs-wrapper.primary .irs-to:after, .irs-wrapper.success .irs-from:after, .irs-wrapper.success .irs-single:after, .irs-wrapper.success .irs-to:after {
-    border-top-color: #1481c3
+    border-top-color: #f28321
 }
 
 .irs-wrapper.warning .irs-bar, .irs-wrapper.warning .irs-diapason, .irs-wrapper.warning .irs-slider.from:before, .irs-wrapper.warning .irs-slider.single:before, .irs-wrapper.warning .irs-slider.to:before {
@@ -5124,15 +5124,15 @@ body > .pgn-wrapper {
 }
 
 .irs-wrapper.complete .irs-bar, .irs-wrapper.complete .irs-diapason, .irs-wrapper.complete .irs-slider.from:before, .irs-wrapper.complete .irs-slider.single:before, .irs-wrapper.complete .irs-slider.to:before {
-    background-color: #1481c3
+    background-color: #f28321
 }
 
 .irs-wrapper.complete .irs-from, .irs-wrapper.complete .irs-single, .irs-wrapper.complete .irs-to {
-    background: #1481c3
+    background: #f28321
 }
 
 .irs-wrapper.complete .irs-from:after, .irs-wrapper.complete .irs-single:after, .irs-wrapper.complete .irs-to:after {
-    border-top-color: #1481c3
+    border-top-color: #f28321
 }
 
 .irs-wrapper.danger .irs-bar, .irs-wrapper.danger .irs-diapason, .irs-wrapper.danger .irs-slider.from:before, .irs-wrapper.danger .irs-slider.single:before, .irs-wrapper.danger .irs-slider.to:before {
@@ -5154,7 +5154,7 @@ body > .pgn-wrapper {
 }
 
 .noUi-target.bg-complete .noUi-connect, .noUi-target.bg-success .noUi-connect {
-    background-color: #1481c3
+    background-color: #f28321
 }
 
 .noUi-target.bg-warning .noUi-connect {
@@ -5170,7 +5170,7 @@ body > .pgn-wrapper {
 }
 
 .noUi-target.bg-primary .noUi-connect {
-    background-color: #1481c3
+    background-color: #f28321
 }
 
 .noUi-target.noUi-connect {
@@ -5284,13 +5284,13 @@ span.dynatree-focused a:link, ul.dynatree-container, ul.dynatree-container a:foc
 }
 
 ul.dynatree-container a:hover {
-    color: #626262;
+    color: #8a8c8e;
     opacity: .7;
     background-color: transparent
 }
 
 ul.dynatree-container a {
-    color: #626262
+    color: #8a8c8e
 }
 
 #dynatree-drop-marker, span.dynatree-checkbox, span.dynatree-connector, span.dynatree-drag-helper-img, span.dynatree-empty, span.dynatree-expander, span.dynatree-icon, span.dynatree-radio, span.dynatree-vline {
@@ -5303,7 +5303,7 @@ ul.dynatree-container a {
 [Nesstables]
 */
 .dd-handle {
-    color: #626262
+    color: #8a8c8e
 }
 
 .dd-handle:hover {
@@ -5311,7 +5311,7 @@ ul.dynatree-container a {
 }
 
 .dark .dd-handle {
-    color: #626262;
+    color: #8a8c8e;
     background: #f0f0f0
 }
 
@@ -5325,7 +5325,7 @@ ul.dynatree-container a {
 
 .dd3-content {
     background: #fff;
-    color: #626262
+    color: #8a8c8e
 }
 
 .dd3-content:hover {
@@ -5338,7 +5338,7 @@ ul.dynatree-container a {
 }
 
 .dd3-handle:before {
-    color: #626262;
+    color: #8a8c8e;
     content: "\e660";
     font-size: 11px;
     top: 5px
@@ -5552,7 +5552,7 @@ form legend {
 }
 
 .radio.radio-primary input[type=radio]:checked + label:before, .radio.radio-success input[type=radio]:checked + label:before {
-    border-color: #1481c3
+    border-color: #f28321
 }
 
 .radio.radio-info input[type=radio]:checked + label:before {
@@ -5568,7 +5568,7 @@ form legend {
 }
 
 .checkbox.check-complete input[type=checkbox]:checked + label:before, .checkbox.check-primary input[type=checkbox]:checked + label:before, .checkbox.check-success input[type=checkbox]:checked + label:before, .radio.radio-complete input[type=radio]:checked + label:before {
-    border-color: #1481c3
+    border-color: #f28321
 }
 
 .checkbox label {
@@ -6192,13 +6192,13 @@ form legend {
 }
 
 .input-group-addon.primary {
-    background-color: #1481c3;
-    border: 1px solid #1481c3;
+    background-color: #f28321;
+    border: 1px solid #f28321;
     color: #fff
 }
 
 .input-group-addon.primary .arrow {
-    color: #1481c3
+    color: #f28321
 }
 
 .input-group-addon.success {
@@ -6286,13 +6286,13 @@ https://github.com/eternicode/bootstrap-datepicker
 }
 
 .datepicker thead tr .next, .datepicker thead tr .prev {
-    color: #1481c3;
+    color: #f28321;
     content: '';
     font-size: 0
 }
 
 .datepicker thead tr .next:before, .datepicker thead tr .prev:before {
-    color: #1481c3;
+    color: #f28321;
     font-family: FontAwesome;
     font-size: 10px
 }
@@ -6306,7 +6306,7 @@ https://github.com/eternicode/bootstrap-datepicker
 }
 
 .datepicker thead tr .dow {
-    color: #1481c3;
+    color: #f28321;
     text-transform: uppercase;
     font-size: 11px
 }
@@ -6324,7 +6324,7 @@ https://github.com/eternicode/bootstrap-datepicker
 }
 
 .datepicker table tr td.active {
-    background-color: #1481c3 !important
+    background-color: #f28321 !important
 }
 
 .datepicker table tr td.active, .datepicker table tr td.active.disabled, .datepicker table tr td.active.disabled:hover, .datepicker table tr td.active:hover {
@@ -6347,7 +6347,7 @@ https://github.com/eternicode/bootstrap-datepicker
 }
 
 .datepicker table tr td span.active {
-    background-color: #1481c3 !important
+    background-color: #f28321 !important
 }
 
 .datepicker table tr td span.active, .datepicker table tr td span.active.disabled, .datepicker table tr td span.active.disabled:hover, .datepicker table tr td span.active:hover {
@@ -6358,7 +6358,7 @@ https://github.com/eternicode/bootstrap-datepicker
 
 .datepicker.dropdown-menu {
     border-color: #e6e6e6;
-    color: #626262
+    color: #8a8c8e
 }
 
 .datepicker.datepicker-dropdown.datepicker-orient-bottom:before {
@@ -6396,7 +6396,7 @@ https://github.com/m3wolf/bootstrap3-timepicker
 }
 
 .daterangepicker .calendar .next, .daterangepicker .calendar .prev, .daterangepicker .calendar th {
-    color: #1481c3;
+    color: #f28321;
     text-transform: uppercase;
     font-size: 11px
 }
@@ -6407,8 +6407,8 @@ https://github.com/m3wolf/bootstrap3-timepicker
 }
 
 .daterangepicker td.active, .daterangepicker td.active:hover {
-    background-color: #1481c3;
-    border-color: #1481c3
+    background-color: #f28321;
+    border-color: #f28321
 }
 
 .form-group-default .select2-container .select2-choice, .select2-container-multi .select2-choices {
@@ -6503,7 +6503,7 @@ https://github.com/m3wolf/bootstrap3-timepicker
 }
 
 .select2-results li {
-    color: #626262
+    color: #8a8c8e
 }
 
 .select2-results li.select2-result-with-children > .select2-result-label {
@@ -6520,12 +6520,12 @@ https://github.com/m3wolf/bootstrap3-timepicker
 }
 
 .select2-results .select2-highlighted .select2-result-label {
-    color: #626262
+    color: #8a8c8e
 }
 
 .select2-results .select2-no-results, .select2-results .select2-searching, .select2-results .select2-selection-limit {
     background: 0 0;
-    color: #626262;
+    color: #8a8c8e;
     font-size: 12px;
     padding-left: 8px;
     padding-top: 0;
@@ -6587,7 +6587,7 @@ https://github.com/m3wolf/bootstrap3-timepicker
     font-family: FontAwesome;
     content: "\f00d";
     font-size: 12px;
-    color: #626262
+    color: #8a8c8e
 }
 
 .select2-drop-multi .select2-results .select2-no-results, .select2-drop-multi .select2-results .select2-searching, .select2-drop-multi .select2-results .select2-selection-limit {
@@ -6607,7 +6607,7 @@ https://github.com/m3wolf/bootstrap3-timepicker
 .ui-select-bootstrap .ui-select-choices-row.active > a {
     background: #f0f0f0;
     border-radius: 3px;
-    color: #626262
+    color: #8a8c8e
 }
 
 .ui-select-bootstrap > .ui-select-choices {
@@ -6881,7 +6881,7 @@ https://github.com/HackerWins/summernote
     border-radius: 0;
     background-color: #f0f0f0;
     border-color: transparent #e6e6e6 #e6e6e6 transparent;
-    color: #626262
+    color: #8a8c8e
 }
 
 .summernote-wrapper .note-editor .note-toolbar .btn-group .btn.active, .summernote-wrapper .note-editor .note-toolbar .btn-group .btn:active {
@@ -6909,7 +6909,7 @@ https://github.com/HackerWins/summernote
 }
 
 .summernote-wrapper .note-popover .popover .popover-content .dropdown-menu li a i, .summernote-wrapper .note-toolbar .dropdown-menu li a i {
-    color: #1481c3
+    color: #f28321
 }
 
 input, input:focus {
@@ -7483,7 +7483,7 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
 
 .dataTables_wrapper .dataTables_paginate ul > li > a {
     padding: 5px 10px;
-    color: #626262;
+    color: #8a8c8e;
     opacity: .35;
     -webkit-transition: opacity .3s ease;
     transition: opacity .3s ease
@@ -7514,7 +7514,7 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
     clear: none;
     font-size: 12px;
     padding: 0 33px;
-    color: #626262
+    color: #8a8c8e
 }
 
 .dataTables_wrapper .dataTables_paginate ul > li {
@@ -7533,7 +7533,7 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
 
 .dataTables_wrapper .dataTables_paginate ul > li.active > a {
     font-weight: 700;
-    color: #626262;
+    color: #8a8c8e;
     opacity: 1
 }
 
@@ -8657,7 +8657,7 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
 }
 
 .b-complete, .b-primary, .b-success {
-    border-color: #1481c3
+    border-color: #f28321
 }
 
 .b-info {

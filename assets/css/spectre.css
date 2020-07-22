@@ -60,7 +60,7 @@
 }
 
 .page-sidebar .sidebar-menu .menu-items > li ul.sub-menu > li:hover > .icon-thumbnail {
-    color: #1481c3
+    color: #f28321
 }
 
 .panel.panel-default {
@@ -89,7 +89,7 @@
 #tooltip {
     font-size: .8em;
     color: #fff;
-    background: #131218;
+    background: #382b3f;
     position: absolute;
     z-index: 99999999;
     padding: 10px;
@@ -98,7 +98,7 @@
 }
 
 .light-red, .syncing {
-    color: #1481c3
+    color: #f28321
 }
 
 #tooltip:after {
@@ -106,7 +106,7 @@
     height: 0;
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
-    border-top: 10px solid #131218;
+    border-top: 10px solid #382b3f;
     content: '';
     position: absolute;
     left: 50%;
@@ -116,7 +116,7 @@
 
 #tooltip.top:after {
     border-top-color: transparent;
-    border-bottom: 10px solid #131218;
+    border-bottom: 10px solid #382b3f;
     top: -20px;
     bottom: auto
 }
@@ -149,7 +149,7 @@
 }
 
 .transaction-overview span {
-    color: #131218
+    color: #382b3f
 }
 
 .transaction-overview span.date {
@@ -247,7 +247,7 @@ button {
 }
 
 ::-webkit-input-placeholder, :placeholder-shown {
-    color: #626262
+    color: #8a8c8e
 }
 
 .padding-right-forms {
@@ -474,7 +474,7 @@ textarea {
 }
 
 progress::-webkit-progress-bar {
-    background: #131218;
+    background: #382b3f;
     border-radius: 50px;
     padding: 2px;
     box-spectre: 0 1px 0 0 rgba(255, 255, 255, .2)
