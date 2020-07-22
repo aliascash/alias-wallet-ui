@@ -197,7 +197,7 @@ body.dashboard, body.dashboard .page-container {
     color: #626262;
     opacity: .7;
     font-size: 16px;
-    font-family: Helvetica, Verdana, sans-serif
+    font-family: Montserrat, sans-serif;
 }
 
 .header .search-link i {
@@ -577,7 +577,7 @@ body.dashboard, body.dashboard .page-container {
     transition: transform .4s cubic-bezier(.05, .74, .27, .99);
     -webkit-backface-visibility: hidden;
     -webkit-perspective: 1000;
-    font-family: Helvetica, Verdana, sans-serif;
+    font-family: Montserrat, sans-serif;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     font-weight: 700
@@ -1752,7 +1752,7 @@ html {
 }
 
 body {
-    font-family: Helvetica, Verdana, sans-serif;
+    font-family: Montserrat, sans-serif;
     font-size: 13px;
     font-weight: 400
 }
@@ -1763,7 +1763,7 @@ option, select {
 
 h1, h2, h3, h4, h5, h6 {
     margin: 10px 0;
-    font-family: Helvetica, Verdana, sans-serif;
+    font-family: Montserrat, sans-serif;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     font-weight: 300;
@@ -2375,7 +2375,7 @@ hr.dotted {
 ------------------------------------
 */
 .font-montserrat {
-    font-family: Helvetica, Verdana, sans-serif
+    font-family: Montserrat, sans-serif;
 }
 
 .font-georgia {
@@ -2383,7 +2383,7 @@ hr.dotted {
 }
 
 .font-heading {
-    font-family: Helvetica, Verdana, sans-serif
+    font-family: Montserrat, sans-serif;
 }
 
 /* Wells
