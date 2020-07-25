@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
-    <title>Spectrecoin</title>
+    <title>Alias</title>
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet">
     <link href="assets/plugins/boostrapv3/css/bootstrap.css" rel="stylesheet">
@@ -151,7 +151,7 @@
                     <li><a href=# onclick='bridge.userAction(["debugClicked"])'><span
                             class=translate>Debug</span> <span class=icon-thumbnail><i class="fa fa-bug"></i></span></a>
                     </li>
-                    <li><a href=#b onclick='bridge.userAction(["aboutClicked"])'><span class=translate>About Spectrecoin</span>
+                    <li><a href=#b onclick='bridge.userAction(["aboutClicked"])'><span class=translate>About Alias</span>
                         <span class=icon-thumbnail><i class="fa fa-info-circle"></i></span></a></li>
                     <li><a href=# onclick='bridge.userAction(["aboutQtClicked"])'><span class=translate>About QT</span>
                         <span class=icon-thumbnail><i class="fa fa-info-circle"></i></span></a></li>
@@ -184,7 +184,7 @@
                                              data-title="Not staking because wallet is locked"></div>
                                     <li class="inline p-l-10">
                                         <div id=connectionsIcon class=connect-0
-                                             data-title="0 active connection(s) to Spectrecoin network"></div>
+                                             data-title="0 active connection(s) to Alias network"></div>
                                     <li class="inline p-l-10">
                                         <div id=syncingIcon class=syncing-spinner
                                              data-title="Wallet is syncing"></div>
@@ -221,7 +221,7 @@
                                             <div class=col-sm-12><label for=qraddress
                                                                         class="p-t-10 recipient translate">Address:</label><input
                                                     id=qraddress class="form-control pay_to input_box"
-                                                    placeholder="Enter a Spectrecoin address (e.g. SXywGBZBowrppUwwNUo1GCRDTibzJi7g2M)"
+                                                    placeholder="Enter a Alias address (e.g. SXywGBZBowrppUwwNUo1GCRDTibzJi7g2M)"
                                                     onchange=showQRCode()></div>
                                         </div>
                                     </div>
@@ -259,10 +259,10 @@
                                             </div>
                                             <select id=qrunit class="unit select-drop-down" style=width:167px
                                                     onchange='unit.format("#qramount",$(this).val()),showQRCode()'>
-                                                <option value=0 title=XSPEC>XSPEC
-                                                <option value=1 title="Milli-XSPEC (1 / 1000)">mXSPEC
-                                                <option value=2 title="Micro-XSPEC (1 / 1000000)">&micro;XSPEC
-                                                <option value=3 title="spectoshi (1 / 100000000)">spectoshi
+                                                <option value=0 title=ALIAS>ALIAS
+                                                <option value=1 title="Milli-ALIAS (1 / 1000)">mALIAS
+                                                <option value=2 title="Micro-ALIAS (1 / 1000000)">&micro;ALIAS
+                                                <option value=3 title="Satoshi-ALIAS (1 / 100000000)">satALIAS
                                             </select></div>
                                     </div>
                                 </div>
@@ -560,8 +560,8 @@
                                             <div class=row>
                                                 <div class=col-sm-12><input id=sign-address
                                                                             class="input_box form-control"
-                                                                            data-title="Enter a Spectrecoin address to sign the message with (e.g. SaKYqfD8J3vw4RTnqtgk2K9B67CBaL3mhV)"
-                                                                            placeholder="Enter a Spectrecoin address to sign the message with (e.g. SaKYqfD8J3vw4RTnqtgk2K9B67CBaL3mhV)"
+                                                                            data-title="Enter a Alias address to sign the message with (e.g. SaKYqfD8J3vw4RTnqtgk2K9B67CBaL3mhV)"
+                                                                            placeholder="Enter a Alias address to sign the message with (e.g. SaKYqfD8J3vw4RTnqtgk2K9B67CBaL3mhV)"
                                                                             maxlength=128></div>
                                             </div>
                                         </div>
@@ -617,8 +617,8 @@
                                             <div class=row>
                                                 <div class=col-sm-12><input id=verify-address
                                                                             class="input_box form-control"
-                                                                            data-title="Enter a Spectrecoin address to verify the message with (e.g. SaKYqfD8J3vw4RTnqtgk2K9B67CBaL3mhV)"
-                                                                            placeholder="Enter a Spectrecoin address to verify the message with (e.g. SaKYqfD8J3vw4RTnqtgk2K9B67CBaL3mhV)"
+                                                                            data-title="Enter a Alias address to verify the message with (e.g. SaKYqfD8J3vw4RTnqtgk2K9B67CBaL3mhV)"
+                                                                            placeholder="Enter a Alias address to verify the message with (e.g. SaKYqfD8J3vw4RTnqtgk2K9B67CBaL3mhV)"
                                                                             maxlength=128></div>
                                             </div>
                                         </div>
@@ -640,8 +640,8 @@
                                             <div class=row>
                                                 <div class=col-sm-10><input id=verify-signature
                                                                             class="input_box form-control"
-                                                                            placeholder="Enter a Spectrecoin signature"
-                                                                            data-title="Enter a Spectrecoin signature">
+                                                                            placeholder="Enter a Alias signature"
+                                                                            data-title="Enter a Alias signature">
                                                 </div>
                                                 <div class=col-sm-2>
                                                     <div class=btn-group><a class="btn btn-default"
@@ -735,7 +735,7 @@
                                                             <tr>
                                                                 <th style="text-align:left">Balance</th>
                                                                 <th style="text-align:right"><span
-                                                                        class="unit">XSPEC</span>
+                                                                        >Public</span>
                                                                     <div style="float: right;margin-left:5px">
                                                                         <a class="portlet-help" href="#"><i
                                                                                 class="p-b-5 fa fa-question-circle"
@@ -744,7 +744,7 @@
                                                                     </div>
                                                                 </th>
                                                                 <th style="text-align:right"><span
-                                                                        class="unitSpectre">SPECTRE</span>
+                                                                        >Private</span>
                                                                     <div style="float: right;margin-left:5px">
                                                                         <a class="portlet-help" href="#"><i
                                                                                 class="p-b-5 fa fa-question-circle"
@@ -801,7 +801,7 @@
                                                                     <div style="float: right;"><a
                                                                             class="portlet-help" href="#"><i
                                                                             class="p-b-5 fa fa-question-circle"
-                                                                            data-title="XSPEC requires 1 block confirmation<br>SPECTRE requires 10 blocks confirmations"
+                                                                            data-title="Public ALIAS requires 1 block confirmation<br>Private ALIAS requires 10 blocks confirmations"
                                                                             style="color:#f28321"></i></a>
                                                                     </div>
                                                                 </td>
@@ -967,7 +967,7 @@
                                                                                    data-title="Optional address to receive transaction change"
                                                                                    maxlength=128
                                                                                    oninput=base58.check(this)
-                                                                                   placeholder="Enter a Spectrecoin address (e.g. SXywGBZBowrppUwwNUo1GCRDTibzJi7g2M)">
+                                                                                   placeholder="Enter a Alias address (e.g. SXywGBZBowrppUwwNUo1GCRDTibzJi7g2M)">
                                                         </div>
                                                         <div class="btn-group col-sm-3 sm-m-t-10"><a
                                                                 id=cust-add-lkp
@@ -1011,10 +1011,10 @@
                                                             class=translate>Balance:</b> <span
                                                             id=spend_spec><span
                                                             class=balance>0.00</span> <span
-                                                            class=unit>XSPEC</span> </span><span
+                                                            class=unit>pubALIAS</span> </span><span
                                                             id=spend_spectre><span
                                                             class=spectre_balance>0.00</span> <span
-                                                            class=unitSpectre>SPECTRE</span> </span>
+                                                            class=unitSpectre>privALIAS</span> </span>
                                                             </span><span id=tx_ringsize><label
                                                             class="form-controlring_size m-r-10 translate"
                                                             for=ring_size>Ring Size:</label><input
@@ -1045,9 +1045,9 @@
                                                             class=translate>Balance:</b> <span
                                                             id=to_spectre><span
                                                             class=spectre_balance>0.00</span> <span
-                                                            class=unitSpectre>SPECTRE</span> </span><span
+                                                            class=unitSpectre>privALIAS</span> </span><span
                                                             id=to_spec><span class=balance>0.00</span> <span
-                                                            class=unit>XSPEC</span></span>
+                                                            class=unit>pubALIAS</span></span>
                                                             </span>
                                                     </div>
                                                 </div>
@@ -1137,31 +1137,31 @@
                                                                 <div class="col-sm-3 to_unit_public">
                                                                     <select class="unit select-drop-down"
                                                                             onchange='unit.format("#recipient-template .amount",$(this).val());$("#recipient-template .select-drop-down.unitSpectre").val($(this).val());'>
-                                                                        <option value=0 title=XSPEC>XSPEC
+                                                                        <option value=0 title=Public ALIAS>pubALIAS
                                                                         <option value=1
-                                                                                title="Milli-XSPEC (1 / 1000)">
+                                                                                title="Milli-ALIAS (1 / 1000)">
                                                                             mXSPEC
                                                                         <option value=2
-                                                                                title="Micro-XSPEC (1 / 1000000)">
-                                                                            &micro;XSPEC
+                                                                                title="Micro-ALIAS (1 / 1000000)">
+                                                                            &micro;ALIAS
                                                                         <option value=3
-                                                                                title="xSpectoshi (1 / 100000000)">
-                                                                            xSpectoshi
+                                                                                title="Satoshi-ALIAS (1 / 100000000)">
+                                                                            satALIAS
                                                                     </select>
                                                                 </div>
                                                                 <div class="col-sm-3 to_unit_private">
                                                                     <select class="unitSpectre select-drop-down"
                                                                             onchange='unit.format("#recipient-template .amount",$(this).val());$("#recipient-template .select-drop-down.unit").val($(this).val());'>
-                                                                        <option value=0 title=SPECTRE>SPECTRE
+                                                                        <option value=0 title=Private ALIAS>privALIAS
                                                                         <option value=1
-                                                                                title="Milli-SPECTRE (1 / 1000)">
+                                                                                title="Milli-ALIAS (1 / 1000)">
                                                                             mSPECTRE
                                                                         <option value=2
-                                                                                title="Micro-SPECRE (1 / 1000000)">
-                                                                            &micro;SPECTRE
+                                                                                title="Micro-ALIAS (1 / 1000000)">
+                                                                            &micro;ALIAS
                                                                         <option value=3
-                                                                                title="Spectoshi (1 / 100000000)">
-                                                                            Spectoshi
+                                                                                title="Satoshi-ALIAS (1 / 100000000)">
+                                                                            satALIAS
                                                                     </select>
                                                                 </div>
                                                             </div>
@@ -1177,7 +1177,7 @@
                                                 <div class="form-group"><label
                                                         class="col-sm-3 p-l-20 control-label translate">Pay to
                                                     <a href=#><i class="p-b-5 fa fa-question-circle"
-                                                                 data-title="The stealth address to transfer the balance to.<br>Only <b>owned</b> stealth addresses can be used for XSPEC-SPECTRE transfers.<br>SPECTRE to XSPEC transfers create <b>new one-time</b> XSPEC addresses (visible in <b>Coin Control</b> dialog)."
+                                                                 data-title="The stealth address to transfer the balance to.<br>Only <b>owned</b> stealth addresses can be used for Public-Private transfers.<br>Private to Public transfers create <b>new one-time</b> public ALIAS addresses (visible in <b>Coin Control</b> dialog)."
                                                                  style=color:#8a8c8e></i></a></label>
                                                     <div class=col-sm-9>
                                                         <div class=row>
@@ -1227,30 +1227,30 @@
                                                                     class="unit select-drop-down"
                                                                     style=margin-left:7px
                                                                     onchange="unit.format('#send-balance .amount',$(this).val());$('#send-balance .select-drop-down.unitSpectre').val($(this).val());">
-                                                                <option value=0 title=XSPEC>XSPEC
+                                                                <option value=0 title=Public ALIAS>pubALIAS
                                                                 <option value=1
-                                                                        title="Milli-XSPEC (1 / 1000)">mXSPEC
+                                                                        title="Milli-ALIAS (1 / 1000)">mALIAS
                                                                 <option value=2
-                                                                        title="Micro-XSPEC (1 / 1000000)">
-                                                                    &micro;XSPEC
+                                                                        title="Micro-ALIAS (1 / 1000000)">
+                                                                    &micro;ALIAS
                                                                 <option value=3
-                                                                        title="xSpectoshi (1 / 100000000)">
-                                                                    xSpectoshi
+                                                                        title="Satoshi-ALIAS (1 / 100000000)">
+                                                                    satALIAS
                                                             </select></div>
                                                             <div class="col-sm-3 to_unit_public"><select
                                                                     class="unitSpectre select-drop-down"
                                                                     style=margin-left:7px
                                                                     onchange="unit.format('#send-balance .amount',$(this).val());$('#send-balance .select-drop-down.unit').val($(this).val());">
-                                                                <option value=0 title=SPECTRE>SPECTRE
+                                                                <option value=0 title=Private ALIAS>privALIAS
                                                                 <option value=1
-                                                                        title="Milli-SPECTRE (1 / 1000)">
+                                                                        title="Milli-ALIAS (1 / 1000)">
                                                                     mSPECTRE
                                                                 <option value=2
-                                                                        title="Micro-SPECTRE (1 / 1000000)">
-                                                                    &micro;SPECTRE
+                                                                        title="Micro-ALIAS (1 / 1000000)">
+                                                                    &micro;ALIAS
                                                                 <option value=3
-                                                                        title="Spectoshi (1 / 100000000)">
-                                                                    Spectoshi
+                                                                        title="Satoshi-ALIAS (1 / 100000000)">
+                                                                    satALIAS
                                                             </select></div>
                                                         </div>
                                                     </div>
@@ -1587,7 +1587,7 @@
                                                     <div id=options-main>
                                                         <div class=form-group><label
                                                                 class="col-sm-3 control-label p-l-20"
-                                                                for=optStartAtStartup>Start Spectrecoin on
+                                                                for=optStartAtStartup>Start Alias on
                                                             system login</label>
                                                             <div class=col-sm-9>
                                                                 <div class="checkbox option check-danger">
@@ -1624,13 +1624,13 @@
                                                                     type=number value=0.00000000><select
                                                                     class=select-drop-down id=optFeeunit
                                                                     onchange='unit.format("#optFee",$(this).val())'>
-                                                                <option title=XSPEC value=0>XSPEC
-                                                                <option title="Milli-XSPEC (1 / 1000)"
+                                                                <option title=ALIAS value=0>ALIAS
+                                                                <option title="Milli-ALIAS (1 / 1000)"
                                                                         value=1>mXSPEC
-                                                                <option title="Micro-XSPEC (1 / 1000000)"
-                                                                        value=2>&micro;XSPEC
-                                                                <option title="spectoshi (1 / 100000000)"
-                                                                        value=3>spectoshi
+                                                                <option title="Micro-ALIAS (1 / 1000000)"
+                                                                        value=2>&micro;ALIAS
+                                                                <option title="Satoshi-ALIAS (1 / 100000000)"
+                                                                        value=3>satALIAS
                                                             </select></div>
                                                         </div>
 
@@ -1681,13 +1681,13 @@
                                                                     class=select-drop-down
                                                                     id=optReserveBalanceunit
                                                                     onchange='unit.format("#optReserveBalance",$(this).val())'>
-                                                                <option title=XSPEC value=0>XSPEC
-                                                                <option title="Milli-XSPEC (1 / 1000)"
+                                                                <option title=ALIAS value=0>ALIAS
+                                                                <option title="Milli-ALIAS (1 / 1000)"
                                                                         value=1>mXSPEC
-                                                                <option title="Micro-XSPEC (1 / 1000000)"
-                                                                        value=2>&micro;XSPEC
-                                                                <option title="spectoshi (1 / 100000000)"
-                                                                        value=3>spectoshi
+                                                                <option title="Micro-ALIAS (1 / 1000000)"
+                                                                        value=2>&micro;ALIAS
+                                                                <option title="Satoshi-ALIAS (1 / 100000000)"
+                                                                        value=3>satALIAS
                                                             </select></div>
                                                         </div>
                                                         <div class=form-group><label
@@ -1824,13 +1824,13 @@
                                                                 <div class=option><select
                                                                         class=select-drop-down
                                                                         id=optDisplayUnit>
-                                                                    <option title=XSPEC value=0>XSPEC
-                                                                    <option title="Milli-XSPEC (1 / 1000)"
+                                                                    <option title=ALIAS value=0>ALIAS
+                                                                    <option title="Milli-ALIAS (1 / 1000)"
                                                                             value=1>mXSPEC
-                                                                    <option title="Micro-XSPEC (1 / 1000000)"
-                                                                            value=2>&micro;XSPEC
-                                                                    <option title="spectoshi (1 / 100000000)"
-                                                                            value=3>spectoshi
+                                                                    <option title="Micro-ALIAS (1 / 1000000)"
+                                                                            value=2>&micro;ALIAS
+                                                                    <option title="Satoshi-ALIAS (1 / 100000000)"
+                                                                            value=3>satALIAS
                                                                 </select></div>
                                                             </div>
                                                         </div>
@@ -1942,7 +1942,7 @@
                                                         intended for advanced users only.<br>
                                                         Please do not use it unless you know what you are
                                                         doing and want to have multiple sub-wallets within
-                                                        your Spectrecoin wallet.<br>
+                                                        your Alias wallet.<br>
                                                         You are responsible of keeping track of which
                                                         sub-wallets you have made and received payments using.
                                                     </p>
@@ -2154,7 +2154,7 @@
                                                         your transactions and balance to appear within the
                                                         wallet.<br>
                                                         If you have a wallet.dat file, you can simply copy it
-                                                        to your Spectrecoin data directory to restore it.
+                                                        to your Alias data directory to restore it.
                                                     </p>
                                                 </div>
                                                 <hr class=no-margin>
