@@ -1,3 +1,11 @@
+@font-face{font-family:'framework-icon';src:url('../fonts/Framework-icon/framework-icon.eot');
+    src:url('../fonts/Framework-icon/framework-icon.eot') format('embedded-opentype'),
+    url('../fonts/Framework-icon/framework-icon.woff') format('woff'),
+    url('../fonts/Framework-icon/framework-icon.ttf') format('truetype'),
+    url('../fonts/Framework-icon/framework-icon.svg') format('svg');
+    font-weight:normal;
+    font-style:normal}
+
 .pg, [class*=" pg-"], [class^=pg-] {
     display: inline-block;
     font: normal normal normal 14px/1 framework-icon;
