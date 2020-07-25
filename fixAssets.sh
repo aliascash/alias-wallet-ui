@@ -24,8 +24,8 @@ mv build/index.min.html build/index.html
 IFS=$'\n'
 MINIFY="
 assets/plugins/framework/framework.js
-assets/plugins/boostrapv3/js/bootstrap.js
-assets/plugins/boostrapv3/css/bootstrap.css
+assets/plugins/bootstrapv3/js/bootstrap.js
+assets/plugins/bootstrapv3/css/bootstrap.css
 assets/plugins/jquery-scrollbar/jquery.scrollbar.js
 assets/plugins/qrcode/qrcode.js
 assets/css/font-awesome-buttons.css
