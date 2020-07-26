@@ -66,8 +66,6 @@ $(function() {
       }
       // show public or private unit depending on transaction_type_to
       var trxTypeTo = $("[name=transaction_type_to]:checked").val();
-      $(".to_unit_public").css('display', 'public' === trxTypeTo ? 'block': 'none');
-      $(".to_unit_private").css('display', 'private' === trxTypeTo ? 'block': 'none');
     }
     function draw(time, value, v, hour) {
       reset();
@@ -175,9 +173,6 @@ $(function() {
 
       $(".advanced_controls").toggle(!isSendMain);
       $("#add_recipient").toggle($("#send-main").is(":visible"));
-
-      $(".to_unit_public").css('display', 'public' === trxTypeTo ? 'block': 'none');
-      $(".to_unit_private").css('display', 'private' === trxTypeTo ? 'block': 'none');
 
       if (!isSendMain) {
         init();

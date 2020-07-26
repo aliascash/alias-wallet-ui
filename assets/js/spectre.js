@@ -855,43 +855,30 @@ var base58 = {
 var pasteTo = "";
 var unit = {
   type : 0,
-  name : "pubALIAS",
-  display : "pubALIAS",
-  nameSpectre : "privALIAS",
-  displaySpectre : "privALIAS",
+  name : "ALIAS",
+  display : "ALIAS",
   setType : function(v) {
     switch(this.type = void 0 == v ? 0 : v, v) {
       case 1:
         this.name = "mALIAS";
         this.display = "mALIAS";
-        this.nameSpectre = "mALIAS";
-        this.displaySpectre = "mALIAS";
         break;
       case 2:
         this.name = "uALIAS";
         this.display = "&micro;ALIAS";
-        this.nameSpectre = "uALIAS";
-        this.displaySpectre = "&micro;ALIAS";
         break;
       case 3:
         this.name = "satALIAS";
         this.display = "satALIAS";
-        this.nameSpectre = "satALIAS";
-        this.displaySpectre = "satALIAS";
         break;
       default:
-        this.name = "pubALIAS";
-        this.display = "pubALIAS";
-        this.nameSpectre = "privALIAS";
-        this.displaySpectre = "privALIAS";
+        this.name = "ALIAS";
+        this.display = "ALIAS";
     }
     $("td.unit,span.unit,div.unit").html(this.display);
     $("select.unit").val(v).trigger("change");
     $("input.unit").val(this.name);
-
-    $("td.unitSpectre,span.unitSpectre,div.unitSpectre").html(this.displaySpectre);
-    $("select.unitSpectre").val(v).trigger("change");
-    $("input.unitSpectre").val(this.nameSpectre);
+    
     overviewPage.updateBalance();
   },
   format : function(value, arg) {
@@ -1087,7 +1074,7 @@ var overviewPage = {
         return "<tr><td class='text-left' width='30%' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><center><label style='margin-top:6px;' class='label label-important inline fs-12'>" +
                 label +
                 "</label></center></td><td class='text-left' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><center><a id='" + data.id.substring(data.id.length-20) + "' data-title='" + data.tt +
-                "' href='#' onclick='$(\"#navitems [href=#transactions]\").click();$(\"#" + data.id + "\").click();'> " + unit.format(data.am) + " " + ((data.am_curr === 'privALIAS') ? unit.displaySpectre : unit.display) +
+                "' href='#' onclick='$(\"#navitems [href=#transactions]\").click();$(\"#" + data.id + "\").click();'> " + unit.format(data.am) + " " + unit.display + " (" + ((data.am_curr === 'PRIVATE') ? "private" : "public") + ")" +
                 " </a></center></td><td width='30%' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><span class='overview_date' data-value='" + data.d + "'><center>" + data.d_s + "</center></span></td></tr>";
     };
     var row = update(message);

@@ -1012,10 +1012,10 @@
                                                             class=translate>Balance:</b> <span
                                                             id=spend_spec><span
                                                             class=balance>0.00</span> <span
-                                                            class=unit>pubALIAS</span> </span><span
+                                                            class=unit>ALIAS</span> </span><span
                                                             id=spend_spectre><span
                                                             class=spectre_balance>0.00</span> <span
-                                                            class=unitSpectre>privALIAS</span> </span>
+                                                            class=unitSpectre>ALIAS</span> </span>
                                                             </span><span id=tx_ringsize><label
                                                             class="form-controlring_size m-r-10 translate"
                                                             for=ring_size>Ring Size:</label><input
@@ -1046,9 +1046,9 @@
                                                             class=translate>Balance:</b> <span
                                                             id=to_spectre><span
                                                             class=spectre_balance>0.00</span> <span
-                                                            class=unitSpectre>privALIAS</span> </span><span
+                                                            class=unitSpectre>ALIAS</span> </span><span
                                                             id=to_spec><span class=balance>0.00</span> <span
-                                                            class=unit>pubALIAS</span></span>
+                                                            class=unit>ALIAS</span></span>
                                                             </span>
                                                     </div>
                                                 </div>
@@ -1135,28 +1135,13 @@
                                                                            onfocus=invalid($(this),!0)
                                                                            onchange='unit.parse(this,$("#recipient-template .unit").val()),sendPage.updateCoinControl()'>
                                                                 </div>
-                                                                <div class="col-sm-3 to_unit_public">
+                                                                <div class="col-sm-3 to_unit">
                                                                     <select class="unit select-drop-down"
-                                                                            onchange='unit.format("#recipient-template .amount",$(this).val());$("#recipient-template .select-drop-down.unitSpectre").val($(this).val());'>
-                                                                        <option value=0 title=Public ALIAS>pubALIAS
+                                                                            onchange='unit.format("#recipient-template .amount",$(this).val());'>
+                                                                        <option value=0 title=ALIAS>ALIAS
                                                                         <option value=1
                                                                                 title="Milli-ALIAS (1 / 1000)">
-                                                                            mXSPEC
-                                                                        <option value=2
-                                                                                title="Micro-ALIAS (1 / 1000000)">
-                                                                            &micro;ALIAS
-                                                                        <option value=3
-                                                                                title="Satoshi-ALIAS (1 / 100000000)">
-                                                                            satALIAS
-                                                                    </select>
-                                                                </div>
-                                                                <div class="col-sm-3 to_unit_private">
-                                                                    <select class="unitSpectre select-drop-down"
-                                                                            onchange='unit.format("#recipient-template .amount",$(this).val());$("#recipient-template .select-drop-down.unit").val($(this).val());'>
-                                                                        <option value=0 title=Private ALIAS>privALIAS
-                                                                        <option value=1
-                                                                                title="Milli-ALIAS (1 / 1000)">
-                                                                            mSPECTRE
+                                                                            mALIAS
                                                                         <option value=2
                                                                                 title="Micro-ALIAS (1 / 1000000)">
                                                                             &micro;ALIAS
@@ -1224,25 +1209,11 @@
                                                                                        onfocus=invalid($(this),!0)
                                                                                        onchange='unit.parse(this,$("#send-balance .unit").val()),sendPage.updateCoinControl()'>
                                                             </div>
-                                                            <div class="col-sm-3 to_unit_private"><select
+                                                            <div class="col-sm-3 to_unit"><select
                                                                     class="unit select-drop-down"
                                                                     style=margin-left:7px
-                                                                    onchange="unit.format('#send-balance .amount',$(this).val());$('#send-balance .select-drop-down.unitSpectre').val($(this).val());">
-                                                                <option value=0 title=Public ALIAS>pubALIAS
-                                                                <option value=1
-                                                                        title="Milli-ALIAS (1 / 1000)">mALIAS
-                                                                <option value=2
-                                                                        title="Micro-ALIAS (1 / 1000000)">
-                                                                    &micro;ALIAS
-                                                                <option value=3
-                                                                        title="Satoshi-ALIAS (1 / 100000000)">
-                                                                    satALIAS
-                                                            </select></div>
-                                                            <div class="col-sm-3 to_unit_public"><select
-                                                                    class="unitSpectre select-drop-down"
-                                                                    style=margin-left:7px
-                                                                    onchange="unit.format('#send-balance .amount',$(this).val());$('#send-balance .select-drop-down.unit').val($(this).val());">
-                                                                <option value=0 title=Private ALIAS>privALIAS
+                                                                    onchange="unit.format('#send-balance .amount',$(this).val());">
+                                                                <option value=0 title=ALIAS>ALIAS
                                                                 <option value=1
                                                                         title="Milli-ALIAS (1 / 1000)">
                                                                     mSPECTRE
@@ -1627,7 +1598,7 @@
                                                                     onchange='unit.format("#optFee",$(this).val())'>
                                                                 <option title=ALIAS value=0>ALIAS
                                                                 <option title="Milli-ALIAS (1 / 1000)"
-                                                                        value=1>mXSPEC
+                                                                        value=1>mALIAS
                                                                 <option title="Micro-ALIAS (1 / 1000000)"
                                                                         value=2>&micro;ALIAS
                                                                 <option title="Satoshi-ALIAS (1 / 100000000)"
@@ -1684,7 +1655,7 @@
                                                                     onchange='unit.format("#optReserveBalance",$(this).val())'>
                                                                 <option title=ALIAS value=0>ALIAS
                                                                 <option title="Milli-ALIAS (1 / 1000)"
-                                                                        value=1>mXSPEC
+                                                                        value=1>mALIAS
                                                                 <option title="Micro-ALIAS (1 / 1000000)"
                                                                         value=2>&micro;ALIAS
                                                                 <option title="Satoshi-ALIAS (1 / 100000000)"
@@ -1827,7 +1798,7 @@
                                                                         id=optDisplayUnit>
                                                                     <option title=ALIAS value=0>ALIAS
                                                                     <option title="Milli-ALIAS (1 / 1000)"
-                                                                            value=1>mXSPEC
+                                                                            value=1>mALIAS
                                                                     <option title="Micro-ALIAS (1 / 1000000)"
                                                                             value=2>&micro;ALIAS
                                                                     <option title="Satoshi-ALIAS (1 / 100000000)"
