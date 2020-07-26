@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: © 2020 Alias Developers -->
+<!-- SPDX-FileCopyrightText: © 2016 SpectreCoin Developers -->
+<!-- SPDX-License-Identifier: MIT -->
 <RCC>
     <qresource prefix="/">
         <file alias="src/qt/res/index.html">src/qt/res/index.html</file>
