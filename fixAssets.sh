@@ -1,4 +1,11 @@
 #!/bin/bash
+# ===========================================================================
+#
+# SPDX-FileCopyrightText: © 2020 Alias Developers
+# SPDX-FileCopyrightText: © 2016 SpectreCoin Developers
+# SPDX-License-Identifier: MIT
+#
+# ===========================================================================
 
 # Special sed syntax on Mac:
 unameOut="$(uname -s)"
@@ -50,7 +57,7 @@ for file in ${MINIFY} ; do
 done
 
 cd build
-assets=`find assets/ -type f|sort`
+assets=$(find assets/ -type f|sort)
 cd ..
 
 while read line ; do
@@ -70,7 +77,7 @@ while read line ; do
     [[ "$line" == '<qresource prefix="/">' ]] && RES=true
     [[ "$line" == '</qresource>' ]] && break
     if [[ "$RES" = true ]] ; then
-        line=`echo ${line} | sed 's^<file alias="\(.*\)">.*</file>^\1^'`
+        line=$(echo ${line} | sed 's^<file alias="\(.*\)">.*</file>^\1^')
         ALIASES+=(${line})
         FILES+=("build/${line}")
     fi
@@ -80,15 +87,15 @@ for index in ${!FILES[*]} ; do
     file=${FILES[$index]}
     alias=${ALIASES[$index]}
     if [[ ${file} == *".css" ]] && [[ $(fgrep "url(" ${file} -l) ]] ; then
-        DIR=`dirname ${alias}`
-        PREVDIR=`dirname ${DIR}`
+        DIR=$(dirname ${alias})
+        PREVDIR=$(dirname ${DIR})
         REPLACE=$(fgrep "url(" ${file} | grep -o 'url(['\''"]\?\([^'\''")]\+\)["'\'']\?)' | sed 's/url(\|["'\'']\|)//g' | sed 's/&/\\&/g')
         for filename in ${REPLACE} ; do
             [[ ${filename} == "qrc:"* ]] && continue
             [[ ${filename} == "data:image"* ]] && continue
 
             if [[ ${filename} == "../"* ]] ; then
-                replacement=`echo ${filename} | sed 's!^..!qrc:///'${PREVDIR}'!'`
+                replacement=$(echo ${filename} | sed 's!^..!qrc:///'${PREVDIR}'!')
 #               sed -i ${backupFileSuffix} 's^url(['\''"]\?'${filename}'['\''"]\?)^url('${replacement}')^g' ${file}
                 sed -i ${backupFileSuffix} "s^url(['\"]\?${filename}['\"]\?)^url(${replacement})^g" ${file}
             else
