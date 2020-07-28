@@ -24,15 +24,15 @@
 }
 
 .fa.grey {
-    color: #898989
+    color: #8a8c8e
 }
 
 .fa.red {
-    color: #E3223C
+    color: #f84444
 }
 
 .fa.yellow {
-    color: #c3de00
+    color: #fbaa26
 }
 
 .fa.lightgreen {
@@ -44,7 +44,7 @@
 }
 
 .fa.orange {
-    color: #f39347
+    color: #f28321
 }
 
 /*------------------------------------------------------------------
@@ -175,7 +175,7 @@
 
 .warning {
     font-size: .8em;
-    color: #F51E3E;
+    color: #f84444;
     padding: 5px
 }
 
@@ -375,7 +375,7 @@ button {
 
 .contributor-mark {
     color: #fff;
-    background-color: #f11426;
+    background-color: #f84444;
     border-radius: 15px;
     padding: 5px
 }
@@ -466,7 +466,7 @@ textarea {
     -webkit-appearance: none;
     -moz-appearance: none;
     border: none;
-    margin-bottom: 2px
+    margin-bottom: 2px;
 }
 
 .connect-1, .connect-2, .connect-3, .connect-4, .connect-5, .connect-6, .encryption, .encryption-stake, .i2p, .no-encryption, .no-i2p, .no-syncing, .no-tor, .not-staking, .staking, .syncing-spinner, .tor {
@@ -483,7 +483,7 @@ progress::-webkit-progress-bar {
 progress::-webkit-progress-value {
     border-radius: 50px;
     box-spectre: inset 0 1px 1px 0 rgba(255, 255, 255, .4);
-    background: -webkit-linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, .1) 33%, rgba(0, 0, 0, .1) 66%, transparent 66%), -webkit-linear-gradient(top, rgba(255, 255, 255, .25), rgba(0, 0, 0, .2)), -webkit-linear-gradient(left, #e5203d, #e41c39);
+    background: -webkit-linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, .1) 33%, rgba(0, 0, 0, .1) 66%, transparent 66%), -webkit-linear-gradient(top, rgba(255, 255, 255, .25), rgba(0, 0, 0, .2)), -webkit-linear-gradient(left, #f84444, #f28321);
     background-size: 25px 14px, 100% 100%, 100% 100%;
     -webkit-animation: animateprogress 5s linear 0 infinite;
     animation: animateprogress 5s linear 0 infinite
@@ -643,7 +643,7 @@ progress::-webkit-progress-value {
 }
 
 .red-circle {
-    color: #F51E3E
+    color: #f84444
 }
 
 /*------------------------------------------------------------------
@@ -904,7 +904,7 @@ body.fixed-header {
     display: flex;
     height: 100%;
     align-items: center;
-    color: rgb(200,0,0);
+    color: #f84444;
     font-weight: bold;
 }
 

@@ -184,7 +184,7 @@ body.dashboard, body.dashboard .page-container {
     border-radius: 100%;
     height: 14px;
     width: 14px;
-    background-color: rgba(226, 32, 91, .77);
+    background-color: rgba(248, 68, 68, .77);
     color: #fff;
     position: relative;
     top: -6px;
@@ -369,7 +369,7 @@ body.dashboard, body.dashboard .page-container {
     width: 45px;
     position: absolute;
     height: 100%;
-    background-color: #0aa699 !important
+    background-color: #382b3f !important
 }
 
 .page-sidebar .sidebar-menu .menu-items {
@@ -995,7 +995,7 @@ body.dashboard, body.dashboard .page-container {
 
 .breadcrumb a.active {
     font-weight: 600;
-    color: #0090d9
+    color: #f28321
 }
 
 .breadcrumb li {
@@ -1507,7 +1507,7 @@ body, p {
 }
 
 .panel.panel-featured .footer .buttons .heart {
-    color: #5f9dd6
+    color: #f28321
 }
 
 .panel.panel-featured .footer .buttons .comment {
@@ -1822,7 +1822,7 @@ h1.block, h2.block, h3.block, h4.block, h5.block, h6.block {
 */
 a {
     text-spectre: none !important;
-    color: #5f9dd6
+    color: #f28321
 }
 
 a:active, a:focus, a:hover {
@@ -1840,7 +1840,7 @@ br {
 }
 
 code {
-    color: #c64643;
+    color: #f84444;
     background-color: #f0f0f0
 }
 
@@ -2040,23 +2040,23 @@ hr.dotted {
 ------------------------------------
 */
 .bg-primary {
-    background-color: #f28321
+    background-color: #fff
 }
 
 .bg-primary-dark {
-    background-color: #b81c31
+    background-color: #382b3f
 }
 
 .bg-primary-darker {
-    background-color: #881424
+    background-color: #282829
 }
 
 .bg-primary-light {
-    background-color: #e94e63
+    background-color: #fbaa26
 }
 
 .bg-primary-lighter {
-    background-color: #f9d3d8
+    background-color: #8a8c8e
 }
 
 /* Complete
@@ -2067,15 +2067,15 @@ hr.dotted {
 }
 
 .bg-complete-dark {
-    background-color: #b81c31
+    background-color: #f84444
 }
 
 .bg-complete-darker {
-    background-color: #881424
+    background-color: #382b3f
 }
 
 .bg-complete-light {
-    background-color: #e94e63
+    background-color: #f84444
 }
 
 .bg-complete-lighter {
@@ -2090,15 +2090,15 @@ hr.dotted {
 }
 
 .bg-success-dark {
-    background-color: #b81c31
+    background-color: #f84444
 }
 
 .bg-success-darker {
-    background-color: #881424
+    background-color: #382b3f
 }
 
 .bg-success-light {
-    background-color: #e94e63
+    background-color: #f84444
 }
 
 .bg-success-lighter {
@@ -2109,15 +2109,15 @@ hr.dotted {
 ------------------------------------
 */
 .bg-info {
-    background-color: #3b4752
+    background-color: #382b3f
 }
 
 .bg-info-dark {
-    background-color: #303a42
+    background-color: #382b3f
 }
 
 .bg-info-darker {
-    background-color: #232b31
+    background-color: #282829
 }
 
 .bg-info-light {
@@ -2132,19 +2132,19 @@ hr.dotted {
 ------------------------------------
 */
 .bg-danger {
-    background-color: #5f9dd6
+    background-color: #f84444
 }
 
 .bg-danger-dark {
-    background-color: #c64643
+    background-color: #f84444
 }
 
 .bg-danger-darker {
-    background-color: #933432
+    background-color: #f84444
 }
 
 .bg-danger-light {
-    background-color: #f77975
+    background-color: #f84444
 }
 
 .bg-danger-lighter {
@@ -2155,19 +2155,19 @@ hr.dotted {
 ------------------------------------
  */
 .bg-warning {
-    background-color: #f8d053
+    background-color: #fbaa26
 }
 
 .bg-warning-dark {
-    background-color: #c9a843
+    background-color: #fbaa26
 }
 
 .bg-warning-darker {
-    background-color: #957d32
+    background-color: #fbaa26
 }
 
 .bg-warning-light {
-    background-color: #f9d975
+    background-color: #fbaa26
 }
 
 .bg-warning-lighter {
@@ -2305,7 +2305,7 @@ hr.dotted {
 }
 
 .label-inverse {
-    background-color: #b81c31;
+    background-color: #f84444;
     color: #fff
 }
 
@@ -2577,8 +2577,8 @@ hr.dotted {
 }
 
 .btn-primary.active, .btn-primary.active:focus, .btn-primary:active, .btn-primary:active:focus, .btn-primary:active:hover, .open .dropdown-toggle.btn-primary {
-    background-color: #b81c31;
-    border-color: #b81c31;
+    background-color: #f84444;
+    border-color: #f84444;
     color: #fff
 }
 
@@ -2589,8 +2589,8 @@ hr.dotted {
 }
 
 .btn-primary.active:hover {
-    background: #c31d34;
-    border-color: #c31d34
+    background: #f84444;
+    border-color: #f84444
 }
 
 .btn-primary.disabled, .btn-primary.disabled.active, .btn-primary.disabled:active, .btn-primary.disabled:focus, .btn-primary.disabled:hover, .btn-primary[disabled], .btn-primary[disabled].active, .btn-primary[disabled]:active, .btn-primary[disabled]:focus, .btn-primary[disabled]:hover, fieldset[disabled] .btn-primary, fieldset[disabled] .btn-primary.active, fieldset[disabled] .btn-primary:active, fieldset[disabled] .btn-primary:focus, fieldset[disabled] .btn-primary:hover {
@@ -2610,20 +2610,20 @@ hr.dotted {
 }
 
 .btn-success.active, .btn-success.active:focus, .btn-success:active, .btn-success:active:focus, .btn-success:active:hover, .open .dropdown-toggle.btn-success {
-    background-color: #b81c31;
-    border-color: #b81c31;
+    background-color: #f84444;
+    border-color: #f84444;
     color: #fff
 }
 
 .btn-success.hover, .btn-success:hover, .open .dropdown-toggle.btn-success {
-    background-color: #e94e63;
-    border-color: #e94e63;
+    background-color: #f84444;
+    border-color: #f84444;
     color: #fff
 }
 
 .btn-success.active:hover {
-    background: #c31d34;
-    border-color: #c31d34
+    background: #f84444;
+    border-color: #f84444
 }
 
 .btn-success.disabled, .btn-success.disabled.active, .btn-success.disabled:active, .btn-success.disabled:focus, .btn-success.disabled:hover, .btn-success[disabled], .btn-success[disabled].active, .btn-success[disabled]:active, .btn-success[disabled]:focus, .btn-success[disabled]:hover, fieldset[disabled] .btn-success, fieldset[disabled] .btn-success.active, fieldset[disabled] .btn-success:active, fieldset[disabled] .btn-success:focus, fieldset[disabled] .btn-success:hover {
@@ -2643,20 +2643,20 @@ hr.dotted {
 }
 
 .btn-complete.active, .btn-complete.active:focus, .btn-complete:active, .btn-complete:active:focus, .btn-complete:active:hover, .open .dropdown-toggle.btn-complete {
-    background-color: #b81c31;
-    border-color: #b81c31;
+    background-color: #f84444;
+    border-color: #f84444;
     color: #fff
 }
 
 .btn-complete.hover, .btn-complete:hover, .open .dropdown-toggle.btn-complete {
-    background-color: #e94e63;
-    border-color: #e94e63;
+    background-color: #f84444;
+    border-color: #f84444;
     color: #fff
 }
 
 .btn-complete.active:hover {
-    background: #c31d34;
-    border-color: #c31d34
+    background: #f84444;
+    border-color: #f84444
 }
 
 .btn-complete.disabled, .btn-complete.disabled.active, .btn-complete.disabled:active, .btn-complete.disabled:focus, .btn-complete.disabled:hover, .btn-complete[disabled], .btn-complete[disabled].active, .btn-complete[disabled]:active, .btn-complete[disabled]:focus, .btn-complete[disabled]:hover, fieldset[disabled] .btn-complete, fieldset[disabled] .btn-complete.active, fieldset[disabled] .btn-complete:active, fieldset[disabled] .btn-complete:focus, fieldset[disabled] .btn-complete:hover {
@@ -2742,8 +2742,8 @@ hr.dotted {
 }
 
 .btn-danger.active, .btn-danger.active:focus, .btn-danger:active, .btn-danger:active:focus, .btn-danger:active:hover, .open .dropdown-toggle.btn-danger {
-    background-color: #c64643;
-    border-color: #c64643;
+    background-color: #f84444;
+    border-color: #f84444;
     color: #fff
 }
 
@@ -2817,7 +2817,7 @@ hr.dotted {
     text-align: right;
     filter: alpha(opacity=0);
     opacity: 0;
-    background: red;
+    background: #f84444;
     cursor: inherit;
     display: block
 }
@@ -2899,11 +2899,11 @@ hr.dotted {
 }
 
 .dropdown-default.open > .btn-danger + .dropdown-menu:after {
-    background-color: #5f9dd6
+    background-color: #382b3f
 }
 
 .dropdown-default.open > .btn-info + .dropdown-menu:after {
-    background-color: #3b4752
+    background-color: #382b3f
 }
 
 .dropdown-default.dropup .btn.dropdown-toggle.btn-lg + .dropdown-menu {
@@ -3119,7 +3119,7 @@ hr.dotted {
 }
 
 .dropdown-menu > li > a:focus, .dropdown-menu > li > a:hover {
-    color: #1a1a1a;
+    color: #382b3f;
     text-decoration: none;
     background-color: transparent;
     background-image: none
@@ -3224,7 +3224,7 @@ hr.dotted {
 
 .btn-tag.btn-tag-light {
     background: #fafdff;
-    color: #5b8ca5;
+    color: #f28321;
     border: 1px solid #cbe4f0
 }
 
@@ -3320,8 +3320,8 @@ hr.dotted {
 
 .alert-danger, .alert-error {
     background-color: #fddddd;
-    color: #933432;
-    border-color: #933432
+    color: #f84444;
+    border-color: #f84444
 }
 
 .alert-danger .close, .alert-error .close {
@@ -3336,8 +3336,8 @@ hr.dotted {
 
 .alert-info, .alert-success {
     background-color: #f9d3d8;
-    color: #881424;
-    border-color: #881424
+    color: #f84444;
+    border-color: #f84444
 }
 
 .alert-info .close {
@@ -3397,7 +3397,7 @@ hr.dotted {
 }
 
 .badge-inverse {
-    background-color: #881424;
+    background-color: #f84444;
     color: #fff
 }
 
@@ -3454,7 +3454,7 @@ hr.dotted {
 }
 
 .notification-panel .notification-body .notification-item.unread .option .mark {
-    color: #e94e63
+    color: #f84444
 }
 
 .notification-panel .notification-body .notification-item .heading {
@@ -4161,7 +4161,7 @@ body > .pgn-wrapper {
 }
 
 .progress-bar-black {
-    background-color: #000;
+    background-color: #282829;
     background-image: none
 }
 
@@ -4176,7 +4176,7 @@ body > .pgn-wrapper {
 }
 
 .progress .bar-danger, .progress-danger .bar {
-    background-color: #933432;
+    background-color: #f84444;
     background-image: none
 }
 
@@ -4648,7 +4648,7 @@ body > .pgn-wrapper {
 }
 
 .nav-tabs-danger.nav-tabs-simple > li:after {
-    background-color: #5f9dd6
+    background-color: #f28321
 }
 
 .nav-tabs-warning.nav-tabs-simple > li:after {
@@ -5162,7 +5162,7 @@ body > .pgn-wrapper {
 }
 
 .noUi-target.bg-danger .noUi-connect {
-    background-color: #5f9dd6
+    background-color: #f84444
 }
 
 .noUi-target.bg-info .noUi-connect {
@@ -5564,7 +5564,7 @@ form legend {
 }
 
 .radio.radio-danger input[type=radio]:checked + label:before {
-    border-color: #5f9dd6
+    border-color: #f84444
 }
 
 .checkbox.check-complete input[type=checkbox]:checked + label:before, .checkbox.check-primary input[type=checkbox]:checked + label:before, .checkbox.check-success input[type=checkbox]:checked + label:before, .radio.radio-complete input[type=radio]:checked + label:before {
@@ -5846,7 +5846,7 @@ form legend {
 }
 
 .form-group-default.required:after {
-    color: #5f9dd6;
+    color: #f28321;
     content: "*";
     font-family: arial;
     font-size: 20px;
@@ -6095,16 +6095,16 @@ form legend {
 }
 
 .has-success .checkbox, .has-success .checkbox-inline, .has-success .control-label, .has-success .help-block, .has-success .radio, .has-success .radio-inline {
-    color: #b81c31
+    color: #f84444
 }
 
 .has-success .form-control {
-    border-color: #b81c31;
+    border-color: #f84444;
     box-spectre: none
 }
 
 .has-success .form-control:focus {
-    border-color: #8c1525;
+    border-color: #f84444;
     box-spectre: none
 }
 
@@ -6115,7 +6115,7 @@ form legend {
 }
 
 .has-success .form-control-feedback {
-    color: #b81c31
+    color: #f84444
 }
 
 .has-warning .checkbox, .has-warning .checkbox-inline, .has-warning .control-label, .has-warning .help-block, .has-warning .radio, .has-warning .radio-inline {
@@ -6143,16 +6143,16 @@ form legend {
 }
 
 .has-error .checkbox, .has-error .checkbox-inline, .has-error .control-label, .has-error .help-block, .has-error .radio, .has-error .radio-inline {
-    color: #5f9dd6
+    color: #f28321
 }
 
 .has-error .form-control {
-    border-color: #5f9dd6;
+    border-color: #f28321;
     box-spectre: none
 }
 
 .has-error .form-control:focus {
-    border-color: #f22823;
+    border-color: #f84444;
     box-spectre: none
 }
 
@@ -6166,7 +6166,7 @@ form legend {
 }
 
 .error, .has-error .form-control-feedback {
-    color: #5f9dd6
+    color: #f28321
 }
 
 .error {
@@ -6202,12 +6202,12 @@ form legend {
 }
 
 .input-group-addon.success {
-    background-color: #0090d9;
+    background-color: #f28321;
     color: #fff
 }
 
 .input-group-addon.success .arrow {
-    color: #0090d9
+    color: #f28321
 }
 
 .input-group-addon.info {
