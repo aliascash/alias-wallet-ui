@@ -54,11 +54,11 @@ body.mobile .sidebar-menu > ul {
 }
 
 body.mobile .page-sidebar .sidebar-menu .menu-items li:hover a {
-    color: #4c4a55
+    color: #8a8c8e
 }
 
 body.mobile .page-sidebar .sidebar-menu .menu-items li:hover .icon-thumbnail {
-    color: #4c4a55 !important
+    color: #8a8c8e !important
 }
 
 body.mobile .page-sidebar .sidebar-menu .menu-items li.active > a, body.mobile .page-sidebar .sidebar-menu .menu-items li.active > a .icon-thumbnail, body.mobile .page-sidebar .sidebar-menu .menu-items li.open > a, body.mobile .page-sidebar .sidebar-menu .menu-items li.open > a .icon-thumbnail {
@@ -252,7 +252,7 @@ body.dashboard, body.dashboard .page-container {
 }
 
 .page-sidebar a, .page-sidebar button {
-    color: #4c4a55
+    color: #8a8c8e
 }
 
 .page-sidebar a:active, .page-sidebar a:hover, .page-sidebar button:active, .page-sidebar button:hover {
@@ -260,7 +260,7 @@ body.dashboard, body.dashboard .page-container {
 }
 
 .page-sidebar a:focus, .page-sidebar a:visited, .page-sidebar button:focus, .page-sidebar button:visited {
-    color: #4c4a55
+    color: #8a8c8e
 }
 
 .page-sidebar .scroll-element {
@@ -580,7 +580,7 @@ body.dashboard, body.dashboard .page-container {
     left: 0;
     float: right;
     margin-right: 14px;
-    color: #4c4a55;
+    color: #8a8c8e;
     font-size: 16px;
     -webkit-transition: -webkit-transform .4s cubic-bezier(.05, .74, .27, .99);
     transition: transform .4s cubic-bezier(.05, .74, .27, .99);
@@ -835,7 +835,7 @@ body.dashboard, body.dashboard .page-container {
 }
 
 .quickview-wrapper .nav-tabs ~ .tab-content .quickview-notes .note .toolbar > li > a.active {
-    color: #333;
+    color: #282829;
     background: #f9f1ea
 }
 
@@ -1619,7 +1619,7 @@ body, p {
 }
 
 address a, body {
-    color: #8a8c8e
+    color: #282829;
 }
 
 .panel-heading a.portlet-refresh {
@@ -2189,7 +2189,7 @@ hr.dotted {
 }
 
 .bg-menu-light {
-    background-color: #4c4a55
+    background-color: #8a8c8e
 }
 
 .gradient-black, .gradient-grey {
@@ -2226,7 +2226,7 @@ hr.dotted {
 }
 
 .text-black {
-    color: #2c2c2c !important
+    color: #282829 !important
 }
 
 .text-white {
@@ -4550,13 +4550,13 @@ body > .pgn-wrapper {
     border-color: transparent;
     font-weight: bolder;
     font-size: 13px;
-    color: #333
+    color: #282829
 }
 
 .nav-tabs > li > a:focus, .nav-tabs > li > a:hover {
     background: 0 0;
     border-color: transparent;
-    color: #333
+    color: #282829
 }
 
 .nav-tabs-simple, .nav-tabs.nav-tabs-left:after, .nav-tabs.nav-tabs-right:after {
@@ -4664,7 +4664,7 @@ body > .pgn-wrapper {
     border-color: transparent;
     font-weight: bolder;
     font-size: 13px;
-    color: #333
+    color: #282829
 }
 
 .nav-tabs-linetriangle, .nav-tabs-simple.nav-tabs-left:after, .nav-tabs-simple.nav-tabs-right:after {
@@ -5714,7 +5714,7 @@ form legend {
 }
 
 .form-horizontal .form-group:hover .control-label {
-    opacity: .6
+    opacity: .75
 }
 
 .form-horizontal .form-group.focused .control-label {
@@ -5723,7 +5723,7 @@ form legend {
 
 .form-horizontal .form-group .control-label {
     text-align: left;
-    opacity: .42;
+    opacity: .6;
     -webkit-transition: opacity ease .3s;
     transition: opacity ease .3s
 }
@@ -7315,7 +7315,7 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
     padding-top: 14px;
     padding-bottom: 14px;
     vertical-align: middle;
-    color: #333
+    color: #282829
 }
 
 .table thead tr th[class*=sorting_] {
