@@ -265,7 +265,7 @@ body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 14px;
     line-height: 1.42857143;
-    color: #333
+    color: #282829
 }
 
 button, input, select, textarea {
@@ -643,7 +643,7 @@ blockquote .small, blockquote footer, blockquote small {
 
 legend, pre {
     display: block;
-    color: #333
+    color: #282829
 }
 
 blockquote .small:before, blockquote footer:before, blockquote small:before {
@@ -687,7 +687,7 @@ code {
 
 kbd {
     color: #fff;
-    background-color: #333;
+    background-color: #282829;
     border-radius: 3px;
     -webkit-box-spectre: inset 0 -1px 0 rgba(0, 0, 0, .25);
     box-spectre: inset 0 -1px 0 rgba(0, 0, 0, .25)
@@ -2239,7 +2239,7 @@ select[multiple].form-group-lg .form-control, textarea.form-group-lg .form-contr
 }
 
 .btn.focus, .btn:focus, .btn:hover {
-    color: #333;
+    color: #282829;
     text-decoration: none
 }
 
@@ -2258,13 +2258,13 @@ select[multiple].form-group-lg .form-control, textarea.form-group-lg .form-contr
 }
 
 .btn-default {
-    color: #333;
+    color: #282829;
     background-color: #fff;
     border-color: #ccc
 }
 
 .btn-default.active, .btn-default.focus, .btn-default:active, .btn-default:focus, .btn-default:hover, .open > .dropdown-toggle.btn-default {
-    color: #333;
+    color: #282829;
     background-color: #e6e6e6;
     border-color: #adadad
 }
@@ -2276,7 +2276,7 @@ select[multiple].form-group-lg .form-control, textarea.form-group-lg .form-contr
 
 .btn-default .badge {
     color: #fff;
-    background-color: #333
+    background-color: #282829
 }
 
 .btn-primary {
@@ -2553,7 +2553,7 @@ tbody.collapse.in {
 .dropdown-menu > li > a {
     clear: both;
     font-weight: 400;
-    color: #333
+    color: #282829
 }
 
 .dropdown-menu > li > a:focus, .dropdown-menu > li > a:hover {
@@ -3480,7 +3480,7 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
 }
 
 .navbar-default .navbar-nav > li > a:focus, .navbar-default .navbar-nav > li > a:hover {
-    color: #333;
+    color: #282829;
     background-color: transparent
 }
 
@@ -3521,7 +3521,7 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
     }
 
     .navbar-default .navbar-nav .open .dropdown-menu > li > a:focus, .navbar-default .navbar-nav .open .dropdown-menu > li > a:hover {
-        color: #333;
+        color: #282829;
         background-color: transparent
     }
 
@@ -3541,7 +3541,7 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
 }
 
 .navbar-default .navbar-link:hover {
-    color: #333
+    color: #282829
 }
 
 .navbar-default .btn-link {
@@ -3549,7 +3549,7 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
 }
 
 .navbar-default .btn-link:focus, .navbar-default .btn-link:hover {
-    color: #333
+    color: #282829
 }
 
 .navbar-default .btn-link[disabled]:focus, .navbar-default .btn-link[disabled]:hover, fieldset[disabled] .navbar-default .btn-link:focus, fieldset[disabled] .navbar-default .btn-link:hover {
@@ -3590,11 +3590,11 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
 }
 
 .navbar-inverse .navbar-toggle {
-    border-color: #333
+    border-color: #282829
 }
 
 .navbar-inverse .navbar-toggle:focus, .navbar-inverse .navbar-toggle:hover {
-    background-color: #333
+    background-color: #282829
 }
 
 .navbar-inverse .navbar-toggle .icon-bar {
@@ -3904,7 +3904,7 @@ a.thumbnail.active, a.thumbnail:focus, a.thumbnail:hover {
 
 .thumbnail .caption {
     padding: 9px;
-    color: #333
+    color: #282829
 }
 
 .alert {
@@ -4181,7 +4181,7 @@ a.list-group-item {
 }
 
 a.list-group-item .list-group-item-heading {
-    color: #333
+    color: #282829
 }
 
 a.list-group-item:focus, a.list-group-item:hover {
@@ -4477,7 +4477,7 @@ a.list-group-item-danger.active, a.list-group-item-danger.active:focus, a.list-g
 }
 
 .panel-default > .panel-heading {
-    color: #333;
+    color: #282829;
     background-color: #f5f5f5;
     border-color: #ddd
 }
@@ -4488,7 +4488,7 @@ a.list-group-item-danger.active, a.list-group-item-danger.active:focus, a.list-g
 
 .panel-default > .panel-heading .badge {
     color: #f5f5f5;
-    background-color: #333
+    background-color: #282829
 }
 
 .panel-default > .panel-footer + .panel-collapse > .panel-body {
