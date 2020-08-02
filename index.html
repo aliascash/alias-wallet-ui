@@ -292,9 +292,9 @@
                                                                            maxlength=128></div>
                                                 <select id=new-addresstype class="recipient select-drop-down"
                                                         style=width:167px>
-                                                    <option value=1 title=Normal>Normal
-                                                    <option value=2 title=Stealth>Stealth
-                                                    <option value=3 title=BIP32>BIP32
+                                                    <option value=1 title=Public>Public
+                                                    <option value=2 title=Private>Private
+<!--                                                    <option value=3 title=BIP32>BIP32-->
                                                 </select></div>
                                         </div>
                                     </div>
@@ -363,10 +363,10 @@
                                                     class="recipient select-drop-down" style=width:167px>
                                                 <option value="" title="Filter Address Type" selected
                                                         class=translate>Address Type
-                                                <option title=Normal class=translate>Normal
-                                                <option title=Stealth class=translate>Stealth
-                                                <option title=Group class=translate>Group
-                                                <option title=BIP32 class=translate>BIP32
+                                                <option title=Public class=translate>Public
+                                                <option title=Private class=translate>Private
+<!--                                                <option title=Group class=translate>Group-->
+<!--                                                <option title=BIP32 class=translate>BIP32-->
                                             </select></div>
                                     </div>
                                 </div>
@@ -1163,14 +1163,14 @@
                                                 <div class="form-group"><label
                                                         class="col-sm-3 p-l-20 control-label translate">Pay to
                                                     <a href=#><i class="p-b-5 fa fa-question-circle"
-                                                                 data-title="The stealth address to transfer the balance to.<br>Only <b>owned</b> stealth addresses can be used for Public-Private transfers.<br>Private to Public transfers create <b>new one-time</b> public ALIAS addresses (visible in <b>Coin Control</b> dialog)."
+                                                                 data-title="The private address to transfer the balance to.<br>Only <b>owned</b> private addresses can be used for Public-Private transfers.<br>Private to Public transfers create <b>new one-time</b> public ALIAS addresses based on the given private address (visible in <b>Coin Control</b> dialog)."
                                                                  style=color:#8a8c8e></i></a></label>
                                                     <div class=col-sm-9>
                                                         <div class=row>
                                                             <div class=col-sm-6><input
                                                                     class="form-control pay_to"
-                                                                    data-title="The stealth address to transfer the balance to"
-                                                                    placeholder="The stealth address to transfer the balance to"
+                                                                    data-title="The private address to transfer the balance to"
+                                                                    placeholder="The private address to transfer the balance to"
                                                                     maxlength=128 oninput=base58.check(this)
                                                                     onchange='bridge.getAddressLabelForSelectorAsync(this.value, "#send-balance .pay_to_label", "(no label)")'>
                                                             </div>
@@ -1183,7 +1183,7 @@
                                                                     data-title="Choose from address book"
                                                                     data-toggle=modal
                                                                     data-target=#address-lookup-modal href=#
-                                                                    onclick='addressLookup("send-balance .pay_to,send-balance .pay_to_label",!0,"Stealth")'
+                                                                    onclick='addressLookup("send-balance .pay_to,send-balance .pay_to_label",!0,"Private")'
                                                                     class="btn btn-default"><i
                                                                     class="fa fa-book"></i> </a><a
                                                                     data-title="Paste address from clipboard"
@@ -1257,9 +1257,9 @@
                             <div class=form-group><select class="select-drop-down m-l-10"
                                                           id=filter-addresstype>
                                 <option selected title=Type.. value="">Filter by type..
-                                <option title=Normal value=Normal>Normal
-                                <option title=Stealth value=Stealth>Stealth
-                                <option title=BIP32 value=BIP32>BIP32
+                                <option title=Public value=Public>Public
+                                <option title=Private value=Private>Private
+<!--                                <option title=BIP32 value=BIP32>BIP32-->
                             </select></div>
                         </div>
                         <div class="p-t-10 pull-right">
