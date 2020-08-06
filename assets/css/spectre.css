@@ -476,10 +476,6 @@ textarea {
     margin-bottom: 2px;
 }
 
-.connect-1, .connect-2, .connect-3, .connect-4, .connect-5, .connect-6, .encryption, .encryption-stake, .i2p, .no-encryption, .no-i2p, .no-syncing, .no-tor, .not-staking, .staking, .syncing-spinner, .tor {
-    height: 16px
-}
-
 progress::-webkit-progress-bar {
     background: #382b3f;
     border-radius: 50px;
@@ -510,95 +506,105 @@ progress::-webkit-progress-value {
 [Icons]
 */
 
-.staking {
-    background: url('../icons/staking.png');
-    width: 26px
+#status .fa {
+    font-size: 1.66666666em;
+    vertical-align: baseline;
+    color: #f28321;
 }
 
-.not-staking {
-    background: url('../icons/staking_off.png');
-    width: 26px
+#status img {
+    height: 28px;
+    margin-left: 12px;
+    margin-top: -6px;
+    vertical-align: top;
 }
 
-.encryption {
-    background: url('../icons/lock.png');
-    width: 26px
+img.staking {
+    content:url("../svg/staking.svg");
 }
 
-.no-encryption {
-    background: url('../icons/lock_off.png');
-    width: 26px
+img.not-staking {
+    content:url("../svg/staking_off.svg");
 }
 
-.encryption-stake {
-    background: url('../icons/lock_stake.png');
-    width: 26px
+img.encryption {
+    content:url("../svg/lock.svg");
 }
 
-.i2p {
-    background: url('../icons/i2p.png');
-    width: 26px
+img.no-encryption {
+    content:url("../svg/lock_off.svg");
 }
 
-.no-i2p {
-    background: url('../icons/i2p_off.png');
-    width: 26px
+img.encryption-stake {
+    content:url("../svg/lock_stake.svg");
 }
 
-.tor {
-    background: url('../icons/tor.png');
-    width: 26px
+img.tor {
+    content:url("../svg/tor.svg");
 }
 
-.no-tor {
-    background: url('../icons/tor_off.png');
-    width: 26px
+img.no-tor {
+    content:url('../svg/tor_off.svg');
 }
 
-.connect-0 {
-    background: url('../icons/connect_0.png');
-    height: 16px;
-    width: 26px
+img.connection-0 {
+    content:url('../svg/connection-0.svg');
 }
 
-.connect-1 {
-    background: url('../icons/connect_1.png');
-    width: 26px
+img.connection-1 {
+    content:url('../svg/connection-1.svg');
 }
 
-.connect-2 {
-    background: url('../icons/connect_2.png');
-    width: 26px
+img.connection-2 {
+    content:url('../svg/connection-2.svg');
 }
 
-.connect-3 {
-    background: url('../icons/connect_3.png');
-    width: 26px
+img.connection-3 {
+    content:url('../svg/connection-3.svg');
 }
 
-.connect-4 {
-    background: url('../icons/connect_4.png');
-    width: 26px
+img.connection-4 {
+    content:url('../svg/connection-4.svg');
 }
 
-.connect-5 {
-    background: url('../icons/connect_5.png');
-    width: 26px
+img.connection-5 {
+    content:url('../svg/connection-5.svg');
 }
 
-.connect-6 {
-    background: url('../icons/connect_6.png');
-    width: 26px
+img.connection-6 {
+    content:url('../svg/connection-6.svg');
 }
 
-.no-syncing {
-    background: url('../icons/synced.png');
-    width: 26px
+img.connection-7 {
+    content:url('../svg/connection-7.svg');
 }
 
-.syncing-spinner {
-    background: url('../icons/syncing.gif');
-    width: 16px
+img.connection-8 {
+    content:url('../svg/connection-8.svg');
+}
+
+img.connection-9 {
+    content:url('../svg/connection-9.svg');
+}
+
+img.connection-10 {
+    content:url('../svg/connection-10.svg');
+}
+
+img.connection-11 {
+    content:url('../svg/connection-11.svg');
+}
+
+img.connection-12 {
+    content:url('../svg/connection-12.svg');
+}
+
+img.no-syncing {
+    content:url('../svg/synced.svg');
+}
+
+img.syncing-spinner  {
+    content:url("../svg/syncing.svg");
 }
 
 .heading-selected {
@@ -896,6 +902,10 @@ progress::-webkit-progress-value {
 
 #transactions-table > tbody > tr > td.trans-status {
     width: 1em;
+}
+
+#transactions-table > tbody > tr > td.trans_type > img {
+    margin-right: 0.5em;
 }
 
 /* Make page-content scrollable with fix header */

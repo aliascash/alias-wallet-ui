@@ -108,9 +108,9 @@ for index in ${!FILES[*]} ; do
     fi
 
     if [[ ${file} == *".js" ]] && [[ $(fgrep "assets" ${file} -l) ]] ; then
-        sed -i ${backupFileSuffix} 's^\(assets/\(js\|icons\|img\|plugins\)\)^qrc:///\1^g' ${file}
+        sed -i ${backupFileSuffix} 's^\(assets/\(js\|icons\|img\|plugins\|svg\)\)^qrc:///\1^g' ${file}
         sed -i ${backupFileSuffix} 's^\./qrc:///^qrc:///^g' ${file}
-        sed -i ${backupFileSuffix} 's^\(qtwebchannel/\(js\|icons\|img\|plugins\)\)^qrc:///\1^g' ${file}
+        sed -i ${backupFileSuffix} 's^\(qtwebchannel/\(js\|icons\|img\|plugins\|svg\)\)^qrc:///\1^g' ${file}
 
         echo ${file}
     fi

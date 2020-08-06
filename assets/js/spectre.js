@@ -576,7 +576,7 @@ function formatTransaction(tx) {
             "<td class='trans-status' data-value='" + o.c + "'" + ((tx.length > 1) ? " data-title='" + tooltipStatus + "'" : "") + "><center><i class='fa fa-lg " + o.s + "'></center></td>"+
             "<td data-value='" + o.d + "'" + ((tx.length > 1) ? " data-title='" + tx[0].d_s + " - "+ tx[tx.length-1].d_s + "'" : "") + ">" + o.d_s + "</td>"+
             "<td class='amount' style='color:" + o.am_c + ";' data-value='" + unit.format(totalAmount) + "'>" + unit.format(totalAmount) + "</td>"+
-            "<td class='trans_type'" + ((tx.length > 1) ? " data-title='" + tooltipStatus + "'" : "") + "><img height='15' width='15' src='assets/icons/tx_" + o.t + ".png' /> " + o.t_l + " <b>(x" + tx.length + ")</b></td>"+
+            "<td class='trans_type'" + ((tx.length > 1) ? " data-title='" + tooltipStatus + "'" : "") + "><img height='15' width='15' src='assets/svg/tx_" + o.t + ".svg' /> " + o.t_l + " <b>(x" + tx.length + ")</b></td>"+
             "<td class='address' style='color:" + o.a_c + ";' data-value='" + addrCons + "' data-label='" + addrCons + "' data-title='" + addrCons + "' ><span>" + addrCons + "</span></td>"+
             "<td class='trans-nar' data-title='" + narrCons + "'>" + narrCons + "</td>" +
             "</tr>";
@@ -587,7 +587,7 @@ function formatTransaction(tx) {
             "<td class='trans-status' data-value='" + o.c + "'><center><i class='fa fa-lg " + o.s + "'></center></td>"+
             "<td data-value='" + o.d + "'>" + o.d_s + "</td>"+
             "<td class='amount' style='color:" + o.am_c + ";' data-value='" + o.am_d + "'>" + o.am_d + "</td>"+
-            "<td class='trans_type'><img height='15' width='15' src='assets/icons/tx_" + o.t + ".png' /> " + o.t_l + "</td>"+
+            "<td class='trans_type'><img height='15' width='15' src='assets/svg/tx_" + o.t + ".svg' /> " + o.t_l + "</td>"+
             "<td class='address' style='color:" + o.a_c + ";' data-value='" + o.ad + "' data-label='" + o.ad_l + "'><span "+ ( o.ad ? "class='editable'" : "") +">" + o.ad_d + "</span></td>"+
             "<td class='trans-nar'>" + o.n + "</td>" +
             "</tr>";
