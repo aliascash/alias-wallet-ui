@@ -2250,7 +2250,7 @@ hr.dotted {
 }
 
 .text-danger {
-    color: #5f9dd6 !important
+    color: #f28321 !important
 }
 
 .text-primary {
@@ -3387,7 +3387,7 @@ hr.dotted {
 }
 
 .badge-danger, .badge-important {
-    background-color: #5f9dd6;
+    background-color: #f28321;
     color: #fff
 }
 
@@ -4151,7 +4151,7 @@ body > .pgn-wrapper {
 }
 
 .progress-bar-danger {
-    background-color: #5f9dd6;
+    background-color: #f28321;
     background-image: none
 }
 
@@ -4244,7 +4244,7 @@ body > .pgn-wrapper {
 }
 
 .progress-circle.progress-circle-danger .pie .half-circle {
-    border-color: #5f9dd6
+    border-color: #f28321
 }
 
 .progress-circle.progress-circle-info .pie .half-circle {
@@ -4637,7 +4637,7 @@ body > .pgn-wrapper {
     transition: all .1s linear 0s;
     width: 100%;
     display: block;
-    background-color: #5f9dd6;
+    background-color: #f28321;
     height: 0;
     content: '';
     z-index: 125
@@ -4866,8 +4866,8 @@ body > .pgn-wrapper {
 }
 
 .nav-tabs-danger.nav-tabs-fillup > li > a:after {
-    background: #5f9dd6;
-    border: 1px solid #5f9dd6
+    background: #f28321;
+    border: 1px solid #f28321
 }
 
 .nav-tabs-info.nav-tabs-fillup > li > a:after {
@@ -5065,7 +5065,7 @@ body > .pgn-wrapper {
 }
 
 .irs-bar {
-    background: #5f9dd6
+    background: #f28321
 }
 
 .irs-wrapper .irs-line {
@@ -5077,13 +5077,13 @@ body > .pgn-wrapper {
 }
 
 .irs-wrapper .irs-diapason {
-    background-color: #5f9dd6;
+    background-color: #f28321;
     -webkit-transition: all .3s ease;
     transition: all .3s ease
 }
 
 .irs-wrapper .irs-from, .irs-wrapper .irs-single, .irs-wrapper .irs-to {
-    background: #5f9dd6
+    background: #f28321
 }
 
 .irs-wrapper .irs-slider.from:before, .irs-wrapper .irs-slider.single:before, .irs-wrapper .irs-slider.to:before {
@@ -5092,7 +5092,7 @@ body > .pgn-wrapper {
     width: 16%;
     height: 100%;
     background: rgba(0, 0, 0, 0);
-    background-color: #5f9dd6
+    background-color: #f28321
 }
 
 .irs-wrapper.primary .irs-from, .irs-wrapper.primary .irs-single, .irs-wrapper.primary .irs-to, .irs-wrapper.success .irs-from, .irs-wrapper.success .irs-single, .irs-wrapper.success .irs-to {
@@ -5104,7 +5104,7 @@ body > .pgn-wrapper {
 }
 
 .irs-wrapper .irs-from:after, .irs-wrapper .irs-single:after, .irs-wrapper .irs-to:after {
-    border-top-color: #5f9dd6
+    border-top-color: #f28321
 }
 
 .irs-wrapper.primary .irs-from:after, .irs-wrapper.primary .irs-single:after, .irs-wrapper.primary .irs-to:after, .irs-wrapper.success .irs-from:after, .irs-wrapper.success .irs-single:after, .irs-wrapper.success .irs-to:after {
@@ -5136,15 +5136,15 @@ body > .pgn-wrapper {
 }
 
 .irs-wrapper.danger .irs-bar, .irs-wrapper.danger .irs-diapason, .irs-wrapper.danger .irs-slider.from:before, .irs-wrapper.danger .irs-slider.single:before, .irs-wrapper.danger .irs-slider.to:before {
-    background-color: #5f9dd6
+    background-color: #f28321
 }
 
 .irs-wrapper.danger .irs-from, .irs-wrapper.danger .irs-single, .irs-wrapper.danger .irs-to {
-    background: #5f9dd6
+    background: #f28321
 }
 
 .irs-wrapper.danger .irs-from:after, .irs-wrapper.danger .irs-single:after, .irs-wrapper.danger .irs-to:after {
-    border-top-color: #5f9dd6
+    border-top-color: #f28321
 }
 
 .noUi-target {
@@ -5653,7 +5653,7 @@ form legend {
 }
 
 .checkbox.check-danger input[type=checkbox]:checked + label:before {
-    border-color: #5f9dd6
+    border-color: #f28321
 }
 
 .checkbox.check-info input[type=checkbox]:checked + label:before {
@@ -8665,7 +8665,7 @@ div.cs-skin-slide .cs-options ul li span:hover, div.cs-skin-slide .cs-options ul
 }
 
 .b-danger {
-    border-color: #5f9dd6
+    border-color: #f28321
 }
 
 .b-warning {
