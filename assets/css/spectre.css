@@ -102,6 +102,8 @@
     border-style: solid;
     border-width: thin;
     border-color: #8a8c8e;
+    pointer-events: none;
+    pointer: none;
 }
 
 .light-red, .syncing {
