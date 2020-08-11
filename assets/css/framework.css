@@ -5714,7 +5714,7 @@ form legend {
 }
 
 .form-horizontal .form-group:hover .control-label {
-    opacity: .75
+    opacity: .8
 }
 
 .form-horizontal .form-group.focused .control-label {
@@ -5723,7 +5723,7 @@ form legend {
 
 .form-horizontal .form-group .control-label {
     text-align: left;
-    opacity: .6;
+    opacity: .66;
     -webkit-transition: opacity ease .3s;
     transition: opacity ease .3s
 }
