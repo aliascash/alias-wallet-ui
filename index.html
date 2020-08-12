@@ -133,16 +133,22 @@
                 </ul>
             </li>
             <li>
+                <a href=#><span class="title translate">Blockchain Info</span> <span class=arrow></span> <span
+                        class=icon-thumbnail><i class="fa fa-th-large"></i></span></a>
+                <ul class=sub-menu>
+                    <li><a href=#chaindata onclick=chainDataPage.updateAnonOutputs()><span class=translate>Chain Data</span>
+                        <span class=icon-thumbnail><i class="fa fa-link"></i></span></a></li>
+                    <li><a href=#blockdata onclick=blockExplorerPage.updateLatestBlocks()><span
+                            class=translate>Block Explorer</span> <span class=icon-thumbnail><i
+                            class="fa fa-th"></i></span></a></li>
+                </ul>
+            </li>
+            <li>
                 <a href=#><span class="title translate">Tools</span> <span class=arrow></span> <span
                         class=icon-thumbnail><i class="fa fa-cogs"></i></span></a>
                 <ul class=sub-menu>
                     <li><a href=# onclick='bridge.userAction(["backupWallet"])'><span class=translate>Backup Wallet</span>
                         <span class=icon-thumbnail><i class="fa fa-floppy-o"></i></span></a></li>
-                    <li><a href=#chaindata onclick=chainDataPage.updateAnonOutputs()><span class=translate>Chain Data</span>
-                        <span class=icon-thumbnail><i class="fa fa-link"></i></span></a></li>
-                    <li><a href=#blockdata onclick=blockExplorerPage.updateLatestBlocks()><span
-                            class=translate>Block Explorer</span> <span class=icon-thumbnail><i
-                            class="fa fa-th-large"></i></span></a></li>
                     <li><a href=# data-target=#verify-sign-message-modal data-toggle=modal
                            onclick='$("#sign-href").click(),$("#sign-address")'><span class=translate>Sign Message</span>
                         <span class=icon-thumbnail><i class="fa fa-pencil"></i></span></a></li>
@@ -1350,17 +1356,17 @@
                                    style="border-bottom:1px solid rgba(230,230,230,.7)">
                                 <thead>
                                 <tr>
-                                    <th data-hide=phone style=text-align:center;padding-left:12px;width:1em
+                                    <th style="text-align:center;"
                                         data-toggle=true data-type=numeric
                                         data-title="Transaction status. Hover over this field to show number of confirmations.">
                                     <th data-type=numeric data-sort-initial=descending
                                         data-title="Date and time that the transaction was received.">Date
                                     </th>
                                     <th data-type=numeric
-                                        data-title="Amount removed from or added to balance.">Amount
+                                        data-title="Amount removed from or added to balance.">Value
                                     </th>
-                                    <th data-hide=phone data-title="Type of transaction.">Type</th>
-                                    <th data-title="Destination address of transaction.">Address</th>
+                                    <th data-title="Type of transaction.">Type</th>
+                                    <th data-title="Destination address of transaction.">Addr.</th>
                                     <th data-hide=phone data-title="Short payment note.">Narration</th>
                                 <tbody>
                                 <tfoot>
