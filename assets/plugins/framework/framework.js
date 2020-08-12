@@ -563,11 +563,11 @@ $(function () {
                 }
             });
         });
-           
+
 
 
         var init = function (element, options) {
-            function start(ui) {
+            function showSidebar(ui) {
                 return (void ($(".close-sidebar").data("clicked") || (that.$body.hasClass("menu-pin") || (that.cssAnimation ? (that.$element.css({
                     transform: that.menuOpenCSS
                 }), that.$body.addClass("sidebar-visible"), $("#sidebar-header-collapsed").removeClass("sidebar-header-collapsed-visible"), $("#sidebar-header").removeClass("sidebar-header-hidden")) : that.$element.stop().animate({
@@ -579,13 +579,28 @@ $(function () {
                 })))));
             }
 
-            function show(ev) {
+            window.fixArticleShownMenuItemTimeout = undefined;
+            function hideSidebar(ev) {
                 if ("undefined" != typeof ev) {
                     var $tabsLinks = $(ev.target);
                     if ($tabsLinks.parent(".page-sidebar").length) {
                         return;
                     }
                 }
+                // Make sure that the menu item which corresponds to the shown article is shown
+                clearTimeout(window.fixArticleShownMenuItemTimeout);
+                window.fixArticleShownMenuItemTimeout = setTimeout(function () {
+                    let visibleArticle = $("article:visible").attr('id');
+                    let $menuitem = $(".sidebar-menu a[href$='" + visibleArticle + "']");
+                    let $menugroup = $menuitem.parent().parent(".sub-menu");
+
+                    if (!$menuitem.parent().hasClass('open')) {
+                        $menuitem.trigger("click");
+                    }
+                    else if($menugroup.length > 0 && !$menugroup.parent().hasClass('open')) {
+                        $menugroup.prev().trigger("click")
+                    }
+                }, 10);
                 if (!that.$body.hasClass("menu-pin")) {
                     if ($(".sidebar-overlay-slide").hasClass("show")) {
                         $(".sidebar-overlay-slide").removeClass("show");
@@ -615,7 +630,7 @@ $(function () {
                 }
             }
 
-            if (this.$element = $(element), this.options = $.extend(true, {}, $.fn.sidebar.defaults, options), this.bezierEasing = [0.05, 0.74, 0.27, 0.99], this.cssAnimation = true, this.menuClosedCSS, this.menuOpenCSS, this.css3d = true, this.sideBarWidth = 280, this.sideBarWidthCondensed = 210, this.$sidebarMenu = this.$element.find(".sidebar-menu > ul"), this.$pageContainer = $(this.options.pageContainer), this.$body = $("body"), this.$sidebarMenu.length) {
+            if (this.$element = $(element), this.options = $.extend(true, {}, $.fn.sidebar.defaults, options), this.bezierEasing = [0.05, 0.74, 0.27, 0.99], this.cssAnimation = true, this.menuClosedCSS, this.menuOpenCSS, this.css3d = true, this.sideBarWidth = 280, this.sideBarWidthCondensed = 210, this.$sidebarMenu = this.$element.find(".sidebar-menu > ul"), this.$pageContainer = $(this.options.pageContainer), this.$body = $("body"), this.$sidebarHeader = $(".sidebar-header"), this.$sidebarHeaderCollapsed = $(".sidebar-header-collapsed"), this.$sidebarMenu.length) {
                 if ("desktop" == $.Framework.getUserAgent()) {
                     this.$sidebarMenu.scrollbar({
                         ignoreOverlay: false
@@ -630,26 +645,60 @@ $(function () {
                 this.menuOpenCSS = 1 == this.css3d ? "translate3d(" + this.sideBarWidthCondensed + "px, 0,0)" : "translate(" + this.sideBarWidthCondensed + "px, 0)";
                 this.menuClosedCSS = 1 == this.css3d ? "translate3d(0, 0,0)" : "translate(0, 0)";
                 $("body").on("click", ".sidebar-menu a", function (dataAndEvents) {
-                    if ($(this).parent().children(".sub-menu") !== false) {
-                        var ul = $(this).parent().parent();
-                        $(this).parent();
-                        ul.children("li.open").children("a").children(".arrow").removeClass("open");
-                        ul.children("li.open").children("a").children(".arrow").removeClass("active");
-                        ul.children("li.open").children(".sub-menu").slideUp(200, function () {
-                        });
-                        ul.children("li").removeClass("open");
-                        var target = $(this).parent().children(".sub-menu");
+                    var target = $(this).parent().children(".sub-menu");
+                    // Case submenu group clicked
+                    if ($(this).parent().children(".sub-menu").length > 0) {
                         if (target.is(":visible")) {
+                            // Close the cicked submenu
                             $(".arrow", $(this)).removeClass("open");
+                            $(this).parent().removeClass("open");
                             target.slideUp(200, function () {
                                 $(this).parent().removeClass("active");
                             });
                         } else {
+                            // Close other opened submenus
+                            let $otherOpenMenu = $(this).parent().siblings("li.open");
+                            $otherOpenMenu.children("a").children(".arrow").removeClass("open active");
+                            $otherOpenMenu.removeClass("open");
+                            $otherOpenMenu.children(".sub-menu").slideUp(200, function () {
+                                $(this).removeClass("active");
+                            });
+                            // Open the clicked submenu
                             $(".arrow", $(this)).addClass("open");
                             $(this).parent().addClass("open");
                             target.slideDown(200, function () {
                             });
                         }
+                    }
+                    // Case action clicked
+                    else {
+                        // get submenu of this action if available
+                        let $submenu = $(this).parent().parent('.sub-menu');
+                        let $otherMenus;
+                        // this action is nested in a submenu
+                        if ($submenu.length > 0) {
+                            $otherMenus = $(this).parent().parent().parent().siblings("li");
+                            // close other menu items in this submenu
+                            $(this).parent().siblings("li.open").removeClass('open active');
+                            // make sure the corresponding submenu is opened
+                            $submenu.parent().addClass("open");
+                            if (!$submenu.is(":visible")) {
+                                $submenu.slideDown(200, function () {
+                                });
+                            }
+                        }
+                        else {
+                            $otherMenus = $(this).parent().siblings("li");
+                        }
+                        // close all other menus and remove selected items in it
+                        $($otherMenus).filter('.open').children(".sub-menu").slideUp(200, function () {
+                            $(this).removeClass("active");
+                        });
+                        $('.open', $otherMenus).removeClass('open selected');
+                        $otherMenus.removeClass('open selected active');
+
+                        // make this item opened
+                        $(this).parent().addClass("open");
                     }
                 });
                 $(".sidebar-slide-toggle").on("click touchend", function (types) {
@@ -661,8 +710,11 @@ $(function () {
                     }
                 });
                 var that = this;
-                this.$element.bind("mouseenter mouseleave", start);
-                this.$pageContainer.bind("mouseover", show);
+                this.$element.bind("mouseenter", showSidebar);
+                this.$element.bind("mouseleave", hideSidebar);
+                this.$pageContainer.bind("mouseenter", hideSidebar);
+                this.$sidebarHeaderCollapsed.bind("click", showSidebar);
+                this.$sidebarHeader.bind("click", hideSidebar);
             }
         };
         init.prototype.toggleSidebar = function (e) {
