@@ -16,6 +16,24 @@
 }
 
 /*------------------------------------------------------------------
+[Flexbox Base Container]
+*/
+.flex-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    align-content: center;
+    margin-right: -15px;
+}
+.flex-container > div:first-child {
+    flex-grow: 1;
+}
+.flex-container > div {
+    padding-right: 15px;
+}
+
+/*------------------------------------------------------------------
 [FA]
 */
 
@@ -72,6 +90,34 @@
     background: #fff
 }
 
+.page-container > .page-content-wrapper > .content {
+    padding-top: 0px !important;
+}
+
+.page-container > .page-content-wrapper {
+    position: absolute !important;
+    min-height: initial !important;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 5px;
+}
+
+@media (max-width: 767px) {
+    .page-container > .page-content-wrapper {
+        position: absolute !important;
+        min-height: initial !important;
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+        overflow-y: auto;
+    }
+}
+
 
 /*------------------------------------------------------------------
 [Nav]
@@ -83,6 +129,71 @@
     -webkit-border-radius: 0 !important;
     -moz-border-radius: 0 !important;
     border-radius: 0 !important
+}
+
+nav.navbar {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: baseline;
+    flex-wrap: wrap;
+    align-content: center;
+}
+nav.navbar > div:first-child {
+    flex-grow: 1;
+}
+nav.navbar > div:not(:first-child) {
+    padding-left: 15px;
+}
+
+nav.navbar {
+    padding-top: 5px;
+    padding-bottom: 10px;
+    padding-left: 35px;
+    padding-right: 35px;
+}
+nav.navbar + div.row {
+    margin-top: 5px;
+    margin-bottom: 0px;
+    margin-left: 35px;
+    margin-right: 35px;
+}
+
+@media (max-width: 767px) {
+    .nav-tabs ~ .tab-content {
+        padding: 5px !important;
+    }
+
+    nav.navbar {
+        padding-top: 0px;
+        padding-bottom: 0px;
+        padding-left: 20px;
+        padding-right: 20px;
+        margin-bottom: 0px;
+    }
+    nav.navbar + div.row {
+        margin-left: 5px;
+        margin-right: 0px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-tabs > li > a {
+        padding-left: 5px !important;
+    }
+
+    nav.navbar {
+        padding-left: 10px;
+        padding-right: 5px;
+    }
+}
+
+@media (max-height: 680px) {
+    nav.navbar {
+        margin-bottom: 5px !important;
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
 }
 
 
@@ -178,8 +289,9 @@
     margin-right: 5px
 }
 
+
 /*------------------------------------------------------------------
-[Send]
+[<Forms & Inputs>]
 */
 
 .warning {
@@ -188,27 +300,9 @@
     padding: 5px
 }
 
-table.dataTable thead td, table.dataTable thead th {
-    padding: 10px 18px;
-    border-bottom: 1px solid blue
-}
-
-td {
-    max-width: 0;
-    white-space: nowrap
-}
-
-table {
-    width: 100%
-}
-
-.table {
-    color: #282829
-}
-
 button, input, optgroup, select, textarea {
     background: transparant;
-    font-family: Helvetica, Verdana, Helvetica, sans-serif;
+    font-family: Montserrat, sans-serif;
     font-size: 13px;
     color: #000
 }
@@ -252,7 +346,12 @@ button {
     -webkit-appearance: none;
     -moz-appearance: none;
     font-size: 13px;
-    height: 35px
+    height: 35px;
+}
+
+select.unit[disabled], select.unitSpectre {
+    appearance: none !important;
+    border: none !important;
 }
 
 ::-webkit-input-placeholder, :placeholder-shown {
@@ -300,6 +399,246 @@ button {
     border-radius: 5px;
     -webkit-transition: background .2s linear 0s;
     transition: background .2s linear 0s
+}
+
+@media (max-width: 700px) {
+    .padding-right-forms {
+        margin-right: 0
+    }
+
+    .hide-this-icon {
+        display: none
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Table]
+*/
+
+td {
+    max-width: 0;
+    white-space: nowrap
+}
+
+table {
+    width: 100%
+}
+
+.table {
+    color: #282829
+}
+
+@media (max-width: 480px) {
+    .table.table-condensed thead tr th {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
+    .table tbody tr td {
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+}
+
+@media (max-height: 680px) {
+    .table > tbody > tr > td, .table > thead > tr > th {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+
+    .header {
+        height: 49px !important;
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Footable]
+*/
+
+.footable-row-detail-group {
+    font-weight: 700
+}
+
+.footable-row-detail-name {
+    font-weight: 700;
+}
+
+.footable > tfoot > tr > td{
+    padding-bottom: 0px !important;
+}
+
+.footable-row-detail-value {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+    .footable > tbody > tr > td, .footable > thead > tr > th {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Overview]
+*/
+.wallet {
+    min-height: 307px;
+    padding-top: 8px;
+}
+
+#balances td {
+    padding-left: 20px;
+}
+
+#recenttxns-container {
+    height: 424px;
+}
+
+#recenttxns thead tr th, #recenttxns tbody tr td {
+    text-align: center;
+}
+
+.overview_date {
+    white-space: normal !important;
+}
+
+@media (max-height: 680px) {
+    .wallet {
+        min-height: 360px;
+    }
+}
+
+@media (max-width: 991px) {
+    .wallet {
+        min-height: 0px;
+    }
+}
+
+@media (max-height: 680px), (max-width: 767px) {
+    .panel {
+        margin-bottom: 5px !important;
+    }
+    .panel .panel-body {
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
+    #balances {
+        margin-bottom: 0px;
+    }
+}
+
+@media (max-width: 480px) {
+    .panel .panel-heading, #balances td {
+        padding-left: 5px;
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Receive]
+*/
+#receive .center-div {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#receive .table > tbody > tr > td {
+    vertical-align: middle;
+}
+
+@media (max-width: 767px) {
+    #receive .center-div > a.btn {
+        width: 145px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+}
+
+@media (min-width: 531px) {
+    #receive tbody > tr > td:first-child, #receive thead > tr > th:first-child {
+        display: none!important;
+    }
+}
+
+@media (max-width: 530px) {
+    #receive tbody > tr > td:first-child, #receive thead > tr > th:first-child {
+        display: table-cell;
+        width: 32px;
+        padding-left: 7px !important;
+    }
+
+    #receive tbody > tr > td:nth-child(2), #receive thead > tr > th:nth-child(2) {
+        padding-left: 0px !important;
+    }
+}
+
+/*------------------------------------------------------------------
+[Addressbook]
+*/
+.address {
+    overflow-wrap: anywhere;
+}
+
+#addressbook .table > tbody > tr > td {
+    vertical-align: middle;
+}
+
+#addressbook .center-div {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 767px) {
+    #addressbook .center-div > a.btn {
+        width: 145px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+}
+
+@media (min-width: 531px) {
+    #addressbook tbody > tr > td:first-child, #addressbook thead > tr > th:first-child {
+        display: none!important;
+    }
+}
+
+@media (max-width: 530px) {
+    #addressbook tbody > tr > td:first-child, #addressbook thead > tr > th:first-child {
+        width: 32px;
+        display: table-cell;
+        padding-left: 7px !important;
+    }
+
+    #addressbook tbody > tr > td:nth-child(2), #addressbook thead > tr > th:nth-child(2) {
+        padding-left: 0px !important;
+    }
+}
+
+#address-lookup-table tbody > tr > td:first-child, #address-lookup-table thead > tr > th:first-child {
+    display: none;
+}
+
+
+/*------------------------------------------------------------------
+[Blockdata]
+*/
+#blk-hash, #txn-hash {
+    overflow-wrap: anywhere;
+}
+
+#block-info-modal td:first-child, #block-info-modal th:first-child, #blkexp-txn-modal td:first-child, #blkexp-txn-modal th:first-child {
+    width: 30%;
+}
+
+#block-info-modal td, #blkexp-txn-modal td{
+    overflow-wrap: anywhere;
+    white-space: normal;
+    padding-top: 12px;
+    padding-bottom: 12px;
 }
 
 
@@ -442,6 +781,23 @@ textarea {
     padding: 20px
 }
 
+@media (max-width: 767px) {
+    .modal .modal-header {
+        padding: 15px 10px 0px !important;
+    }
+    .modal-dialog {
+        margin-left: 45px;
+        margin-right: 25px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-dialog {
+        margin: 0px;
+    }
+}
+
+
 /*------------------------------------------------------------------
 [Scrollbars]
 */
@@ -475,11 +831,11 @@ textarea {
     -webkit-appearance: none;
     -moz-appearance: none;
     border: none;
-    margin-bottom: 2px;
+    margin-bottom: 2px
 }
 
 progress::-webkit-progress-bar {
-    background: #382b3f;
+    background: #131218;
     border-radius: 50px;
     padding: 2px;
     box-shadow: 0 1px 0 0 rgba(255, 255, 255, .2)
@@ -488,7 +844,7 @@ progress::-webkit-progress-bar {
 progress::-webkit-progress-value {
     border-radius: 50px;
     box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, .4);
-    background: -webkit-linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, .1) 33%, rgba(0, 0, 0, .1) 66%, transparent 66%), -webkit-linear-gradient(top, rgba(255, 255, 255, .25), rgba(0, 0, 0, .2)), -webkit-linear-gradient(left, #f84444, #f28321);
+    background: -webkit-linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, .1) 33%, rgba(0, 0, 0, .1) 66%, transparent 66%), -webkit-linear-gradient(top, rgba(255, 255, 255, .25), rgba(0, 0, 0, .2)), -webkit-linear-gradient(left, #e5203d, #e41c39);
     background-size: 25px 14px, 100% 100%, 100% 100%;
     -webkit-animation: animateprogress 5s linear 0 infinite;
     animation: animateprogress 5s linear 0 infinite
@@ -661,219 +1017,6 @@ img.syncing-spinner  {
     color: #f84444
 }
 
-/*------------------------------------------------------------------
-[Footable]
-*/
-
-.footable {
-    width: 100%
-}
-
-.footable.breakpoint > tbody > tr.footable-detail-show > td {
-    border-bottom: none
-}
-
-.footable.breakpoint > tbody > tr.footable-detail-show > td > span.footable-toggle:before {
-    content: "\e001"
-}
-
-.footable.breakpoint > tbody > tr:hover:not(.footable-row-detail) {
-    cursor: pointer
-}
-
-.footable.breakpoint > tbody > tr > td.footable-cell-detail {
-    background: #eee;
-    border-top: none
-}
-
-.footable.breakpoint > tbody > tr > td > span.footable-toggle {
-    padding-right: 5px;
-    font-size: 14px;
-    color: #888
-}
-
-.footable.breakpoint > tbody > tr > td > span.footable-toggle:before {
-    content: "\e000"
-}
-
-.footable.breakpoint.toggle-circle > tbody > tr.footable-detail-show > td > span.footable-toggle:before {
-    content: "\e005"
-}
-
-.footable.breakpoint.toggle-circle > tbody > tr > td > span.footable-toggle:before {
-    content: "\e004"
-}
-
-.footable.breakpoint.toggle-circle-filled > tbody > tr.footable-detail-show > td > span.footable-toggle:before {
-    content: "\e003"
-}
-
-.footable.breakpoint.toggle-circle-filled > tbody > tr > td > span.footable-toggle:before {
-    content: "\e002"
-}
-
-.footable.breakpoint.toggle-square > tbody > tr.footable-detail-show > td > span.footable-toggle:before {
-    content: "\e007"
-}
-
-.footable.breakpoint.toggle-square > tbody > tr > td > span.footable-toggle:before {
-    content: "\e006"
-}
-
-.footable.breakpoint.toggle-square-filled > tbody > tr.footable-detail-show > td > span.footable-toggle:before {
-    content: "\e009"
-}
-
-.footable.breakpoint.toggle-square-filled > tbody > tr > td > span.footable-toggle:before {
-    content: "\e008"
-}
-
-.footable.breakpoint.toggle-arrow > tbody > tr.footable-detail-show > td > span.footable-toggle:before {
-    content: "\e00f"
-}
-
-.footable.breakpoint.toggle-arrow > tbody > tr > td > span.footable-toggle:before {
-    content: "\e011"
-}
-
-.footable.breakpoint.toggle-arrow-small > tbody > tr.footable-detail-show > td > span.footable-toggle:before {
-    content: "\e013"
-}
-
-.footable.breakpoint.toggle-arrow-small > tbody > tr > td > span.footable-toggle:before {
-    content: "\e015"
-}
-
-.footable.breakpoint.toggle-arrow-circle > tbody > tr.footable-detail-show > td > span.footable-toggle:before {
-    content: "\e01b"
-}
-
-.footable.breakpoint.toggle-arrow-circle > tbody > tr > td > span.footable-toggle:before {
-    content: "\e01d"
-}
-
-.footable.breakpoint.toggle-arrow-circle-filled > tbody > tr.footable-detail-show > td > span.footable-toggle:before {
-    content: "\e00b"
-}
-
-.footable.breakpoint.toggle-arrow-circle-filled > tbody > tr > td > span.footable-toggle:before {
-    content: "\e00d"
-}
-
-.footable.breakpoint.toggle-arrow-tiny > tbody > tr.footable-detail-show > td > span.footable-toggle:before {
-    content: "\e01f"
-}
-
-.footable.breakpoint.toggle-arrow-tiny > tbody > tr > td > span.footable-toggle:before {
-    content: "\e021"
-}
-
-.footable.breakpoint.toggle-arrow-alt > tbody > tr.footable-detail-show > td > span.footable-toggle:before {
-    content: "\e017"
-}
-
-.footable.breakpoint.toggle-arrow-alt > tbody > tr > td > span.footable-toggle:before {
-    content: "\e019"
-}
-
-.footable.breakpoint.toggle-medium > tbody > tr > td > span.footable-toggle {
-    font-size: 18px
-}
-
-.footable.breakpoint.toggle-large > tbody > tr > td > span.footable-toggle {
-    font-size: 24px
-}
-
-.footable > thead > tr > th {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none
-}
-
-.footable > thead > tr > th.footable-sortable:hover {
-    cursor: pointer
-}
-
-.footable > thead > tr > th.footable-sorted > span.footable-sort-indicator:before {
-    content: "\e013"
-}
-
-.footable > thead > tr > th.footable-sorted-desc > span.footable-sort-indicator:before {
-    content: "\e012"
-}
-
-.footable > thead > tr > th > span.footable-sort-indicator {
-    padding-left: 5px
-}
-
-.footable > thead > tr > th > span.footable-sort-indicator:before {
-    content: "\e022"
-}
-
-.footable > tfoot .pagination {
-    margin: 0
-}
-
-.footable.no-paging .hide-if-no-paging {
-    display: none
-}
-
-.footable-row-detail-inner {
-    display: table
-}
-
-.footable-row-detail-row {
-    display: table-row;
-    line-height: 1.5em
-}
-
-.footable-row-detail-group {
-    display: block;
-    line-height: 2em;
-    font-size: 1.2em;
-    font-weight: 700
-}
-
-.footable-row-detail-name {
-    display: table-cell;
-    font-weight: 700;
-    padding-right: .5em
-}
-
-.footable-row-detail-value {
-    display: table-cell
-}
-
-.footable-odd {
-    background-color: #f7f7f7
-}
-
-.table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
-    padding: 18px
-}
-
-@media (max-width: 700px) {
-    .padding-right-forms {
-        margin-right: 0
-    }
-
-    .hide-this-icon {
-        display: none
-    }
-}
-
-@media (max-width: 600px) {
-    .trans-nar, .trans-status, .trans-type {
-        display: none
-    }
-
-    .btn {
-        width: 100%;
-        min-width: 50px;
-        max-width: 300px;
-        margin-top: 15px
-    }
-}
 
 .none {
     display: none !important
@@ -883,10 +1026,15 @@ img.syncing-spinner  {
     display: none
 }
 
+
+/*------------------------------------------------------------------
+[Transactions]
+*/
+
 /* Make tbody scrollable */
 #transactions-table > thead {
     display: table;
-    width: calc(100% - 1.25em);
+    width: 100%;
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
@@ -902,13 +1050,65 @@ img.syncing-spinner  {
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
-#transactions-table > tbody > tr > td.trans-status {
-    width: 1em;
+#transactions-table > thead > tr > th:first-child {
+    width:20px !important;
+    padding-left:5px !important;
 }
 
-#transactions-table > tbody > tr > td.trans_type > img {
-    margin-right: 0.5em;
+#transactions-table > tbody > tr > td:first-child {
+    width: 20px !important;
+    padding-left: 6px !important;
+    overflow: visible;
 }
+
+#transactions-table > tbody > tr > td.trans-type > img {
+    margin-right: 0.5em;
+    margin-top: -3px;
+    margin-bottom: -3px;
+    float:left;
+}
+#transactions-table > tbody > tr > td.trans-type > span {
+    display: flex;
+}
+
+#transactions-table {
+    margin-bottom: 0px !important;
+}
+
+@media (max-width: 680px) {
+    #transactions-table > thead > tr > th:first-child {
+        width:16px !important;
+        padding-left:1px !important;
+    }
+
+    #transactions-table > tbody > tr > td:first-child {
+        width: 16px !important;
+        padding-left: 2px !important;
+    }
+
+    #transactions-table > tbody > tr > td {
+        white-space: normal !important;
+        overflow-wrap: break-word;
+    }
+
+    #transactions-table > tbody > tr > td, #transactions-table > thead > tr > th {
+        padding-top: 6px !important;
+        padding-bottom: 6px !important;
+    }
+}
+
+@media (max-width: 530px) {
+    .trans-nar {
+        display: none
+    }
+}
+
+@media (max-width: 480px) {
+    #transactions-table > thead > tr > th:nth-child(2), #transactions-table > tbody > tr > td:nth-child(2){
+        width: 62px !important;
+    }
+}
+
 
 /* Make page-content scrollable with fix header */
 body.fixed-header {
@@ -927,32 +1127,6 @@ body.fixed-header {
     font-weight: bold;
 }
 
-.page-container > .page-content-wrapper > .content {
-    padding-top: 0px !important;
-}
-
-.page-container > .page-content-wrapper {
-    position: absolute !important;
-    min-height: initial !important;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-    overflow-y: auto;
-}
-
-@media (max-width: 767px) {
-    .page-container > .page-content-wrapper {
-        position: absolute !important;
-        min-height: initial !important;
-        top: 0px;
-        left: 0px;
-        right: 0px;
-        bottom: 0px;
-        overflow-y: auto;
-    }
-}
-
 #transaction-info dl {
     width: 100%;
     overflow: hidden;
@@ -962,22 +1136,27 @@ body.fixed-header {
 
 #transaction-info dt {
     float: left;
-    width: 18%;
+    width: 22%;
     padding: 0;
     margin: 0
 }
 
 #transaction-info dd {
+    overflow-wrap: anywhere;
     float: left;
-    width: 82%;
+    width: 78%;
     padding: 0;
     margin: 0
+}
+
+#transaction-info a {
+    overflow-wrap: anywhere;
 }
 
 /* Make tbody scrollable */
 #chaindata-table > thead {
     display: table;
-    width: calc(100% - 1.25em);
+    width: 100%;
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
@@ -993,6 +1172,28 @@ body.fixed-header {
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
+#chaindata-table tbody > tr > td {
+    vertical-align: middle;
+}
+
+@media (min-width: 531px) {
+    #chaindata-table tbody > tr > td:first-child, #chaindata-table thead > tr > th:first-child {
+        display: none!important;
+    }
+}
+
+@media (max-width: 530px) {
+    #chaindata-table tbody > tr > td:first-child, #chaindata-table thead > tr > th:first-child {
+        width: 32px;
+        display: table-cell;
+        padding-left: 7px !important;
+    }
+
+    #chaindata-table tbody > tr > td:nth-child(2), #chaindata-table thead > tr > th:nth-child(2) {
+        padding-left: 0px !important;
+    }
+}
+
 /* Fix sidebar padding on MacOS (without jquery-scrollbar ) */
 .page-sidebar .sidebar-menu > .menu-items > li > ul.sub-menu li > a > .arrow:before {
     margin-right: 3px !important;
@@ -1003,6 +1204,5 @@ body.fixed-header {
 }
 
 .page-sidebar .sidebar-menu > *:not(.scroll-wrapper) .icon-thumbnail {
-    margin-right: 0px !important; 
+    margin-right: 0px !important;
 }
-
