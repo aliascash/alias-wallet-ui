@@ -293,8 +293,8 @@ button {
     font-size: 14px;
     font-weight: 400;
     min-height: 35px;
-    -webkit-box-spectre: none;
-    box-spectre: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
@@ -319,9 +319,9 @@ button {
     border-radius: 5px;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
-    box-spectre: 0 0 4px rgba(0, 0, 0, .7);
-    -webkit-box-spectre: 0 0 4px rgba(0, 0, 0, .7);
-    -moz-box-spectre: 0 0 4px rgba(0, 0, 0, .7);
+    box-shadow: 0 0 4px rgba(0, 0, 0, .7);
+    -webkit-box-shadow: 0 0 4px rgba(0, 0, 0, .7);
+    -moz-box-shadow: 0 0 4px rgba(0, 0, 0, .7);
     display: none;
     position: absolute
 }
@@ -423,7 +423,7 @@ textarea {
     font-family: sans-serif;
     font-size: 18px;
     appearance: none;
-    box-spectre: none;
+    box-shadow: none;
     border-radius: none
 }
 
@@ -482,12 +482,12 @@ progress::-webkit-progress-bar {
     background: #382b3f;
     border-radius: 50px;
     padding: 2px;
-    box-spectre: 0 1px 0 0 rgba(255, 255, 255, .2)
+    box-shadow: 0 1px 0 0 rgba(255, 255, 255, .2)
 }
 
 progress::-webkit-progress-value {
     border-radius: 50px;
-    box-spectre: inset 0 1px 1px 0 rgba(255, 255, 255, .4);
+    box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, .4);
     background: -webkit-linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, .1) 33%, rgba(0, 0, 0, .1) 66%, transparent 66%), -webkit-linear-gradient(top, rgba(255, 255, 255, .25), rgba(0, 0, 0, .2)), -webkit-linear-gradient(left, #f84444, #f28321);
     background-size: 25px 14px, 100% 100%, 100% 100%;
     -webkit-animation: animateprogress 5s linear 0 infinite;

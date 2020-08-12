@@ -107,7 +107,7 @@ body.dashboard, body.dashboard .page-container {
 }
 
 .pace .pace-progress-inner {
-    box-spectre: none
+    box-shadow: none
 }
 
 .pace .pace-activity {
@@ -383,12 +383,12 @@ body.dashboard, body.dashboard .page-container {
     width: 100%
 }
 
-.page-sidebar .sidebar-menu .menu-items li.active > a .icon-thumbnail, .page-sidebar .sidebar-menu .menu-items li.open > a .icon-thumbnail, .page-sidebar .sidebar-menu .menu-items li:hover > a .icon-thumbnail {
-    color: #f28321
+.page-sidebar .sidebar-menu .menu-items li.active > a, .page-sidebar .sidebar-menu .menu-items li.open > a, .page-sidebar .sidebar-menu .menu-items li:hover > a, .page-sidebar .sidebar-menu .menu-items li:hover > a .icon-thumbnail  {
+    color: #fff
 }
 
-.page-sidebar .sidebar-menu .menu-items li.active > a, .page-sidebar .sidebar-menu .menu-items li.open > a, .page-sidebar .sidebar-menu .menu-items li:hover > a {
-    color: #fff
+.page-sidebar .sidebar-menu .menu-items li.active > a .icon-thumbnail, .page-sidebar .sidebar-menu .menu-items li.open > a .icon-thumbnail{
+    color: #f28321
 }
 
 .page-sidebar .sidebar-menu .menu-items li > a {
@@ -435,7 +435,7 @@ body.dashboard, body.dashboard .page-container {
     height: auto;
     content: "\f104";
     font-weight: 300;
-    text-spectre: none;
+    text-shadow: none;
     -webkit-transition: all .12s ease;
     transition: all .12s ease
 }
@@ -499,7 +499,7 @@ body.dashboard, body.dashboard .page-container {
     height: auto;
     content: "\f104";
     font-weight: 300;
-    text-spectre: none;
+    text-shadow: none;
     -webkit-transition: all .12s ease;
     transition: all .12s ease
 }
@@ -516,7 +516,7 @@ body.dashboard, body.dashboard .page-container {
     -ms-transform: rotate(-90deg);
     transform: rotate(-90deg);
     font-weight: 300;
-    text-spectre: none
+    text-shadow: none
 }
 
 .page-sidebar .sidebar-menu .menu-items > li ul.sub-menu {
@@ -609,7 +609,7 @@ body.dashboard, body.dashboard .page-container {
     top: 0;
     width: 285px;
     background: #fff;
-    box-spectre: 0 0 9px rgba(191, 191, 191, .36);
+    box-shadow: 0 0 9px rgba(191, 191, 191, .36);
     -webkit-transition: -webkit-transform .4s cubic-bezier(.05, .74, .27, .99);
     transition: transform .4s cubic-bezier(.05, .74, .27, .99);
     -ms-backface-visibility: hidden
@@ -811,7 +811,7 @@ body.dashboard, body.dashboard .page-container {
     height: 55px;
     width: 100%;
     display: table-row;
-    box-spectre: 0 1px 1px -1px rgba(0, 0, 0, .33)
+    box-shadow: 0 1px 1px -1px rgba(0, 0, 0, .33)
 }
 
 .quickview-wrapper .nav-tabs ~ .tab-content .quickview-notes .note .toolbar > li {
@@ -978,7 +978,7 @@ body.dashboard, body.dashboard .page-container {
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
     border-radius: 0;
-    box-spectre: none;
+    box-shadow: none;
     background-color: transparent;
     padding: 15px 0;
     margin: 0;
@@ -1013,7 +1013,7 @@ body.dashboard, body.dashboard .page-container {
 .breadcrumb a, .breadcrumb i, .breadcrumb li, .breadcrumb span {
     color: #7b7d82;
     font-weight: 300;
-    text-spectre: none
+    text-shadow: none
 }
 
 /* Image Icon Sent
@@ -1331,14 +1331,14 @@ body.dashboard, body.dashboard .page-container {
     -webkit-transform: translate3d(-100%, 0, 0);
     transform: translate3d(-100%, 0, 0);
     -ms-transform: translate(-100%, 0);
-    box-spectre: 0 0 9px rgba(191, 191, 191, .36)
+    box-shadow: 0 0 9px rgba(191, 191, 191, .36)
 }
 
 /*------------------------------------------------------------------
 [Panels]
 */
 .panel {
-    box-spectre: none;
+    box-shadow: none;
     border-radius: 1px;
     -webkit-border-radius: 1px;
     -moz-border-radius: 1px;
@@ -1456,7 +1456,7 @@ body, p {
 
 .panel.panel-transparent {
     background: 0 0;
-    box-spectre: none
+    box-shadow: none
 }
 
 .panel.panel-transparent .panel-body {
@@ -1473,7 +1473,7 @@ body, p {
 }
 
 .panel.panel-featured {
-    box-spectre: -1px 1px 3px 0 rgba(121, 129, 135, .14);
+    box-shadow: -1px 1px 3px 0 rgba(121, 129, 135, .14);
     width: calc(100% - 50px);
     float: right
 }
@@ -1519,7 +1519,7 @@ body, p {
     height: 38px;
     margin-left: -39px;
     float: left;
-    box-spectre: inset -3px 0 3px 0 rgba(0, 0, 0, .14)
+    box-shadow: inset -3px 0 3px 0 rgba(0, 0, 0, .14)
 }
 
 .panel.panel-featured .ribbon.blue, .panel.panel-featured .ribbon.green {
@@ -1821,7 +1821,7 @@ h1.block, h2.block, h3.block, h4.block, h5.block, h6.block {
 ------------------------------------
 */
 a {
-    text-spectre: none !important;
+    text-shadow: none !important;
     color: #f28321
 }
 
@@ -2278,7 +2278,7 @@ hr.dotted {
 .label {
     padding: 3px 9px;
     font-size: 11px;
-    text-spectre: none;
+    text-shadow: none;
     background-color: #e6e6e6;
     font-weight: 600;
     color: #8a8c8e
@@ -2403,13 +2403,13 @@ hr.dotted {
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
-    box-spectre: none !important;
+    box-shadow: none !important;
     border: none;
     background-image: none
 }
 
 .btn, .btn-group.open .dropdown-toggle, .btn.active, .btn.disabled, .btn:active, .btn:focus, .btn:hover, .btn[disabled], .open .dropdown-toggle, .open.dropdown-default .dropdown-toggle {
-    box-spectre: none
+    box-shadow: none
 }
 
 .well.well-large {
@@ -2546,7 +2546,7 @@ hr.dotted {
     background-image: none !important;
     color: #8a8c8e;
     background-color: #fff;
-    text-spectre: none;
+    text-shadow: none;
     line-height: 21px;
     padding-left: 17px;
     padding-right: 17px
@@ -3052,8 +3052,8 @@ hr.dotted {
     display: none;
     float: left;
     list-style: none;
-    text-spectre: none;
-    box-spectre: 0 0 5px rgba(98, 98, 98, .2);
+    text-shadow: none;
+    box-shadow: 0 0 5px rgba(98, 98, 98, .2);
     border: none;
     border-radius: 3px;
     font-size: 13px;
@@ -3268,8 +3268,8 @@ hr.dotted {
 */
 .alert {
     background-image: none;
-    box-spectre: none;
-    text-spectre: none;
+    box-shadow: none;
+    text-shadow: none;
     padding: 9px 19px 9px 15px;
     border-radius: 3px;
     font-size: 13px;
@@ -3365,7 +3365,7 @@ hr.dotted {
 --------------------------------------------------
 */
 .badge {
-    text-spectre: none;
+    text-shadow: none;
     font-family: Montserrat, sans-serif;
     font-weight: 600;
     background-color: #e6e6e6;
@@ -3416,7 +3416,7 @@ hr.dotted {
 */
 .popover {
     border: 1px solid rgba(0, 0, 0, .1);
-    box-spectre: 0 0 9px rgba(191, 191, 191, .36);
+    box-shadow: 0 0 9px rgba(191, 191, 191, .36);
     z-index: 790
 }
 
@@ -3895,7 +3895,7 @@ body.menu-pin > .pgn-wrapper[data-position$='-left'], body.menu-pin > .pgn-wrapp
 .pgn-flip .alert {
     -webkit-transform-origin: 50% 0;
     transform-origin: 50% 0;
-    box-spectre: 0 6px 4px -3px rgba(0, 0, 0, .2);
+    box-shadow: 0 6px 4px -3px rgba(0, 0, 0, .2);
     -webkit-animation-name: flipInX;
     animation-name: flipInX;
     -webkit-animation-duration: .8s;
@@ -4046,7 +4046,7 @@ body > .pgn-wrapper {
 
 .progress, .progress-bar {
     border-radius: 0;
-    box-spectre: none
+    box-shadow: none
 }
 
 .notification-positions .position.active img {
@@ -4296,7 +4296,7 @@ body > .pgn-wrapper {
 .modal .modal-content {
     border: 1px solid #f2f6f7;
     border-radius: 3px;
-    box-spectre: none
+    box-shadow: none
 }
 
 .modal.fade.center-scale .modal-content .modal-header, .modal.fade.fill-in .modal-content .modal-header {
@@ -4318,20 +4318,20 @@ body > .pgn-wrapper {
 }
 
 .modal .modal-body {
-    box-spectre: none;
+    box-shadow: none;
     padding: 0 25px 25px;
     white-space: normal
 }
 
 .modal .modal-footer {
     border-top: none;
-    box-spectre: none;
+    box-shadow: none;
     margin-top: 0;
     padding: 0 25px 25px
 }
 
 .modal .drop-spectre {
-    box-spectre: 0 0 9px rgba(191, 191, 191, .36) !important
+    box-shadow: 0 0 9px rgba(191, 191, 191, .36) !important
 }
 
 .modal.fade {
@@ -4521,7 +4521,7 @@ body > .pgn-wrapper {
     }
 
     .modal .modal-content {
-        box-spectre: none
+        box-shadow: none
     }
 }
 
@@ -4632,7 +4632,7 @@ body > .pgn-wrapper {
     margin-bottom: 0
 }
 
-.nav-tabs-simple > li:after {
+.nav-tabs-simple > li.active:after {
     -webkit-transition: all .1s linear 0s;
     transition: all .1s linear 0s;
     width: 100%;
@@ -4704,7 +4704,7 @@ body > .pgn-wrapper {
 
 .nav-tabs-linetriangle > li.active > a {
     background: 0 0;
-    box-spectre: none;
+    box-shadow: none;
     border-color: transparent
 }
 
@@ -5150,7 +5150,7 @@ body > .pgn-wrapper {
 .noUi-target {
     border-radius: 0;
     border: 0;
-    box-spectre: none
+    box-shadow: none
 }
 
 .noUi-target.bg-complete .noUi-connect, .noUi-target.bg-success .noUi-connect {
@@ -5174,12 +5174,12 @@ body > .pgn-wrapper {
 }
 
 .noUi-target.noUi-connect {
-    box-spectre: none
+    box-shadow: none
 }
 
 .noUi-handle {
     border-radius: 999px;
-    box-spectre: none
+    box-shadow: none
 }
 
 .noUi-handle:after, .noUi-handle:before {
@@ -5258,12 +5258,12 @@ body > .pgn-wrapper {
 }
 
 .noUi-connect {
-    box-spectre: none
+    box-shadow: none
 }
 
 .noUi-background {
     background: #ececec;
-    box-spectre: none
+    box-shadow: none
 }
 
 /*------------------------------------------------------------------
@@ -5397,7 +5397,7 @@ select[multiple], select[size] {
 
 input:focus, input[type=radio]:focus, input[type=checkbox]:focus, input[type=file]:focus, select:focus, textarea:focus {
     outline: 0;
-    box-spectre: none
+    box-shadow: none
 }
 
 form legend {
@@ -5418,7 +5418,7 @@ form legend {
     font-weight: 400;
     vertical-align: middle;
     min-height: 35px;
-    box-spectre: none;
+    box-shadow: none;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
@@ -5430,7 +5430,7 @@ form legend {
     border-color: rgba(0, 0, 0, .1);
     background-color: #f0f0f0;
     outline: 0 !important;
-    box-spectre: none
+    box-shadow: none
 }
 
 .form-control:focus::-moz-placeholder {
@@ -5892,7 +5892,7 @@ form legend {
 
 .form-group-default.has-error .form-control, .form-group-default.has-error .form-control:focus, .form-group-default.has-success .form-control, .form-group-default.has-success .form-control:focus {
     border: none;
-    box-spectre: none
+    box-shadow: none
 }
 
 .form-group-default.input-group {
@@ -6100,12 +6100,12 @@ form legend {
 
 .has-success .form-control {
     border-color: #f84444;
-    box-spectre: none
+    box-shadow: none
 }
 
 .has-success .form-control:focus {
     border-color: #f84444;
-    box-spectre: none
+    box-shadow: none
 }
 
 .has-success .input-group-addon {
@@ -6124,12 +6124,12 @@ form legend {
 
 .has-warning .form-control {
     border-color: #c9a843;
-    box-spectre: none
+    box-shadow: none
 }
 
 .has-warning .form-control:focus {
     border-color: #a98b31;
-    box-spectre: none
+    box-shadow: none
 }
 
 .has-warning .input-group-addon {
@@ -6148,12 +6148,12 @@ form legend {
 
 .has-error .form-control {
     border-color: #f28321;
-    box-spectre: none
+    box-shadow: none
 }
 
 .has-error .form-control:focus {
     border-color: #f84444;
-    box-spectre: none
+    box-shadow: none
 }
 
 .has-error .input-group-addon, .input-group-addon {
@@ -6183,7 +6183,7 @@ form legend {
     padding: 6px 9px;
     display: table-cell;
     border-radius: 3px;
-    transition: border .2s linear 0s, box-spectre .2s linear 0s, color .2s linear 0s, box-spectre .2s linear 0s, background .2s linear 0s
+    transition: border .2s linear 0s, box-shadow .2s linear 0s, color .2s linear 0s, box-shadow .2s linear 0s, background .2s linear 0s
 }
 
 .input-group-addon i {
@@ -6329,7 +6329,7 @@ https://github.com/eternicode/bootstrap-datepicker
 
 .datepicker table tr td.active, .datepicker table tr td.active.disabled, .datepicker table tr td.active.disabled:hover, .datepicker table tr td.active:hover {
     background-image: none;
-    text-spectre: none;
+    text-shadow: none;
     font-weight: 600
 }
 
@@ -6353,7 +6353,7 @@ https://github.com/eternicode/bootstrap-datepicker
 .datepicker table tr td span.active, .datepicker table tr td span.active.disabled, .datepicker table tr td span.active.disabled:hover, .datepicker table tr td span.active:hover {
     background-image: none;
     border: none;
-    text-spectre: none
+    text-shadow: none
 }
 
 .datepicker.dropdown-menu {
@@ -6370,7 +6370,7 @@ https://github.com/eternicode/bootstrap-datepicker
 }
 
 .input-daterange .input-group-addon {
-    text-spectre: none;
+    text-shadow: none;
     border: 0
 }
 
@@ -6464,7 +6464,7 @@ https://github.com/m3wolf/bootstrap3-timepicker
 .select2-drop.select2-drop-above {
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
-    box-spectre: none
+    box-shadow: none
 }
 
 .select2-drop.select2-drop-above.select2-drop-active {
@@ -6475,7 +6475,7 @@ https://github.com/m3wolf/bootstrap3-timepicker
 }
 
 .select2-container-active .select2-choice, .select2-container-active .select2-choices {
-    box-spectre: none;
+    box-shadow: none;
     border: 1px solid rgba(0, 0, 0, .07);
     background: #f0f0f0;
     border-top-left-radius: 2px;
@@ -6553,7 +6553,7 @@ https://github.com/m3wolf/bootstrap3-timepicker
     background-color: #e6e6e6;
     background-image: none;
     border: none;
-    box-spectre: none;
+    box-shadow: none;
     color: inherit;
     border-radius: 8px;
     margin: 8px -5px 7px 10px;
@@ -6562,7 +6562,7 @@ https://github.com/m3wolf/bootstrap3-timepicker
 
 .select2-container-multi.select2-container-active .select2-choices {
     border: 1px solid rgba(0, 0, 0, .07);
-    box-spectre: none
+    box-shadow: none
 }
 
 .select2-container-multi.select2-container-active .select2-search-choice {
@@ -6596,7 +6596,7 @@ https://github.com/m3wolf/bootstrap3-timepicker
 
 .select2.form-control {
     padding: 0;
-    box-spectre: none;
+    box-shadow: none;
     border: 0
 }
 
@@ -6657,7 +6657,7 @@ https://github.com/timschlechter/bootstrap-tagsinput
     border: 1px solid rgba(0, 0, 0, .07);
     border-radius: 4px;
     padding-bottom: 5px;
-    box-spectre: none;
+    box-shadow: none;
     width: 100%;
     -webkit-transition: background .2s linear 0s;
     transition: background .2s linear 0s
@@ -6686,7 +6686,7 @@ https://github.com/timschlechter/bootstrap-tagsinput
 }
 
 .bootstrap-tagsinput .tag [data-role=remove]:hover, .bootstrap-tagsinput .tag[data-role=remove]:hover:active {
-    box-spectre: none
+    box-shadow: none
 }
 
 .bootstrap-tagsinput .tag [data-role=remove]:after {
@@ -6722,7 +6722,7 @@ https://github.com/Waxolunist/bootstrap3-wysihtml5-bower
     padding: 0 5px;
     border-width: 1px;
     border-radius: 0 !important;
-    box-spectre: none !important
+    box-shadow: none !important
 }
 
 .wysiwyg5-wrapper .wysihtml5-toolbar .btn:hover .editor-icon {
@@ -6760,7 +6760,7 @@ https://github.com/Waxolunist/bootstrap3-wysihtml5-bower
 .wysiwyg5-wrapper .wysiwyg:focus {
     background-color: #fafafa;
     outline: 0 !important;
-    box-spectre: none
+    box-shadow: none
 }
 
 .wysiwyg5-wrapper .expand-wysiwyg {
@@ -6917,15 +6917,15 @@ input, input:focus {
 }
 
 input:-webkit-autofill {
-    box-spectre: 0 0 0 1000px #fff inset !important
+    box-shadow: 0 0 0 1000px #fff inset !important
 }
 
 input:-webkit-autofill:focus {
-    box-spectre: 0 0 0 1000px #f0f0f0 inset !important
+    box-shadow: 0 0 0 1000px #f0f0f0 inset !important
 }
 
 .has-error input:-webkit-autofill, input.error:-webkit-autofill, input.error:-webkit-autofill:focus {
-    box-spectre: 0 0 0 1000px #F9E9E9 inset !important
+    box-shadow: 0 0 0 1000px #F9E9E9 inset !important
 }
 
 /* SelectFx */
@@ -7221,7 +7221,7 @@ div.cs-skin-slide.cs-active:before {
 div.cs-skin-slide.cs-active .cs-backdrop {
     border: transparent;
     background: #fafafa;
-    box-spectre: -1px 0 1px #ccc, 1px 0 1px #ccc
+    box-shadow: -1px 0 1px #ccc, 1px 0 1px #ccc
 }
 
 div.cs-skin-slide.cs-active > span:after, div.cs-skin-slide > span:after {

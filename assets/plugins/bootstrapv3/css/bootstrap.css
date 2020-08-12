@@ -170,10 +170,10 @@ td, th {
 
     *, :after, :before {
         color: #000 !important;
-        text-spectre: none !important;
+        text-shadow: none !important;
         background: 0 0 !important;
-        -webkit-box-spectre: none !important;
-        box-spectre: none !important
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important
     }
 
     a, a:visited {
@@ -689,15 +689,15 @@ kbd {
     color: #fff;
     background-color: #282829;
     border-radius: 3px;
-    -webkit-box-spectre: inset 0 -1px 0 rgba(0, 0, 0, .25);
-    box-spectre: inset 0 -1px 0 rgba(0, 0, 0, .25)
+    -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .25);
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .25)
 }
 
 kbd kbd {
     padding: 0;
     font-size: 100%;
-    -webkit-box-spectre: none;
-    box-spectre: none
+    -webkit-box-shadow: none;
+    box-shadow: none
 }
 
 pre {
@@ -1808,11 +1808,11 @@ output {
     background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 4px;
-    -webkit-box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075);
-    box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075);
-    -webkit-transition: border-color ease-in-out .15s, -webkit-box-spectre ease-in-out .15s;
-    -o-transition: border-color ease-in-out .15s, box-spectre ease-in-out .15s;
-    transition: border-color ease-in-out .15s, box-spectre ease-in-out .15s
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s
 }
 
 .form-group-sm .form-control, .input-sm {
@@ -1824,8 +1824,8 @@ output {
 .form-control:focus {
     border-color: #66afe9;
     outline: 0;
-    -webkit-box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
-    box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6)
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6)
 }
 
 .form-control::-moz-placeholder {
@@ -2048,14 +2048,14 @@ select[multiple].form-group-lg .form-control, textarea.form-group-lg .form-contr
 
 .has-success .form-control {
     border-color: #3c763d;
-    -webkit-box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075);
-    box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075)
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075)
 }
 
 .has-success .form-control:focus {
     border-color: #2b542c;
-    -webkit-box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #67b168;
-    box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #67b168
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #67b168;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #67b168
 }
 
 .has-success .input-group-addon {
@@ -2070,14 +2070,14 @@ select[multiple].form-group-lg .form-control, textarea.form-group-lg .form-contr
 
 .has-warning .form-control {
     border-color: #8a6d3b;
-    -webkit-box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075);
-    box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075)
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075)
 }
 
 .has-warning .form-control:focus {
     border-color: #66512c;
-    -webkit-box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #c0a16b;
-    box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #c0a16b
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #c0a16b;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #c0a16b
 }
 
 .has-warning .input-group-addon {
@@ -2092,14 +2092,14 @@ select[multiple].form-group-lg .form-control, textarea.form-group-lg .form-contr
 
 .has-error .form-control {
     border-color: #a94442;
-    -webkit-box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075);
-    box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075)
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075)
 }
 
 .has-error .form-control:focus {
     border-color: #843534;
-    -webkit-box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483;
-    box-spectre: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483
 }
 
 .has-error .input-group-addon {
@@ -2244,16 +2244,16 @@ select[multiple].form-group-lg .form-control, textarea.form-group-lg .form-contr
 }
 
 .btn.active, .btn:active {
-    -webkit-box-spectre: inset 0 3px 5px rgba(0, 0, 0, .125);
-    box-spectre: inset 0 3px 5px rgba(0, 0, 0, .125)
+    -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125)
 }
 
 .btn.disabled, .btn[disabled], fieldset[disabled] .btn {
     pointer-events: none;
     cursor: not-allowed;
     filter: alpha(opacity=65);
-    -webkit-box-spectre: none;
-    box-spectre: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
     opacity: .65
 }
 
@@ -2401,8 +2401,8 @@ select[multiple].form-group-lg .form-control, textarea.form-group-lg .form-contr
 
 .btn-link, .btn-link.active, .btn-link:active, .btn-link[disabled], fieldset[disabled] .btn-link {
     background-color: transparent;
-    -webkit-box-spectre: none;
-    box-spectre: none
+    -webkit-box-shadow: none;
+    box-shadow: none
 }
 
 .btn-link, .btn-link:active, .btn-link:focus, .btn-link:hover {
@@ -2523,8 +2523,8 @@ tbody.collapse.in {
     border: 1px solid #ccc;
     border: 1px solid rgba(0, 0, 0, .15);
     border-radius: 4px;
-    -webkit-box-spectre: 0 6px 12px rgba(0, 0, 0, .175);
-    box-spectre: 0 6px 12px rgba(0, 0, 0, .175)
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, .175)
 }
 
 .dropdown-menu-right, .dropdown-menu.pull-right {
@@ -2698,13 +2698,13 @@ tbody.collapse.in {
 }
 
 .btn-group.open .dropdown-toggle {
-    -webkit-box-spectre: inset 0 3px 5px rgba(0, 0, 0, .125);
-    box-spectre: inset 0 3px 5px rgba(0, 0, 0, .125)
+    -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125)
 }
 
 .btn-group.open .dropdown-toggle.btn-link {
-    -webkit-box-spectre: none;
-    box-spectre: none
+    -webkit-box-shadow: none;
+    box-shadow: none
 }
 
 .btn-lg .caret {
@@ -3123,8 +3123,8 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
     overflow-x: visible;
     -webkit-overflow-scrolling: touch;
     border-top: 1px solid transparent;
-    -webkit-box-spectre: inset 0 1px 0 rgba(255, 255, 255, .1);
-    box-spectre: inset 0 1px 0 rgba(255, 255, 255, .1)
+    -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1)
 }
 
 .navbar-collapse.in {
@@ -3143,8 +3143,8 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
     .navbar-collapse {
         width: auto;
         border-top: 0;
-        -webkit-box-spectre: none;
-        box-spectre: none
+        -webkit-box-shadow: none;
+        box-shadow: none
     }
 
     .navbar-collapse.collapse {
@@ -3274,8 +3274,8 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
         margin-top: 0;
         background-color: transparent;
         border: 0;
-        -webkit-box-spectre: none;
-        box-spectre: none
+        -webkit-box-shadow: none;
+        box-shadow: none
     }
 
     .navbar-nav .open .dropdown-menu .dropdown-header, .navbar-nav .open .dropdown-menu > li > a {
@@ -3320,8 +3320,8 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
     padding: 10px 15px;
     border-top: 1px solid transparent;
     border-bottom: 1px solid transparent;
-    -webkit-box-spectre: inset 0 1px 0 rgba(255, 255, 255, .1), 0 1px 0 rgba(255, 255, 255, .1);
-    box-spectre: inset 0 1px 0 rgba(255, 255, 255, .1), 0 1px 0 rgba(255, 255, 255, .1);
+    -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 1px 0 rgba(255, 255, 255, .1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 1px 0 rgba(255, 255, 255, .1);
     margin: 8px -15px
 }
 
@@ -3381,8 +3381,8 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
         margin-right: 0;
         margin-left: 0;
         border: 0;
-        -webkit-box-spectre: none;
-        box-spectre: none
+        -webkit-box-shadow: none;
+        box-shadow: none
     }
 }
 
@@ -4032,8 +4032,8 @@ a.thumbnail.active, a.thumbnail:focus, a.thumbnail:hover {
     margin-bottom: 20px;
     background-color: #f5f5f5;
     border-radius: 4px;
-    -webkit-box-spectre: inset 0 1px 2px rgba(0, 0, 0, .1);
-    box-spectre: inset 0 1px 2px rgba(0, 0, 0, .1)
+    -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1)
 }
 
 .progress-bar {
@@ -4045,8 +4045,8 @@ a.thumbnail.active, a.thumbnail:focus, a.thumbnail:hover {
     color: #fff;
     text-align: center;
     background-color: #337ab7;
-    -webkit-box-spectre: inset 0 -1px 0 rgba(0, 0, 0, .15);
-    box-spectre: inset 0 -1px 0 rgba(0, 0, 0, .15);
+    -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .15);
     -webkit-transition: width .6s ease;
     -o-transition: width .6s ease;
     transition: width .6s ease
@@ -4334,8 +4334,8 @@ a.list-group-item-danger.active, a.list-group-item-danger.active:focus, a.list-g
     background-color: #fff;
     border: 1px solid transparent;
     border-radius: 4px;
-    -webkit-box-spectre: 0 1px 1px rgba(0, 0, 0, .05);
-    box-spectre: 0 1px 1px rgba(0, 0, 0, .05)
+    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .05)
 }
 
 .panel-title, .panel > .list-group, .panel > .panel-collapse > .list-group, .panel > .panel-collapse > .table, .panel > .table, .panel > .table-responsive > .table {
@@ -4642,8 +4642,8 @@ a.list-group-item-danger.active, a.list-group-item-danger.active:focus, a.list-g
     background-color: #f5f5f5;
     border: 1px solid #e3e3e3;
     border-radius: 4px;
-    -webkit-box-spectre: inset 0 1px 1px rgba(0, 0, 0, .05);
-    box-spectre: inset 0 1px 1px rgba(0, 0, 0, .05)
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05)
 }
 
 .well blockquote {
@@ -4666,7 +4666,7 @@ a.list-group-item-danger.active, a.list-group-item-danger.active:focus, a.list-g
     font-size: 21px;
     line-height: 1;
     color: #000;
-    text-spectre: 0 1px 0 #fff;
+    text-shadow: 0 1px 0 #fff;
     filter: alpha(opacity=20);
     opacity: .2
 }
@@ -4730,8 +4730,8 @@ button.close {
     border: 1px solid #999;
     border: 1px solid rgba(0, 0, 0, .2);
     border-radius: 6px;
-    -webkit-box-spectre: 0 3px 9px rgba(0, 0, 0, .5);
-    box-spectre: 0 3px 9px rgba(0, 0, 0, .5)
+    -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
+    box-shadow: 0 3px 9px rgba(0, 0, 0, .5)
 }
 
 .modal-backdrop {
@@ -4804,8 +4804,8 @@ button.close {
     }
 
     .modal-content {
-        -webkit-box-spectre: 0 5px 15px rgba(0, 0, 0, .5);
-        box-spectre: 0 5px 15px rgba(0, 0, 0, .5)
+        -webkit-box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, .5)
     }
 
     .modal-sm {
@@ -4861,7 +4861,7 @@ button.close {
 .text-hide {
     font: 0/0 a;
     color: transparent;
-    text-spectre: none;
+    text-shadow: none;
     background-color: transparent;
     border: 0
 }
