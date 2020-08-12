@@ -1,95 +1,157 @@
 !function (t) {
     "use strict";
+
+    let tooltipTarget = undefined;
+    let touchHandled = false;
+
     function e(e) {
         return e === t && (e = t("[data-title]")),
         void 0 === e && (e = this),
-            e.off("mouseenter").on("mouseenter", o)
+            e.off("mouseenter touchstart touchend touchmove touchcancel").on("mouseenter", mouseenter).on("touchstart", touchstart).on("touchend", touchend).on("touchmove touchcancel", aborttouch)
     }
-    function o(e) {
-        let timerId;
-        var r = !1
-        , n = !1
-        , s = !1
-        , a = !1;
 
-        function o() {
-            t(window).width() < 1.5 * n.outerWidth() ? n.css("max-width", t(window).width() / 2) : n.css("max-width", 340);
-            var o = r.offset().left + r.outerWidth() / 2 - n.outerWidth() / 2
-                , i = r.offset().top - n.outerHeight() - 20;
-            o < 0 ? (o = r.offset().left + r.outerWidth() / 2 - 20,
-                n.addClass("left")) : n.removeClass("left"),
-                o + n.outerWidth() > t(document).width() ? (o = r.offset().left - n.outerWidth() + r.outerWidth() / 2 + 20,
-                    n.addClass("right")) : n.removeClass("right"),
-            o + r.outerWidth() > t(document).width() && (o = e.pageX,
-                n.removeClass("left right")),
-                i < 0 ? (i = r.offset().top + r.outerHeight() + 25,
-                    n.addClass("top"),
-                    a = !0) : n.removeClass("top"),
-                n.css({
-                    left: o,
-                    top: i
-                }).animate({
-                    top: (a ? "-" : "+") + "=10",
+    function touchstart(e) {
+        touchHandled = true;
+        tooltipTarget = e.currentTarget !== tooltipTarget && !$(e.target).hasClass('footable-toggle') ? e.currentTarget : undefined;
+        return true;
+    }
+
+    function aborttouch(e) {
+        touchHandled = false;
+        tooltipTarget = undefined;
+        return true;
+    }
+
+    function touchend(e) {
+        if (tooltipTarget === e.currentTarget) {
+            addTooltip(e);
+            return $(this).hasClass('editable'); // don't stop propagation for editables
+        }
+        return true;
+    }
+
+    function mouseenter(e) {
+        if (!touchHandled && !$(e.target).hasClass('footable-toggle')) {
+            tooltipTarget = e.currentTarget;
+            addTooltip(e);
+        }
+        return true;
+    }
+
+    function addTooltip(e) {
+        let $target = undefined
+            , targetOffset = undefined
+            , $tooltip = undefined
+            , tooltipText = undefined
+            , updateTextTimeout = undefined
+            , tooltipBelowElement = !1;
+
+
+        function showTooltip() {
+            t(window).width() < 1.5 * $tooltip.outerWidth() ? $tooltip.css("max-width", t(window).width() / 2) : $tooltip.css("max-width", 340);
+            var tooltipX = $target.offset().left + $target.outerWidth() / 2 - $tooltip.outerWidth() / 2
+                , tooltipY = $target.offset().top - $tooltip.outerHeight() - 20;
+            tooltipX < 0 ? (tooltipX = $target.offset().left + $target.outerWidth() / 2 - 20,
+                $tooltip.addClass("left")) : $tooltip.removeClass("left"),
+                tooltipX + $tooltip.outerWidth() > t(document).width() ? (tooltipX = $target.offset().left - $tooltip.outerWidth() + $target.outerWidth() / 2 + 20,
+                    $tooltip.addClass("right")) : $tooltip.removeClass("right"),
+            tooltipX + $target.outerWidth() > t(document).width() && (tooltipX = e.pageX,
+                $tooltip.removeClass("left right")),
+                tooltipY < 0 ? (tooltipY = $target.offset().top + $target.outerHeight() + 25,
+                    $tooltip.addClass("top"),
+                    tooltipBelowElement = !0) : $tooltip.removeClass("top"),
+                $tooltip.css({
+                    left: tooltipX,
+                    top: tooltipY
+                })
+            if ($tooltip.css('opacity') != 1) {
+                $tooltip.css({
+                    left: tooltipX,
+                    top: tooltipY
+                })
+                $tooltip.animate({
+                    top: (tooltipBelowElement ? "-" : "+") + "=10",
                     opacity: 1
                 }, 100)
+            }
+            else {
+                $tooltip.css({
+                    left: tooltipX,
+                    top: tooltipBelowElement ? tooltipY - 10 : tooltipY + 10
+                })
+            }
         }
 
-        function i() {
-            clearInterval(timerId);
-            n.animate({
-                top: (a ? "+" : "-") + "=10",
+        function removeTooltip() {
+            touchHandled = false;
+            clearInterval(updateTextTimeout);
+            t(window).off("resize", removeTooltip)
+            document.removeEventListener("touchstart", removeTooltip, true);
+            $target.off("contextmenu mouseleave", removeTooltip);
+
+            let removeTooltipElement = e.currentTarget;
+            $tooltip.animate({
+                top: (tooltipBelowElement ? "+" : "-") + "=10",
                 opacity: 0
-            }, 100, function () {               
-                t(this).remove()
+            }, 100, function () {
+                if (tooltipTarget === removeTooltipElement || tooltipTarget === undefined) {
+                    tooltipTarget = undefined;
+                    t(this).remove();
+                }
             })
         }
-    
+
         function prepareTooltipContent() {
-            return s.replace(/&#013;|\n|\x0A/g, "<br />").replace(/%column%/g, function () {
-                return t(r.parents("table").find("thead tr th")[r[0].cellIndex]).text()
+            return tooltipText.replace(/&#013;|\n|\x0A/g, "<br />").replace(/%column%/g, function () {
+                return t($target.parents("table").find("thead tr th")[$target[0].cellIndex]).text()
             }).replace(/%([.\w\-]+),([.\w\-]+)%/g, function (t, e, o) {
-                return r.children(e).attr(o)
+                return $target.children(e).attr(o)
             }).replace(/%([.\w\-]+)%/g, function (t, e) {
-                return r.children(e).text()
+                return $target.children(e).text()
             })
         }
-    
+
         function update(eSource) {
-            var eTooltip = t("#tooltip");
-            if (eTooltip,
-                r = t(eSource), 
-                s = r.attr("data-title"),
-                !s || "" == s)
-            {
-                clearInterval(timerId);
-                return !1;    
+            let oldLength = tooltipText ? tooltipText.length : 0;
+            $tooltip = t("#tooltip");
+            $target = t(eSource);
+            if (!$tooltip.length || !$target.length || $target.is(":hidden") || (tooltipText = $target.attr("data-title"), !tooltipText || "" == tooltipText)) {
+                removeTooltip();
+                return !1;
             }
-                
-            s = prepareTooltipContent(),
-            eTooltip.html(s);    
+            tooltipText = prepareTooltipContent();
+            $tooltip.html(tooltipText);
+            let currentTargetOffset = $target.offset()
+            if (oldLength != tooltipText.length || targetOffset.left != currentTargetOffset.left || targetOffset.right != currentTargetOffset.right) {
+                // reset tooltip that position and width is recalculated from scratch
+                targetOffset = currentTargetOffset;
+                $tooltip.css('left', "");
+                $tooltip.css('top', "");
+                $tooltip.css('max-width', "");
+                $tooltip.removeClass("left, right top");
+                showTooltip();
+            }
         }
-        
+
         if (!t("input, textarea").is(":focus") && "inline-block" != t(".iw-contextMenu").css("display")) {
-            if (e.stopPropagation(),
-                t("#tooltip").remove(),
-                r = t(this),
-                s = r.attr("data-title"),
-                n = t('<div id="tooltip"></div>'),
-                !s || "" == s)
+            if (t("#tooltip").remove(),
+                $target = t(e.currentTarget),
+                tooltipText = $target.attr("data-title"),
+                $tooltip = t('<div id="tooltip"></div>'),
+            !tooltipText || "" == tooltipText)
             {
                 return !1;
             }
-            s = prepareTooltipContent(),
-            n.css("opacity", 0).html(s).appendTo("body"),
-            "pointer" != r.css("cursor") && "A" != r.prop("tagName") && r.css("cursor", "help"),
-                o(),
-                t(window).resize(o),
-                r.on("contextmenu mouseleave", i)
-                r.on("remove", function () {
-                    clearInterval(timerId);
-                })                   
-            
-            timerId = setInterval(update, 500, this);      
+            tooltipText = prepareTooltipContent();
+            $tooltip.css("opacity", 0).html(tooltipText).appendTo("body");
+            "pointer" != $target.css("cursor") && "A" != $target.prop("tagName") && $target.css("cursor", "help"),
+                showTooltip(),
+                t(window).on("resize", removeTooltip);
+            $target.on("contextmenu mouseleave", removeTooltip),
+
+                targetOffset = $target.offset();
+            document.addEventListener("touchstart", removeTooltip, true),
+                updateTextTimeout = setInterval(update, 500, e.currentTarget)
         }
     }
     t.fn.tooltip = e
