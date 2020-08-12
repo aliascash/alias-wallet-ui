@@ -236,12 +236,13 @@ function receivePageInit() {
 function clearRecvAddress() {
   $("#new-address-label").val("");
   $("#new-addresstype").val(1);
+  $("#new-recv-address-error").text("");
 }
 function addAddress() {
-    console.log('addAddress');
+  console.log('addAddress');
   var throughArgs = $("#new-addresstype").val();
   var r20 = $("#new-address-label").val();
-  bridge.newAddress(r20, throughArgs, '', false);
+  clientBridge.newAddress(r20, throughArgs, '', false);
 }
 
 function clearSendAddress() {
@@ -252,42 +253,46 @@ function clearSendAddress() {
 }
 
 function getAddressLabelForSelectorResult(result, selector, fallback) {
-    if (!result) {
-      result = fallback;
-    }
-    $(selector).val(result).text(result).change();
+  if (!result) {
+    result = fallback;
+  }
+  $(selector).val(result).text(result).change();
 }
 
 function addSendAddress() {
-    var udataCur = $("#new-send-address").val()
-    bridge.getAddressLabelAsync(udataCur);
+  var udataCur = $("#new-send-address").val()
+  bridge.getAddressLabelAsync(udataCur);
 }
 
 function getAddressLabelResult(result) {
-    console.log("getAddressLabelResult");
-    var udataCur = result;
-    var name;
-    var g;
-    var data;
-    if (name = $("#new-send-label").val(), udataCur = $("#new-send-address").val(), g = result, "" !== g) {
-      return $("#new-send-address-error").text('Error: address already in addressbook under "' + g + '"'), void $("#new-send-address").addClass("inputError");
-    }
-    var camelKey = 0;
-    bridge.newAddressAsync(name, camelKey, udataCur, true);
+  console.log("getAddressLabelResult");
+  var udataCur = result;
+  var name;
+  var g;
+  var data;
+  if (name = $("#new-send-label").val(), udataCur = $("#new-send-address").val(), g = result, "" !== g) {
+    return $("#new-send-address-error").text('Error: address already in addressbook under "' + g + '"'), void $("#new-send-address").addClass("inputError");
+  }
+  var camelKey = 0;
+  clientBridge.newAddress(name, camelKey, udataCur, true);
 }
-function newAddressResult(result) {
-    var udataCur = result;
-    if (data = result, "" === data) {
-      bridge.lastAddressError();
-    } else {
-      $("#add-address-modal").modal("hide");
+function newAddressResult(success, errorMsg, address, send) {
+  if (success) {
+    $("#add-address-modal").modal("hide");
+  } else {
+    if (send) {
+      lastAddressErrorResult(errorMsg);
     }
+    else {
+      $("#new-recv-address-error").text("Error: " + errorMsg);
+    }
+  }
 }
 
 function lastAddressErrorResult(result) {
-    var to = result;
-    $("#new-send-address-error").text("Error: " + to);
-    $("#new-send-address").addClass("inputError");
+  var to = result;
+  $("#new-send-address-error").text("Error: " + to);
+  $("#new-send-address").addClass("inputError");
 }
 
 function addressBookInit() {
@@ -315,8 +320,8 @@ function addressBookInit() {
     name : "Delete",
     fun : function() {
       var target = $("#addressbook .footable .selected .address");
-        bridge.deleteAddress(target.text())
-        target.closest("tr").remove();
+      bridge.deleteAddress(target.text())
+      target.closest("tr").remove();
     }
   }];
   $("#addressbook .footable tbody").on("contextmenu", function(ev) {
@@ -360,19 +365,20 @@ function appendAddresses(err) {
     if ("R" == item.type) {
       if (sendPage.initSendBalance(item)) {
         if (item.address.length < 75) {
-            if (0 == revisionCheckbox.length) {
-              $("#message-from-address").append("<option title='" + item.address + "' value='" + item.address + "'>" + item.label + "</option>");
-            } else {
-              $("#message-from-address option[value=" + item.address + "]").text(item.label);
-            }
+          if (0 == revisionCheckbox.length) {
+            $("#message-from-address").append("<option title='" + item.address + "' value='" + item.address + "'>" + item.label + "</option>");
+          } else {
+            $("#message-from-address option[value=" + item.address + "]").text(item.label);
           }
+        }
       }
     }
     var param = "S" == item.type;
     var common = "n/a" !== item.pubkey;
     if (0 == revisionCheckbox.length) {
-      $(target + " .footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "'>                 <td style='padding-left:18px;' class='label2 editable' data-value='" + item.label_value + "'>" + item.label + "</td>                 <td class='address'>" + item.address + "</td>                 <td class='pubkey'>" + item.pubkey + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? "Private" : "Public") + "</td></tr>");
-      $("#" + item.address).selection("tr").find(".editable").on("dblclick", function(event) {
+      $(target + " .footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "'> <td data-toggle=true></td>     <td>           <span class='label2 editable' data-value='" + item.label_value + "'>" + item.label + "</span> </td>                <td class='address'>" + item.address + "</td>                 <td class='pubkey'>" + item.pubkey + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? "Stealth" : "Normal") + "</td></tr>");
+      $("#address-lookup-table.footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "' class='addressType"+ item.type +"'> <td data-toggle=true></td>                 <td><span class='label2' data-value='" + item.label_value + "'>" + item.label + "</span></td>                 <td class='address'>" + item.address + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? "Stealth" : "Normal") + "</td></tr>");
+      $(target + " #" + item.address).selection("tr").find(".editable").on("dblclick", function(event) {
         event.stopPropagation();
         updateValue($(this));
       }).attr("data-title", "Double click to edit").tooltip();
@@ -381,7 +387,7 @@ function appendAddresses(err) {
       $("#" + item.address + " .pubkey").text(item.pubkey);
     }
   });
-  $("#addressbook .footable,#receive .footable").trigger("footable_setup_paging");
+  $("#addressbook .footable, #receive .footable").trigger("footable_setup_paging");
 }
 function addressLookup(pair, dataAndEvents, coords) {
   function clear() {
@@ -390,9 +396,8 @@ function addressLookup(pair, dataAndEvents, coords) {
       filter : $("#address-lookup-filter").val()
     });
   }
-  var distanceToUserValue = $((dataAndEvents ? "#receive" : "#addressbook") + " table.footable > tbody").html();
+
   var $table = $("#address-lookup-table");
-  $table.children("tbody").html(distanceToUserValue);
   $table.trigger("footable_initialize");
   $table.data("footable-filter").clearFilter();
   $("#address-lookup-table > tbody tr").selection().on("dblclick", function() {
@@ -418,6 +423,12 @@ function addressLookup(pair, dataAndEvents, coords) {
   if (coords) {
     $("#address-lookup-address-type").val(coords);
     clear();
+  }
+  if (dataAndEvents) {
+    $("tr.addressTypeS", $table).hide();
+  }
+  else {
+    $("tr.addressTypeR", $table).hide();
   }
 }
 function transactionPageInit() {
