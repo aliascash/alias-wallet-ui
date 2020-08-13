@@ -1073,10 +1073,11 @@ img.syncing-spinner  {
 
 #transactions-table > tbody > tr > td.trans-type > img {
     margin-right: 0.5em;
-    margin-top: -3px;
-    margin-bottom: -3px;
+    margin-top: -4px;
+    margin-bottom: -4px;
     float:left;
 }
+
 #transactions-table > tbody > tr > td.trans-type > span {
     display: flex;
 }
@@ -1094,6 +1095,10 @@ img.syncing-spinner  {
     #transactions-table > tbody > tr > td:first-child {
         width: 16px !important;
         padding-left: 2px !important;
+    }
+
+    #transactions-table > tbody > tr > td.trans-type > img {
+        margin-top: 2px;
     }
 
     #transactions-table > tbody > tr > td {
