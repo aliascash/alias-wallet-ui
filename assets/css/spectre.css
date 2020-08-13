@@ -349,7 +349,7 @@ button {
     height: 35px;
 }
 
-select.unit[disabled], select.unitSpectre {
+select.unit[disabled] {
     appearance: none !important;
     border: none !important;
 }
@@ -399,6 +399,16 @@ select.unit[disabled], select.unitSpectre {
     border-radius: 5px;
     -webkit-transition: background .2s linear 0s;
     transition: background .2s linear 0s
+}
+
+.small.hint-text {
+    opacity: 1;
+}
+
+@media (min-width: 768px) {
+    .panel .btn-primary {
+        margin-right: 25px;
+    }
 }
 
 @media (max-width: 700px) {

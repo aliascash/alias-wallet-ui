@@ -8,6 +8,7 @@ function updateValue(button) {
       button.html(names.replace(name, $field.val().trim()));
     }
   }
+  $("#tooltip").remove();
   var names = button.html();
   var name = void 0 !== button.parent("td").data("label") ? button.parent("td").data("label") : void 0 !== button.parent("td").data("value") ? button.parent("td").data("value") : void 0 !== button.data("label") ? button.data("label") : void 0 !== button.data("value") ? button.data("value") : button.text();
   var result = button.parents(".selected").find(".address");
@@ -242,7 +243,7 @@ function addAddress() {
   console.log('addAddress');
   var throughArgs = $("#new-addresstype").val();
   var r20 = $("#new-address-label").val();
-  clientBridge.newAddress(r20, throughArgs, '', false);
+  bridge.newAddress(r20, throughArgs, '', false);
 }
 
 function clearSendAddress() {
@@ -274,7 +275,7 @@ function getAddressLabelResult(result) {
     return $("#new-send-address-error").text('Error: address already in addressbook under "' + g + '"'), void $("#new-send-address").addClass("inputError");
   }
   var camelKey = 0;
-  clientBridge.newAddress(name, camelKey, udataCur, true);
+  bridge.newAddress(name, camelKey, udataCur, true);
 }
 function newAddressResult(success, errorMsg, address, send) {
   if (success) {
@@ -376,8 +377,8 @@ function appendAddresses(err) {
     var param = "S" == item.type;
     var common = "n/a" !== item.pubkey;
     if (0 == revisionCheckbox.length) {
-      $(target + " .footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "'> <td data-toggle=true></td>     <td>           <span class='label2 editable' data-value='" + item.label_value + "'>" + item.label + "</span> </td>                <td class='address'>" + item.address + "</td>                 <td class='pubkey'>" + item.pubkey + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? "Stealth" : "Normal") + "</td></tr>");
-      $("#address-lookup-table.footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "' class='addressType"+ item.type +"'> <td data-toggle=true></td>                 <td><span class='label2' data-value='" + item.label_value + "'>" + item.label + "</span></td>                 <td class='address'>" + item.address + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? "Stealth" : "Normal") + "</td></tr>");
+      $(target + " .footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "'> <td data-toggle=true></td>     <td>           <span class='label2 editable' data-value='" + item.label_value + "'>" + item.label + "</span> </td>                <td class='address'>" + item.address + "</td>                 <td class='pubkey'>" + item.pubkey + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? "Private" : "Public") + "</td></tr>");
+      $("#address-lookup-table.footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "' class='addressType"+ item.type +"'> <td data-toggle=true></td>                 <td><span class='label2' data-value='" + item.label_value + "'>" + item.label + "</span></td>                 <td class='address'>" + item.address + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? "Private" : "Public") + "</td></tr>");
       $(target + " #" + item.address).selection("tr").find(".editable").on("dblclick", function(event) {
         event.stopPropagation();
         updateValue($(this));
@@ -440,8 +441,8 @@ function transactionPageInit() {
   }, {
     name : "Copy&nbsp;transaction&nbsp;ID",
     fun: function () {
-        var trxId = $("#transactions .footable .selected").attr("id");
-        copy(trxId.substring(0, trxId.length-4), "copy");
+      var trxId = $("#transactions .footable .selected").attr("id");
+      copy(trxId.substring(0, trxId.length-4), "copy");
     }
   }, {
     name : "Edit&nbsp;label",
@@ -504,8 +505,8 @@ function transactionPageInit() {
     }
     callback = e.ft.options.sorters[callback];
     filteredTransactions.sort(function(a, b) {
-        var txA = (Array.isArray(a)) ? a[0] : a; 
-        var txB = (Array.isArray(b)) ? b[0] : b; 
+      var txA = (Array.isArray(a)) ? a[0] : a;
+      var txB = (Array.isArray(b)) ? b[0] : b;
       return err ? callback(txA[i], txB[i]) : callback(txB[i], txA[i]);
     });
     delete e.ft.pageInfo.pages;
@@ -524,63 +525,63 @@ function transactionPageInit() {
     }
   }).on("footable_filtering", function(options) {
     if (!!options.clear) {
-        return;
+      return;
     }
     filteredTransactions = [];
     Transactions.forEach(function(tx) {
-        if (Array.isArray(tx)) {
-            var filteredTransactionArray = tx.filter(function(e) {
-                return filterTransaction(e, options.filter);
-            });
-            if (filteredTransactionArray.length === 1) {
-                filteredTransactions.push(filteredTransactionArray[0]);
-            }
-            else if (filteredTransactionArray.length > 0) {
-                filteredTransactions.push(filteredTransactionArray);
-            }
+      if (Array.isArray(tx)) {
+        var filteredTransactionArray = tx.filter(function(e) {
+          return filterTransaction(e, options.filter);
+        });
+        if (filteredTransactionArray.length === 1) {
+          filteredTransactions.push(filteredTransactionArray[0]);
         }
-        else if (filterTransaction(tx, options.filter)) {
-            filteredTransactions.push(tx);
+        else if (filteredTransactionArray.length > 0) {
+          filteredTransactions.push(filteredTransactionArray);
         }
+      }
+      else if (filterTransaction(tx, options.filter)) {
+        filteredTransactions.push(tx);
+      }
     });
   });
 }
 function filterTransaction(tx, filter) {
-    var i;
-    for (i in tx) {
-        if (tx[i].toString().toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
-            return true;
-        }
+  var i;
+  for (i in tx) {
+    if (tx[i].toString().toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
+      return true;
     }
-    return false;
+  }
+  return false;
 }
 function formatTransaction(tx) {
-    if (Array.isArray(tx)) {
-        var tooltipStatus = tx[0].tt;
-        if (tx.length > 1 && tx[0].tt !== tx[tx.length-1].tt) {
-            tooltipStatus = "Tx.No. 1:\n" + tooltipStatus;
-            tooltipStatus += "\n-\n" + "Tx.No. " + tx.length + ":\n" + tx[tx.length-1].tt;
+  if (Array.isArray(tx)) {
+    var tooltipStatus = tx[0].tt;
+    if (tx.length > 1 && tx[0].tt !== tx[tx.length-1].tt) {
+      tooltipStatus = "Tx.No. 1:\n" + tooltipStatus;
+      tooltipStatus += "\n-\n" + "Tx.No. " + tx.length + ":\n" + tx[tx.length-1].tt;
+    }
+    var totalAmount = 0;
+    var narrCons = "";
+    var addresses = new Set();
+    tx.forEach(function(txElement) {
+      addresses.add(txElement.ad_d.trim());
+      if (txElement.n) {
+        if (narrCons) {
+          narrCons += "; "
         }
-        var totalAmount = 0;
-        var narrCons = "";
-        var addresses = new Set();
-        tx.forEach(function(txElement) {
-            addresses.add(txElement.ad_d.trim());
-            if (txElement.n) {
-                if (narrCons) {
-                    narrCons += "; "
-                }
-                narrCons += txElement.n.trim();
-            }
-            totalAmount += txElement.am;
-        });
-        var addrCons = "";
-        addresses.forEach(function(a) {
-            if (addrCons) {
-                addrCons += "; "
-            }
-            addrCons += a;
-        });
+        narrCons += txElement.n.trim();
+      }
+      totalAmount += txElement.am;
+    });
+    var addrCons = "";
+    addresses.forEach(function(a) {
+      if (addrCons) {
+        addrCons += "; "
+      }
+      addrCons += a;
+    });
 
         var o = tx[0];
         return "<tr id='" + o.id + "'"+ ((tx.length === 1) ? " data-title='" + o.tt + "'" : "") + ">"+
@@ -622,7 +623,7 @@ function bindTransactionTableEvents() {
   }).on("dblclick", function(dataAndEvents) {
     $(this).attr("href", "#transaction-info-modal");
     $("#transaction-info-modal").appendTo("body").modal("show");
-      bridge.transactionDetails($(this).attr("id"));
+    bridge.transactionDetails($(this).attr("id"));
     $(this).click();
     $(this).off("click");
     $(this).on("click", function() {
@@ -635,15 +636,15 @@ function bindTransactionTableEvents() {
   }).attr("data-title", "Double click to edit").tooltip();
 }
 function appendTransactions(f, reset) {
-    console.log(f);
+  console.log(f);
   if ("string" == typeof f) {
     if ("[]" == f && !reset) {
       return;
     }
     f = JSON.parse(f.replace(/,\]$/, "]"));
-  } 
+  }
   f.sort(function(a, b) {
-      return a.d = parseInt(a.d), b.d = parseInt(b.d), b.d - a.d;
+    return a.d = parseInt(a.d), b.d = parseInt(b.d), b.d - a.d;
   });
   if (reset) {
     RawTransactions = f;
@@ -660,44 +661,44 @@ function appendTransactions(f, reset) {
 }
 
 function prepareTransactions() {
-    var optGroupTxType = $('select[id=optGroupTxType]').val()
-    var optGroupTxTime = $('select[id=optGroupTxTime]').val()
-    if (optGroupTxTime === "0") {
-        Transactions = RawTransactions;
-    }
-    else {
-        var groups = { };
-        Transactions = [];
-        RawTransactions.forEach(function(tx){
-            if (optGroupTxType === "0" && (tx.t_i < 1 || tx.t_i > 6)) {
-                Transactions.push(tx);
-            }
-            else {
-                var txDate = new Date(tx.d * 1000);
+  var optGroupTxType = $('select[id=optGroupTxType]').val()
+  var optGroupTxTime = $('select[id=optGroupTxTime]').val()
+  if (optGroupTxTime === "0") {
+    Transactions = RawTransactions;
+  }
+  else {
+    var groups = { };
+    Transactions = [];
+    RawTransactions.forEach(function(tx){
+      if (optGroupTxType === "0" && (tx.t_i < 1 || tx.t_i > 6)) {
+        Transactions.push(tx);
+      }
+      else {
+        var txDate = new Date(tx.d * 1000);
 
-                // Generated = 1 / GeneratedDonation = 3 / GeneratedContribution = 5
-                // GeneratedSPECTRE = 2 / GeneratedSPECTREDonation = 4 / GeneratedSPECTREContribution = 6
-                var txType = (tx.s_i !== 9) ? tx.t_i : (tx.t_i === 3 || tx.t_i === 5) ? 1 : (tx.t_i === 4 || tx.t_i === 6) ? 2 : tx.t_i;
-                var key = txType + "-" + tx.s_i;
-                switch (optGroupTxTime) {
-                    case "1":
-                        key = txDate.getDate() + "-" + key;
-                    case "2":
-                        key = txDate.getMonth() + "-" + key;
-                    case "3":
-                        key = txDate.getFullYear() + "-" + key;
-                }           
-                var list = groups[key];
-                if(list) {
-                    list.push(tx);
-                } else {
-                    groups[key] = [tx];
-                    Transactions.push(groups[key]);
-                }
-            }
-        });
-    }
-    $("#transactions .footable").trigger("footable_redraw");
+        // Generated = 1 / GeneratedDonation = 3 / GeneratedContribution = 5
+        // GeneratedSPECTRE = 2 / GeneratedSPECTREDonation = 4 / GeneratedSPECTREContribution = 6
+        var txType = (tx.s_i !== 9) ? tx.t_i : (tx.t_i === 3 || tx.t_i === 5) ? 1 : (tx.t_i === 4 || tx.t_i === 6) ? 2 : tx.t_i;
+        var key = txType + "-" + tx.s_i;
+        switch (optGroupTxTime) {
+          case "1":
+            key = txDate.getDate() + "-" + key;
+          case "2":
+            key = txDate.getMonth() + "-" + key;
+          case "3":
+            key = txDate.getFullYear() + "-" + key;
+        }
+        var list = groups[key];
+        if(list) {
+          list.push(tx);
+        } else {
+          groups[key] = [tx];
+          Transactions.push(groups[key]);
+        }
+      }
+    });
+  }
+  $("#transactions .footable").trigger("footable_redraw");
 }
 
 function getIconTitle(value) {
@@ -1036,40 +1037,40 @@ var overviewPage = {
     this.formatValue("reserved", "reservedSpectre", value, value);
   },
   formatTotalValue : function(value) {
-      var data = ["0","0"];
-      if (void 0 !== value && !isNaN(value)) {
-          data = unit.format(value).split(".");
-      }
-      $("#total-big > span:first-child").text(data[0]);
-      if (unit.type == 3) {
-          $("#total-big .light-red").toggle(false);
-          $("#total-big .cents").toggle(false);
-      }
-      else {
-          $("#total-big .cents").text(data[1]);
-          $("#total-big .light-red").toggle(true);
-          $("#total-big .cents").toggle(true);
-      }
+    var data = ["0","0"];
+    if (void 0 !== value && !isNaN(value)) {
+      data = unit.format(value).split(".");
+    }
+    $("#total-big > span:first-child").text(data[0]);
+    if (unit.type == 3) {
+      $("#total-big .light-red").toggle(false);
+      $("#total-big .cents").toggle(false);
+    }
+    else {
+      $("#total-big .cents").text(data[1]);
+      $("#total-big .light-red").toggle(true);
+      $("#total-big .cents").toggle(true);
+    }
   },
   formatValue : function(target1, target2, value1, value2, showZero) {
-      var target1HTML = this[target1];
-      var target2HTML = this[target2];
+    var target1HTML = this[target1];
+    var target2HTML = this[target2];
 
-      if (0 !== value1 || showZero) {
-        target1HTML.text(unit.format(value1));
-      } else {
-        target1HTML.html("");
-      }
-      if (0 !== value2 || showZero) {
-        target2HTML.text(unit.format(value2));
-      } else {
-        target2HTML.html("");
-      }
-      if (!showZero && 0 === value1 && 0 === value2) {
-        target1HTML.parent("tr").hide();
-      } else {
-        target1HTML.parent("tr").show();
-      }
+    if (0 !== value1 || showZero) {
+      target1HTML.text(unit.format(value1));
+    } else {
+      target1HTML.html("");
+    }
+    if (0 !== value2 || showZero) {
+      target2HTML.text(unit.format(value2));
+    } else {
+      target2HTML.html("");
+    }
+    if (!showZero && 0 === value1 && 0 === value2) {
+      target1HTML.parent("tr").hide();
+    } else {
+      target1HTML.parent("tr").show();
+    }
   },
   recent : function(codeSegments) {
     var i = 0;
@@ -1080,13 +1081,13 @@ var overviewPage = {
   },
   updateTransaction : function(message) {
     var update = function(data) {
-        var label = (8 === data.s_i || 9 === data.s_i) ? "Orphan" :
-                                                       "input" == data.t ? "Received" : "output" == data.t ? "Sent" : "inout" == data.t ? "In-Out" : "staked" == data.t ? "Stake" : "donated" == data.t ? "Donated" : "contributed" == data.t ? "Contributed" : "other" == data.t ? "Other" : data.t;
-        return "<tr><td class='text-left' width='30%' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><center><label style='margin-top:6px;' class='label label-important inline fs-12'>" +
-                label +
-                "</label></center></td><td class='text-left' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><center><a id='" + data.id.substring(data.id.length-20) + "' data-title='" + data.tt +
-                "' href='#' onclick='$(\"#navitems [href=#transactions]\").click();$(\"#" + data.id + "\").click();'> " + unit.format(data.am) + " " + unit.display + " (" + ((data.am_curr === 'PRIVATE') ? "private" : "public") + ")" +
-                " </a></center></td><td width='30%' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><span class='overview_date' data-value='" + data.d + "'><center>" + data.d_s + "</center></span></td></tr>";
+      var label = (8 === data.s_i || 9 === data.s_i) ? "Orphan" :
+          "input" == data.t ? "Received" : "output" == data.t ? "Sent" : "inout" == data.t ? "In-Out" : "staked" == data.t ? "Stake" : "donated" == data.t ? "Donated" : "contributed" == data.t ? "Contributed" : "other" == data.t ? "Other" : data.t;
+      return "<tr><td width='30%' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;' data-title='" + data.tt + "'>" +
+          "<label style='margin-top:6px;' class='label label-important inline fs-12'>" + label + "</label></td>" +
+          "<td style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><a id='" + data.id.substring(data.id.length - 20) + "' href='#' onclick='$(\"#navitems [href=#transactions]\").click();$(\"#" + data.id + " > td.amount\").click();'> " +
+          unit.format(data.am) + " " + unit.display + " (" + ((data.am_curr === 'PRIVATE') ? "private" : "public") + ") </a></td>" +
+          "<td width='30%' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><span class='overview_date' data-value='" + data.d + "'>" + data.d_s + "</span></td></tr>";
     };
     var row = update(message);
     var idfirst = message.id.substring(message.id.length-20);
@@ -1113,21 +1114,21 @@ var overviewPage = {
       }
     }
     else {
-        existingRow.replaceWith(row);
+      existingRow.replaceWith(row);
     }
   },
   clientInfo : function() {
     $("#version").text(bridge.info.build.replace(/\-[\w\d]*$/, ""));
     $("#clientinfo").attr("data-title", "Build Desc: " + bridge.info.build + "\nBuild Date: " + bridge.info.date).tooltip();
   },
-  encryptionStatusChanged : function(dataAndEvents) {
-    switch(dataAndEvents) {
+  encryptionStatusChanged : function(status) {
+    switch(status) {
       case 0:
-      ;
+        ;
       case 1:
-      ;
+        ;
       case 2:
-      ;
+        ;
     }
   }
 };
@@ -1135,75 +1136,80 @@ var optionsPage = {
   init : function() {
   },
   connectSignals : function() {
-      bridge.getOptionResult.connect(this.getOptionResult);
+    bridge.getOptionResult.connect(this.getOptionResult);
   },
   getOptionResult : function (result) {
-      function update($el) {
-        $el = $(this);
-        var val = $el.prop("checked");
-        var codeSegments = $el.data("linked");
-        if (codeSegments) {
-          codeSegments = codeSegments.split(" ");
-          var i = 0;
-          for (;i < codeSegments.length;i++) {
-            var $wrapper = $("#" + codeSegments[i] + ",[for=" + codeSegments[i] + "]").attr("disabled", !val);
-            if (val) {
-              $wrapper.removeClass("disabled");
-            } else {
-              $wrapper.addClass("disabled");
-            }
-          }
-        }
-      }
-      var list = result;
-      console.log('result');
-      console.log(result);
-      $("#options-ok,#options-apply").addClass("disabled");
-      var name;
-      for (name in list) {
-        var el = $("#opt" + name);
-        var value = list[name];
-        var data = list["opt" + name];
-        if (0 != el.length) {
-          if (data) {
-            el.html("");
-            var type;
-            for (type in data) {
-              if ("string" == typeof type && ($.isArray(data[type]) && !$.isNumeric(type))) {
-                el.append("<optgroup label='" + type[0].toUpperCase() + type.slice(1) + "'>");
-                var x = 0;
-                for (;x < data[type].length;x++) {
-                  el.append("<option>" + data[type][x] + "</option>");
-                }
-              } else {
-                el.append("<option" + ($.isNumeric(type) ? "" : " value='" + type + "'") + ">" + data[type] + "</option>");
-              }
-            }
-          }
-          if (el.is(":checkbox")) {
-            el.prop("checked", value === true || "true" === value);
-            el.off("change");
-            el.on("change", update);
-            el.change();
+    function update($el) {
+      $el = $(this);
+      var val = $el.prop("checked");
+      var codeSegments = $el.data("linked");
+      if (codeSegments) {
+        codeSegments = codeSegments.split(" ");
+        var i = 0;
+        for (;i < codeSegments.length;i++) {
+          var $wrapper = $("#" + codeSegments[i] + ",[for=" + codeSegments[i] + "]").attr("disabled", !val);
+          if (val) {
+            $wrapper.removeClass("disabled");
           } else {
-            if (el.is("select[multiple]") && "*" === value) {
-              el.find("option").attr("selected", true);
-            } else {
-              el.val(value);
-            }
-          }
-          el.one("change", function() {
-            $("#options-ok,#options-apply").removeClass("disabled");
-          });
-        } else {
-          if (name.indexOf("opt") == -1) {
-            console.log("Option element not available for %s", name);
+            $wrapper.addClass("disabled");
           }
         }
       }
+    }
+    bridge.info.options = result;
+    var list = result;
+    console.log('result');
+    console.log(result);
+    $("#options-ok,#options-apply").addClass("disabled");
+    var name;
+    for (name in list) {
+      var el = $("#opt" + name);
+      var value = list[name];
+      var data = list["opt" + name];
+      if (0 != el.length) {
+        if (data) {
+          el.html("");
+          var type;
+          for (type in data) {
+            if ("string" == typeof type && ($.isArray(data[type]) && !$.isNumeric(type))) {
+              el.append("<optgroup label='" + type[0].toUpperCase() + type.slice(1) + "'>");
+              var x = 0;
+              for (;x < data[type].length;x++) {
+                el.append("<option>" + data[type][x] + "</option>");
+              }
+            } else {
+              el.append("<option" + ($.isNumeric(type) ? "" : " value='" + type + "'") + ">" + data[type] + "</option>");
+            }
+          }
+        }
+        if (el.is(":checkbox")) {
+          el.prop("checked", value === true || "true" === value);
+          el.off("change");
+          el.on("change", update);
+          el.change();
+        } else {
+          if (el.is("select[multiple]") && ("*" === value || (Array.isArray(value) && value.length > 0 && value[0] === "*"))) {
+            el.find("option").attr("selected", true);
+          } else {
+            if (el.hasClass('amount')) {
+              el.data('value', value);
+              value = unit.format(value, 0); // convert amount from satoshis (note: assumes unit is always 0)
+            }
+            el.val(value);
+          }
+        }
+        el.one("change", function() {
+          $("#options-ok,#options-apply").removeClass("disabled");
+        });
+      } else {
+        if (name.indexOf("opt") == -1) {
+          console.log("Option element not available for %s", name);
+        }
+      }
+    }
   },
   update : function() {
-      bridge.getOptions();
+    bridge.getOptions();
   },
   save : function() {
     var o = bridge.info.options;
@@ -1227,6 +1233,10 @@ var optionsPage = {
             }
           } else {
             value = $field.val();
+            if ($field.hasClass('amount')) {
+              // convert amount to satoshis (note: assumes unit is always 0)
+              value = unit.parse(value, 0);
+            }
           }
         }
         if (n != value) {
@@ -1237,7 +1247,7 @@ var optionsPage = {
       }
     }
     if (!$.isEmptyObject(cache)) {
-        console.log("calling bridge.userAction.optionsChanged")
+      console.log("calling bridge.userAction.optionsChanged")
       bridge.userAction({
         optionsChanged : cache
       });
@@ -1246,7 +1256,7 @@ var optionsPage = {
         changeTxnType();
       }
     } else {
-        console.log("options cache is empty")
+      console.log("options cache is empty")
     }
   }
 };
@@ -1257,10 +1267,10 @@ var current_key = "";
 
 var chainDataPage = {
   anonOutputs : {},
-    connectSignals: function() {
-        console.log("chainDataPage.connectSignals");
-        bridge.listAnonOutputsResult.connect(this.listAnonOutputsResult);
-    },
+  connectSignals: function() {
+    console.log("chainDataPage.connectSignals");
+    bridge.listAnonOutputsResult.connect(this.listAnonOutputsResult);
+  },
   init : function() {
     $("#show-own-outputs,#show-all-outputs").on("click", function(ev) {
       $(ev.target).hide().siblings("a").show();
@@ -1277,7 +1287,7 @@ var chainDataPage = {
     });
   },
   updateAnonOutputs : function() {
-      bridge.listAnonOutputs();
+    bridge.listAnonOutputs();
   },
   /*Available fields in anonOutputs:
   owned_mature
@@ -1292,79 +1302,79 @@ var chainDataPage = {
   system_mixins_mature
   system_mixins_staking */
   listAnonOutputsResult : function(result) {
-      chainDataPage.anonOutputs = result;
-      var tagList = $("#chaindata .footable tbody");
-      tagList.html("");
-      for (value in chainDataPage.anonOutputs) {
-        var state = chainDataPage.anonOutputs[value];
-        tagList.append("<tr>                    <td data-value=" + value + ">" + state.value_s + "</td>                    <td>"
+    chainDataPage.anonOutputs = result;
+    var tagList = $("#chaindata .footable tbody");
+    tagList.html("");
+    for (value in chainDataPage.anonOutputs) {
+      var state = chainDataPage.anonOutputs[value];
+      tagList.append("<tr>  <td data-toggle=true></td>                  <td data-value=" + value + ">" + state.value_s + "</td>                    <td>"
           + state.owned_outputs + (state.owned_outputs == state.owned_mature ? "" : " (<b>" + (state.owned_outputs - state.owned_mature) + "</b>)") + "</td>                    <td>"
           + state.system_unspent + (state.system_unspent == state.system_unspent_mature ? "" : " (<b>" + (state.system_unspent - state.system_unspent_mature)+ "</b>)") + "</td>                    <td>"
           + state.system_mixins + (state.system_mixins == state.system_mixins_mature ? "" : " (<b>" + (state.system_mixins - state.system_mixins_mature)+ "</b>)") + "</td>                    <td>"
           + state.system_outputs + (state.system_compromised == 0 ? "" : " (<b>" + state.system_compromised + "</b>)") + "</td>                    <td>"
           + state.least_depth + "</td>                </tr>");
-      }
-      $("#chaindata .footable").trigger("footable_initialize");
+    }
+    $("#chaindata .footable").trigger("footable_initialize");
   }
 };
 var blockExplorerPage = {
   blockHeader : {},
 
-    connectSignals: function() {
-        console.log("blockExplorerPage.connectSignals");
-        bridge.findBlockResult.connect(this.findBlockResult);
-        bridge.listLatestBlocksResult.connect(this.listLatestBlocksResult);
-        bridge.listTransactionsForBlockResult.connect(this.listTransactionsForBlockResult);
-        bridge.txnDetailsResult.connect(this.txnDetailsResult);
-        bridge.blockDetailsResult.connect(this.blockDetailsResult);
-    },
+  connectSignals: function() {
+    console.log("blockExplorerPage.connectSignals");
+    bridge.findBlockResult.connect(this.findBlockResult);
+    bridge.listLatestBlocksResult.connect(this.listLatestBlocksResult);
+    bridge.listTransactionsForBlockResult.connect(this.listTransactionsForBlockResult);
+    bridge.txnDetailsResult.connect(this.txnDetailsResult);
+    bridge.blockDetailsResult.connect(this.blockDetailsResult);
+  },
 
   findBlock : function(value) {
-      console.log("findBlock : function(value)");
-      console.log(value);
+    console.log("findBlock : function(value)");
+    console.log(value);
 
     if ("" === value || null === value) {
       blockExplorerPage.updateLatestBlocks();
     } else {
-        bridge.findBlock(value);
-        //will callback findBlockResult
+      bridge.findBlock(value);
+      //will callback findBlockResult
     }
   },
 
-    findBlockResult : function(result) {
-        console.log("findBlockResult : function(result)");
-        blockExplorerPage.foundBlock = result;
-        if (blockExplorerPage.foundBlock, "" !== blockExplorerPage.foundBlock.error_msg) {
-          return $("#latest-blocks-table  > tbody").html(""), $("#block-txs-table > tbody").html(""), $("#block-txs-table").addClass("none"), alert(blockExplorerPage.foundBlock.error_msg), false;
-        }
-        var tagList = $("#latest-blocks-table  > tbody");
-        tagList.html("");
-        var $title = $("#block-txs-table  > tbody");
-        $title.html("");
-        $("#block-txs-table").addClass("none");
-        tagList.append("<tr data-value=" + blockExplorerPage.foundBlock.block_hash + ">                                     <td>" + blockExplorerPage.foundBlock.block_hash + "</td>                                     <td>" + blockExplorerPage.foundBlock.block_height + "</td>                                     <td>" + blockExplorerPage.foundBlock.block_timestamp + "</td>                                     <td>" + blockExplorerPage.foundBlock.block_transactions + "</td>                        </tr>");
-        blockExplorerPage.prepareBlockTable();
-    },
+  findBlockResult : function(result) {
+    console.log("findBlockResult : function(result)");
+    blockExplorerPage.foundBlock = result;
+    if (blockExplorerPage.foundBlock, "" !== blockExplorerPage.foundBlock.error_msg) {
+      return $("#latest-blocks-table  > tbody").html(""), $("#block-txs-table > tbody").html(""), $("#block-txs-table").addClass("none"), alert(blockExplorerPage.foundBlock.error_msg), false;
+    }
+    var tagList = $("#latest-blocks-table  > tbody");
+    tagList.html("");
+    var $title = $("#block-txs-table  > tbody");
+    $title.html("");
+    $("#block-txs-table").addClass("none");
+    tagList.append("<tr data-value=" + blockExplorerPage.foundBlock.block_hash + ">                                     <td>" + blockExplorerPage.foundBlock.block_hash + "</td>                                     <td>" + blockExplorerPage.foundBlock.block_height + "</td>                                     <td>" + blockExplorerPage.foundBlock.block_timestamp + "</td>                                     <td>" + blockExplorerPage.foundBlock.block_transactions + "</td>                        </tr>");
+    blockExplorerPage.prepareBlockTable();
+  },
 
   updateLatestBlocks : function() {
     blockExplorerPage.latestBlocks = bridge.listLatestBlocks();
   },
 
-    listLatestBlocksResult : function(result) {
-        console.log("function listLatestBlocksResult")
-        console.log(result)
-        blockExplorerPage.latestBlocks = result;
-        var $title = $("#block-txs-table  > tbody");
-        $title.html("");
-        $("#block-txs-table").addClass("none");
-        var tagList = $("#latest-blocks-table  > tbody");
-        tagList.html("");
-        for (value in blockExplorerPage.latestBlocks) {
-          var cachedObj = blockExplorerPage.latestBlocks[value];
-          tagList.append("<tr data-value=" + cachedObj.block_hash + ">                         <td>" + cachedObj.block_hash + "</td>                         <td>" + cachedObj.block_height + "</td>                         <td>" + cachedObj.block_timestamp + "</td>                         <td>" + cachedObj.block_transactions + "</td>                         </tr>");
-        }
-        blockExplorerPage.prepareBlockTable();
-    },
+  listLatestBlocksResult : function(result) {
+    console.log("function listLatestBlocksResult")
+    console.log(result)
+    blockExplorerPage.latestBlocks = result;
+    var $title = $("#block-txs-table  > tbody");
+    $title.html("");
+    $("#block-txs-table").addClass("none");
+    var tagList = $("#latest-blocks-table  > tbody");
+    tagList.html("");
+    for (value in blockExplorerPage.latestBlocks) {
+      var cachedObj = blockExplorerPage.latestBlocks[value];
+      tagList.append("<tr data-value=" + cachedObj.block_hash + ">                         <td>" + cachedObj.block_hash + "</td>                         <td>" + cachedObj.block_height + "</td>                         <td>" + cachedObj.block_timestamp + "</td>                         <td>" + cachedObj.block_transactions + "</td>                         </tr>");
+    }
+    blockExplorerPage.prepareBlockTable();
+  },
 
   prepareBlockTable : function() {
     $("#latest-blocks-table  > tbody tr").selection().on("click", function() {
@@ -1376,90 +1386,90 @@ var blockExplorerPage = {
     }).find(".editable");
   },
 
-     listTransactionsForBlockResult : function(blkHash, result) {
-        blockExplorerPage.blkTxns = result;
-        var tagList = $("#block-txs-table  > tbody");
-        tagList.html("");
-        for (value in blockExplorerPage.blkTxns) {
-          var cachedObj = blockExplorerPage.blkTxns[value];
-          tagList.append("<tr data-value=" + cachedObj.transaction_hash + ">                                    <td>" + cachedObj.transaction_hash + "</td>                                    <td>" + cachedObj.transaction_value + "</td>                                    </tr>");
-        }
-        $("#block-txs-table").removeClass("none");
-        $("#block-txs-table > tbody tr").selection().on("dblclick", function(dataAndEvents) {
-          $("#blkexp-txn-modal").appendTo("body").modal("show");
-          selectedTxn = bridge.txnDetails(blkHash, $(this).attr("data-value").trim());
-        }).find(".editable");
-    },
-
-    txnDetailsResult : function(result) {
-        selectedTxn = result;
-        if ("" == selectedTxn.error_msg) {
-          $("#txn-hash").html(selectedTxn.transaction_hash);
-          $("#txn-size").html(selectedTxn.transaction_size);
-          $("#txn-rcvtime").html(selectedTxn.transaction_rcv_time);
-          $("#txn-minetime").html(selectedTxn.transaction_mined_time);
-          $("#txn-blkhash").html(selectedTxn.transaction_block_hash);
-          $("#txn-reward").html(selectedTxn.transaction_reward);
-          $("#txn-confirmations").html(selectedTxn.transaction_confirmations);
-          $("#txn-value").html(selectedTxn.transaction_value);
-          $("#error-msg").html(selectedTxn.error_msg);
-          if (selectedTxn.transaction_reward > 0) {
-            $("#lbl-reward-or-fee").html("<strong>Reward</strong>");
-            $("#txn-reward").html(selectedTxn.transaction_reward);
-          } else {
-            $("#lbl-reward-or-fee").html("<strong>Fee</strong>");
-            $("#txn-reward").html(selectedTxn.transaction_reward * -1);
-          }
-        }
-        var tagList = $("#txn-detail-inputs > tbody");
-        tagList.html("");
-        for (value in selectedTxn.transaction_inputs) {
-          var cachedObj = selectedTxn.transaction_inputs[value];
-          tagList.append("<tr data-value=" + cachedObj.input_source_address + ">                                                   <td>" + cachedObj.input_source_address + "</td>                                                   <td style='text-align:right'>" + cachedObj.input_value + "</td>                                                </tr>");
-        }
-        var $options = $("#txn-detail-outputs > tbody");
-        $options.html("");
-        for (value in selectedTxn.transaction_outputs) {
-          var style = selectedTxn.transaction_outputs[value];
-          $options.append("<tr data-value=" + style.output_source_address + ">                                                 <td>" + style.output_source_address + "</td>                                                 <td style='text-align:right'>" + style.output_value + "</td>                                            </tr>");
-        }
-    },
-
-    blockDetailsResult : function(result) {
-        selectedBlock = result;
-        if (selectedBlock) {
-          $("#blk-hash").html(selectedBlock.block_hash);
-          $("#blk-numtx").html(selectedBlock.block_transactions);
-          $("#blk-height").html(selectedBlock.block_height);
-          $("#blk-type").html(selectedBlock.block_type);
-          $("#blk-reward").html(selectedBlock.block_reward);
-          $("#blk-timestamp").html(selectedBlock.block_timestamp);
-          $("#blk-merkleroot").html(selectedBlock.block_merkle_root);
-          $("#blk-prevblock").html(selectedBlock.block_prev_block);
-          $("#blk-nextblock").html(selectedBlock.block_next_block);
-          $("#blk-difficulty").html(selectedBlock.block_difficulty);
-          $("#blk-bits").html(selectedBlock.block_bits);
-          $("#blk-size").html(selectedBlock.block_size);
-          $("#blk-version").html(selectedBlock.block_version);
-          $("#blk-nonce").html(selectedBlock.block_nonce);
-        }
-        $(this).click().off("click").selection();
+  listTransactionsForBlockResult : function(blkHash, result) {
+    blockExplorerPage.blkTxns = result;
+    var tagList = $("#block-txs-table  > tbody");
+    tagList.html("");
+    for (value in blockExplorerPage.blkTxns) {
+      var cachedObj = blockExplorerPage.blkTxns[value];
+      tagList.append("<tr data-value=" + cachedObj.transaction_hash + ">                                    <td>" + cachedObj.transaction_hash + "</td>                                    <td>" + cachedObj.transaction_value + "</td>                                    </tr>");
     }
+    $("#block-txs-table").removeClass("none");
+    $("#block-txs-table > tbody tr").selection().on("dblclick", function(dataAndEvents) {
+      $("#blkexp-txn-modal").appendTo("body").modal("show");
+      selectedTxn = bridge.txnDetails(blkHash, $(this).attr("data-value").trim());
+    }).find(".editable");
+  },
+
+  txnDetailsResult : function(result) {
+    selectedTxn = result;
+    if ("" == selectedTxn.error_msg) {
+      $("#txn-hash").html(selectedTxn.transaction_hash);
+      $("#txn-size").html(selectedTxn.transaction_size);
+      $("#txn-rcvtime").html(selectedTxn.transaction_rcv_time);
+      $("#txn-minetime").html(selectedTxn.transaction_mined_time);
+      $("#txn-blkhash").html(selectedTxn.transaction_block_hash);
+      $("#txn-reward").html(selectedTxn.transaction_reward);
+      $("#txn-confirmations").html(selectedTxn.transaction_confirmations);
+      $("#txn-value").html(selectedTxn.transaction_value);
+      $("#error-msg").html(selectedTxn.error_msg);
+      if (selectedTxn.transaction_reward > 0) {
+        $("#lbl-reward-or-fee").html("<strong>Reward</strong>");
+        $("#txn-reward").html(selectedTxn.transaction_reward);
+      } else {
+        $("#lbl-reward-or-fee").html("<strong>Fee</strong>");
+        $("#txn-reward").html(selectedTxn.transaction_reward * -1);
+      }
+    }
+    var tagList = $("#txn-detail-inputs > tbody");
+    tagList.html("");
+    for (value in selectedTxn.transaction_inputs) {
+      var cachedObj = selectedTxn.transaction_inputs[value];
+      tagList.append("<tr data-value=" + cachedObj.input_source_address + ">                                                   <td>" + cachedObj.input_source_address + "</td>                                                   <td style='text-align:right'>" + cachedObj.input_value + "</td>                                                </tr>");
+    }
+    var $options = $("#txn-detail-outputs > tbody");
+    $options.html("");
+    for (value in selectedTxn.transaction_outputs) {
+      var style = selectedTxn.transaction_outputs[value];
+      $options.append("<tr data-value=" + style.output_source_address + ">                                                 <td>" + style.output_source_address + "</td>                                                 <td style='text-align:right'>" + style.output_value + "</td>                                            </tr>");
+    }
+  },
+
+  blockDetailsResult : function(result) {
+    selectedBlock = result;
+    if (selectedBlock) {
+      $("#blk-hash").html(selectedBlock.block_hash);
+      $("#blk-numtx").html(selectedBlock.block_transactions);
+      $("#blk-height").html(selectedBlock.block_height);
+      $("#blk-type").html(selectedBlock.block_type);
+      $("#blk-reward").html(selectedBlock.block_reward);
+      $("#blk-timestamp").html(selectedBlock.block_timestamp);
+      $("#blk-merkleroot").html(selectedBlock.block_merkle_root);
+      $("#blk-prevblock").html(selectedBlock.block_prev_block);
+      $("#blk-nextblock").html(selectedBlock.block_next_block);
+      $("#blk-difficulty").html(selectedBlock.block_difficulty);
+      $("#blk-bits").html(selectedBlock.block_bits);
+      $("#blk-size").html(selectedBlock.block_size);
+      $("#blk-version").html(selectedBlock.block_version);
+      $("#blk-nonce").html(selectedBlock.block_nonce);
+    }
+    $(this).click().off("click").selection();
+  }
 
 };
 var walletManagementPage = {
 
-    connectSignals : function() {
-        console.log("walletManagementPage.connectSignals");
-        bridge.importFromMnemonicResult.connect(this.importFromMnemonicResult);
-        bridge.getNewMnemonicResult.connect(this.getNewMnemonicResult);
-        bridge.extKeyAccListResult.connect(this.extKeyAccListResult);
-        bridge.extKeyListResult.connect(this.extKeyListResult);
+  connectSignals : function() {
+    console.log("walletManagementPage.connectSignals");
+    bridge.importFromMnemonicResult.connect(this.importFromMnemonicResult);
+    bridge.getNewMnemonicResult.connect(this.getNewMnemonicResult);
+    bridge.extKeyAccListResult.connect(this.extKeyAccListResult);
+    bridge.extKeyListResult.connect(this.extKeyListResult);
 //        bridge.extKeyImportResult.connect(this.extKeyImportResult);
-        bridge.extKeySetDefaultResult.connect(this.extKeySetDefaultResult);
-        bridge.extKeySetMasterResult.connect(this.extKeySetMasterResult);
-        bridge.extKeySetActiveResult.connect(this.extKeySetActiveResult);
-    },
+    bridge.extKeySetDefaultResult.connect(this.extKeySetDefaultResult);
+    bridge.extKeySetMasterResult.connect(this.extKeySetMasterResult);
+    bridge.extKeySetActiveResult.connect(this.extKeySetActiveResult);
+  },
 
   init : function() {
     setupWizard("new-key-wizard");
@@ -1469,16 +1479,16 @@ var walletManagementPage = {
   newMnemonic : function() {
     bridge.getNewMnemonic($("#new-account-passphrase").val(), $("#new-account-language").val());
   },
-    getNewMnemonicResult : function(result) {
-        var c = result;
-        var g = c.error_msg;
-        var i = c.mnemonic;
-        if ("" !== g) {
-          alert(g);
-        } else {
-          $("#new-key-mnemonic").val(i);
-        }
-    },
+  getNewMnemonicResult : function(result) {
+    var c = result;
+    var g = c.error_msg;
+    var i = c.mnemonic;
+    if ("" !== g) {
+      alert(g);
+    } else {
+      $("#new-key-mnemonic").val(i);
+    }
+  },
   compareMnemonics : function() {
     var i = $("#new-key-mnemonic").val().trim();
     var last = $("#validate-key-mnemonic").val().trim();
@@ -1497,15 +1507,15 @@ var walletManagementPage = {
     bridge.extKeyAccList();
   },
   extKeyAccListResult : function(result) {
-      walletManagementPage.accountList = result;
-      var tagList = $("#extkey-account-table  > tbody");
-      tagList.html("");
-      for (value in walletManagementPage.accountList) {
-        var result = walletManagementPage.accountList[value];
-        tagList.append("<tr data-value=" + result.id + " active-flag=" + result.active + ">                         <td>" + result.id + "</td>                         <td>" + result.label + "</td>                         <td>" + result.created_at + '</td>                         <td class="center-margin"><i style="font-size: 1.2em; margin: auto;" ' + ("true" == result.active ? 'class="fa fa-circle green-circle"' : 'class="fa fa-circle red-circle"') + ' ></i></td>                         <td style="font-size: 1em; margin-bottom: 6px;">' +
-        (void 0 !== result.default_account ? "<i class='center fa fa-check'></i>" : "") + "</td>                         </tr>");
-      }
-      walletManagementPage.prepareAccountTable();
+    walletManagementPage.accountList = result;
+    var tagList = $("#extkey-account-table  > tbody");
+    tagList.html("");
+    for (value in walletManagementPage.accountList) {
+      var result = walletManagementPage.accountList[value];
+      tagList.append("<tr data-value=" + result.id + " active-flag=" + result.active + ">                         <td>" + result.id + "</td>                         <td>" + result.label + "</td>                         <td>" + result.created_at + '</td>                         <td class="center-margin"><i style="font-size: 1.2em; margin: auto;" ' + ("true" == result.active ? 'class="fa fa-circle green-circle"' : 'class="fa fa-circle red-circle"') + ' ></i></td>                         <td style="font-size: 1em; margin-bottom: 6px;">' +
+          (void 0 !== result.default_account ? "<i class='center fa fa-check'></i>" : "") + "</td>                         </tr>");
+    }
+    walletManagementPage.prepareAccountTable();
   },
   prepareKeyTable : function() {
     $("#extkey-table  > tbody tr").selection().on("click", function() {
@@ -1514,26 +1524,26 @@ var walletManagementPage = {
     });
   },
   updateKeyList : function() {
-      bridge.extKeyList();
+    bridge.extKeyList();
   },
   extKeyListResult : function(result) {
-      walletManagementPage.keyList = result;
-      var tagList = $("#extkey-table  > tbody");
-      tagList.html("");
-      for (value in walletManagementPage.keyList) {
-        var node = walletManagementPage.keyList[value];
-        tagList.append("<tr data-value=" + node.id + " active-flag=" + node.active + ">                         <td>" + node.id + "</td>                         <td>" + node.label + "</td>                         <td>" + node.path + '</td>                         <td><i style="font-size: 1.2em; margin: auto;" ' + ("true" == node.active ? 'class="fa fa-circle green-circle"' : 'class="fa fa-circle red-circle"') + ' ></i></td>                         <td style="font-size: 1em; margin-bottom: 6px;">' +
-        (void 0 !== node.current_master ? "<i class='center fa fa-check'></i>" : "") + "</td>                         </tr>");
-      }
-      walletManagementPage.prepareKeyTable();
+    walletManagementPage.keyList = result;
+    var tagList = $("#extkey-table  > tbody");
+    tagList.html("");
+    for (value in walletManagementPage.keyList) {
+      var node = walletManagementPage.keyList[value];
+      tagList.append("<tr data-value=" + node.id + " active-flag=" + node.active + ">                         <td>" + node.id + "</td>                         <td>" + node.label + "</td>                         <td>" + node.path + '</td>                         <td><i style="font-size: 1.2em; margin: auto;" ' + ("true" == node.active ? 'class="fa fa-circle green-circle"' : 'class="fa fa-circle red-circle"') + ' ></i></td>                         <td style="font-size: 1em; margin-bottom: 6px;">' +
+          (void 0 !== node.current_master ? "<i class='center fa fa-check'></i>" : "") + "</td>                         </tr>");
+    }
+    walletManagementPage.prepareKeyTable();
   },
   newKey : function() {
     bridge.importFromMnemonic($("#new-key-mnemonic").val().trim(), $("#new-account-passphrase").val().trim(), $("#new-account-label").val().trim(), $("#new-account-bip44").prop("checked"), 0);
   },
   importFromMnemonicResult : function(result) {
-      if (result, "" !== result.error_msg) {
-        return alert(result.error_msg), false;
-      }
+    if (result, "" !== result.error_msg) {
+      return alert(result.error_msg), false;
+    }
   },
   recoverKey : function() {
     bridge.importFromMnemonic($("#recover-key-mnemonic").val().trim(), $("#recover-passphrase").val().trim(), $("#recover-account-label").val().trim(), $("#recover-bip44").prop("checked"), 1443657600);
@@ -1558,7 +1568,7 @@ var walletManagementPage = {
     var add = $("#extkey-account-table tr.selected");
     var $target = $("#extkey-table tr.selected");
     return add.length || $target.length ? (add.length ? (selected = add.attr("data-value").trim(), active = add.attr("active-flag").trim(), e = true) : (selected = $target.attr("data-value").trim(), active = $target.attr("active-flag").trim()), void 0 === selected || "" === selected ? (alert("Please select an account or key to change the active status."), false) : (result = bridge.extKeySetActive(selected, active), "" !== result.error_msg ? (alert(result.error_msg), false) : void(e ? walletManagementPage.updateAccountList() :
-    walletManagementPage.updateKeyList()))) : (alert("Please select an account or key to change the active status."), false);
+        walletManagementPage.updateKeyList()))) : (alert("Please select an account or key to change the active status."), false);
   },
   extKeySetActiveResult : function(result) {
 
@@ -1566,11 +1576,15 @@ var walletManagementPage = {
 };
 
 function resizeTableBodies() {
-  var newHeightTransactionTable = $(window).height() - $('#transactions-table > tbody').offset().top - $('#transactions-table > tfoot').height() - 21;
-  $("#transactions-table > tbody").height(newHeightTransactionTable);  
+  var newHeightTransactionTable = ($(window).height() < 480 || $(window).width() < 480) ?
+      ($(window).height() - $("#transactions nav.navbar").height() - $('#transactions-table > thead').height() - $('#transactions-table > tfoot').height() - 10 ) :
+      ($(window).height() - $('#transactions-table > tbody').offset().top - $('#transactions-table > tfoot').height() - 10);
+  $("#transactions-table > tbody").height(newHeightTransactionTable);
 
-  var newHeighChaindataTable = $(window).height() - $('#chaindata-table > tbody').offset().top - $('#transactions-table > tfoot').height() - 21;
-  $("#chaindata-table > tbody").height(newHeighChaindataTable);   
+  var newHeighChaindataTable =  ($(window).height() < 480 || $(window).width() < 480) ?
+      ($(window).height() - $("#chaindata nav.navbar").height() - $('#chaindata-table > thead').height() - $('#chaindata-table > tfoot').height() - 10 ) :
+      ($(window).height() - $('#chaindata-table > tbody').offset().top - $('#chaindata-table > tfoot').height() - 10);
+  $("#chaindata-table > tbody").height(newHeighChaindataTable);
 }
 
 window.onload = function() {
@@ -1606,7 +1620,7 @@ window.onload = function() {
     if (window.innerWidth > breakpoint) {
       $("#layout").removeClass("active");
     }
-    resizeTableBodies();
+    setTimeout(resizeTableBodies, 50);
   };
 
   // Enhance sidebar on link click behavior
