@@ -585,9 +585,9 @@ function formatTransaction(tx) {
 
         var o = tx[0];
         return "<tr id='" + o.id + "'"+ ((tx.length === 1) ? " data-title='" + o.tt + "'" : "") + ">"+
-            "<td class='trans-status' data-value='" + o.c + "'" + ((tx.length > 1) ? " data-title='" + tooltipStatus + "'" : "") + "><i class='fa fa-lg " + o.s + "'></td>"+
-            "<td data-value='" + o.d + "'" + ((tx.length > 1) ? " data-title='" + tx[0].d_s + " - "+ tx[tx.length-1].d_s + "'" : "") + ">" + o.d_s + "</td>"+
-            "<td class='amount' style='color:" + o.am_c + ";' data-value='" + unit.format(totalAmount) + "'>" + unit.format(totalAmount) + "</td>"+
+            "<td class='trans-status' data-value='" + o.c + "'" + ((tx.length > 1) ? " data-title='" + tooltipStatus + "'" : "") + "><i class='fa fa-2x " + o.s + "'></td>"+
+            "<td class='trans-date' data-value='" + o.d + "'" + ((tx.length > 1) ? " data-title='" + tx[0].d_s + " - "+ tx[tx.length-1].d_s + "'" : "") + ">" + o.d_s + "</td>"+
+            "<td class='amount' style='color:" + o.am_c + ";' data-value='" + unit.format(totalAmount) + "'>" + unit.format(totalAmount) + " " + unit.display + "</td>"+
             "<td class='trans-type'" + ((tx.length > 1) ? " data-title='" + tooltipStatus + "'" : "") + "><img height='22px' width='22px' src='assets/svg/tx_" + o.t + ".svg' /><span>" + o.t_l + " <b>&nbsp;(x" + tx.length + ")</b></span></td>"+
             "<td class='address' style='color:" + o.a_c + ";' data-value='" + addrCons + "' data-label='" + addrCons + "' data-title='" + addrCons + "' ><span>" + ((addrCons.length > 26) ? (addrCons.substr(0, 26) + "...") : addrCons) + "</span></td>"+
             "<td class='trans-nar' data-title='" + narrCons + "'>" + narrCons + "</td>" +
@@ -596,9 +596,9 @@ function formatTransaction(tx) {
     else {
         var o = tx;
         return "<tr id='" + o.id + "'>"+
-            "<td class='trans-status' data-value='" + o.c + "' data-title='" + o.tt + "'><i class='fa fa-lg " + o.s + "'></td>"+
-            "<td data-value='" + o.d + "'>" + o.d_s + "</td>"+
-            "<td class='amount' style='color:" + o.am_c + ";' data-value='" + o.am_d + "'>" + o.am_d + "</td>"+
+            "<td class='trans-status' data-value='" + o.c + "' data-title='" + o.tt + "'><i class='fa fa-2x " + o.s + "'></td>"+
+            "<td class='trans-date' data-value='" + o.d + "'>" + o.d_s + "</td>"+
+            "<td class='amount' style='color:" + o.am_c + ";' data-value='" + o.am_d + "'>" + o.am_d + " " + unit.display + "</td>"+
             "<td class='trans-type'><img height='22px' width='22px' src='assets/svg/tx_" + o.t + ".svg' /><span>" + o.t_l + "</span></td>"+
             "<td class='address' style='color:" + o.a_c + ";' data-value='" + o.ad + "' data-label='" + o.ad_l + "'><span "+ ( o.ad ? "class='editable'" : "") +">" + ((o.ad_d.length > 26) ? (o.ad_d.substr(0, 26) + "...") : o.ad_d) + "</span></td>"+
             "<td class='trans-nar'>" + o.n + "</td>" +

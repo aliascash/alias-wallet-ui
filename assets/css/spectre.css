@@ -1064,24 +1064,44 @@ img.syncing-spinner  {
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
-#transactions-table > thead > tr > th:first-child {
-    width:20px !important;
+#transactions-table > thead > tr > th.trans-status {
+    width:28px !important;
     padding-left:5px !important;
 }
-
-#transactions-table > tbody > tr > td:first-child {
-    width: 20px !important;
+#transactions-table > tbody > tr > td.trans-status {
+    width: 28px !important;
     padding-left: 6px !important;
     overflow: visible;
 }
+#transactions-table > tbody > tr > td.trans-status > i {
+    margin-top: -4px;
+    margin-bottom: -4px;
+}
 
+#transactions-table > thead > tr > th.trans-date {
+    width: 7.7em;
+}
+#transactions-table > tbody > tr > td.trans-date {
+    width: 9em;
+}
+
+#transactions-table > thead > tr > th.amount{
+    text-align: right;
+    padding-right: 0.7em;
+}
+#transactions-table > tbody > tr > td.amount {
+    text-align: right;
+}
+
+#transactions-table > thead > tr > th.trans-type {
+    padding-left: 44px;
+}
 #transactions-table > tbody > tr > td.trans-type > img {
-    margin-right: 0.5em;
+    margin-right: 16px;
     margin-top: -4px;
     margin-bottom: -4px;
     float:left;
 }
-
 #transactions-table > tbody > tr > td.trans-type > span {
     display: flex;
 }
@@ -1091,28 +1111,25 @@ img.syncing-spinner  {
 }
 
 @media (max-width: 680px) {
-    #transactions-table > thead > tr > th:first-child {
-        width:16px !important;
-        padding-left:1px !important;
-    }
-
-    #transactions-table > tbody > tr > td:first-child {
-        width: 16px !important;
-        padding-left: 2px !important;
-    }
-
-    #transactions-table > tbody > tr > td.trans-type > img {
-        margin-top: 2px;
-    }
-
     #transactions-table > tbody > tr > td {
         white-space: normal !important;
         overflow-wrap: break-word;
     }
-
     #transactions-table > tbody > tr > td, #transactions-table > thead > tr > th {
         padding-top: 6px !important;
         padding-bottom: 6px !important;
+    }
+
+    #transactions-table > thead > tr > th.trans-status {
+        width:20px !important;
+        padding-left:1px !important;
+    }
+    #transactions-table > tbody > tr > td.trans-status {
+        width: 20px !important;
+        padding-left: 2px !important;
+    }
+    #transactions-table > tbody > tr > td.trans-status > i, #transactions-table > tbody > tr > td.trans-type > img {
+        margin-top: 2px;
     }
 }
 
@@ -1123,8 +1140,12 @@ img.syncing-spinner  {
 }
 
 @media (max-width: 480px) {
-    #transactions-table > thead > tr > th:nth-child(2), #transactions-table > tbody > tr > td:nth-child(2){
-        width: 62px !important;
+    #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
+        width: 64px !important;
+    }
+
+    #transactions-table > tbody > tr > td.trans-type > img {
+        margin-right: 8px;
     }
 }
 
