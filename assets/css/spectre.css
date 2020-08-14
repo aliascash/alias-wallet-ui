@@ -482,6 +482,7 @@ table {
 .footable-row-detail-value {
     white-space: normal;
     overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 @media (max-width: 480px) {
@@ -591,6 +592,7 @@ table {
 */
 .address {
     overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 #addressbook .table > tbody > tr > td {
@@ -638,6 +640,7 @@ table {
 */
 #blk-hash, #txn-hash {
     overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 #block-info-modal td:first-child, #block-info-modal th:first-child, #blkexp-txn-modal td:first-child, #blkexp-txn-modal th:first-child {
@@ -646,6 +649,7 @@ table {
 
 #block-info-modal td, #blkexp-txn-modal td{
     overflow-wrap: anywhere;
+    word-break: break-word;
     white-space: normal;
     padding-top: 12px;
     padding-bottom: 12px;
@@ -1158,6 +1162,7 @@ body.fixed-header {
 
 #transaction-info dd {
     overflow-wrap: anywhere;
+    word-break: break-word;
     float: left;
     width: 78%;
     padding: 0;
@@ -1166,6 +1171,7 @@ body.fixed-header {
 
 #transaction-info a {
     overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 /* Make tbody scrollable */
