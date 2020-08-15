@@ -120,6 +120,25 @@
 
 
 /*------------------------------------------------------------------
+[Header]
+ */
+.header {
+    position: static !important;
+}
+
+@media (max-width: 480px) {
+    #tor {
+        display: none;
+    }
+}
+@media (max-height: 680px) {
+    .header {
+        height: 49px !important;
+    }
+}
+
+
+/*------------------------------------------------------------------
 [Nav]
 */
 

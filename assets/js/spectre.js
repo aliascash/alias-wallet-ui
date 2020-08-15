@@ -893,7 +893,7 @@ var unit = {
     
     overviewPage.updateBalance();
   },
-  format : function(value, arg) {
+  format : function(value, arg, stripTrailingZeros) {
     var results = $.isNumeric(value) ? null : $(value);
     switch(arg = void 0 == arg ? this.type : parseInt(arg), value = parseInt(void 0 == results ? value : void 0 == results.data("value") ? results.val() : results.data("value")), arg) {
       case 1:
@@ -907,7 +907,7 @@ var unit = {
       default:
         value /= 1E8;
     }
-    return value = value.toFixed(this.mask(arg)), void 0 == results ? value : void results.val(value);
+    return value = stripTrailingZeros ? value.toString() : value.toFixed(this.mask(arg)), void 0 == results ? value : void results.val(value);
   },
   parse : function(value, text) {
     var results = $.isNumeric(value) ? null : $(value);
@@ -1086,7 +1086,7 @@ var overviewPage = {
       return "<tr><td width='30%' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;' data-title='" + data.tt + "'>" +
           "<label style='margin-top:6px;' class='label label-important inline fs-12'>" + label + "</label></td>" +
           "<td style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><a id='" + data.id.substring(data.id.length - 20) + "' href='#' onclick='$(\"#navitems [href=#transactions]\").click();$(\"#" + data.id + " > td.amount\").click();'> " +
-          unit.format(data.am) + " " + unit.display + " (" + ((data.am_curr === 'PRIVATE') ? "private" : "public") + ") </a></td>" +
+          unit.format(data.am, 0, true) + " <span class='unit'>" + unit.display + " (" + ((data.am_curr === 'PRIVATE') ? "private" : "public") + ")</span></a></td>" +
           "<td width='30%' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><span class='overview_date' data-value='" + data.d + "'>" + data.d_s + "</span></td></tr>";
     };
     var row = update(message);
