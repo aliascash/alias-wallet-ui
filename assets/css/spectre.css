@@ -554,7 +554,7 @@ table {
 }
 #overview .table tbody tr td span {
     white-space: nowrap;
-    vertical-align: top;
+    vertical-align: baseline;
 }
 
 @media (max-height: 680px) {
