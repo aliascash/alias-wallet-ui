@@ -355,7 +355,7 @@ select.unit[disabled] {
 }
 
 ::-webkit-input-placeholder, :placeholder-shown {
-    color: #8a8c8e
+    color: #282829
 }
 
 .padding-right-forms {
