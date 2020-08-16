@@ -252,9 +252,10 @@ img.syncing-spinner  {
         margin-left: 6px;
     }
 }
-@media (max-height: 680px) {
-    .header {
-        height: 49px !important;
+
+@media (max-width: 767px) {
+    .header, .header .header-inner {
+        height: 51px !important;
     }
 }
 
