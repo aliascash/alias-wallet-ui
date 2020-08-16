@@ -1123,6 +1123,8 @@ img.syncing-spinner  {
 #transactions-table > tbody > tr > td.trans-status > i {
     margin-top: -4px;
     margin-bottom: -4px;
+    font-size:1.66666666em;
+    vertical-align: middle;
 }
 
 #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
