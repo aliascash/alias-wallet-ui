@@ -459,6 +459,10 @@ table {
 }
 
 @media (max-width: 480px) {
+    .table thead tr th {
+        font-size: 12px;
+    }
+
     .table.table-condensed thead tr th {
         padding-left: 5px !important;
         padding-right: 5px !important;
@@ -487,11 +491,6 @@ table {
         font-size: 13px;
     }
 }
-
-
-
-
-
 
 
 /*------------------------------------------------------------------
@@ -1029,6 +1028,12 @@ img.syncing-spinner  {
     color: #999
 }
 
+@media (max-width: 480px) {
+    .fa-2x {
+        font-size:1.66666666em;
+    }
+}
+
 /*------------------------------------------------------------------
 [HD key wizzard]
 */
@@ -1118,36 +1123,34 @@ img.syncing-spinner  {
     margin-bottom: -4px;
 }
 
-#transactions-table > thead > tr > th.trans-date {
-    width: 7.7em;
-}
-#transactions-table > tbody > tr > td.trans-date {
-    width: 9em;
+#transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
+    width: 110px;
 }
 
 #transactions-table > thead > tr > th.amount{
     text-align: right;
-    padding-right: 0.7em;
 }
 #transactions-table > tbody > tr > td.amount {
     text-align: right;
 }
 
-#transactions-table > thead > tr > th.trans-type {
-    padding-left: 44px;
+#transactions-table > thead > tr > th.trans-type-icon, #transactions-table > tbody > tr > td.trans-type-icon  {
+    width: 38px;
 }
-#transactions-table > tbody > tr > td.trans-type > img {
-    margin-right: 16px;
+
+#transactions-table > tbody > tr > td.trans-type-icon img {
     margin-top: -4px;
     margin-bottom: -4px;
-    float:left;
-}
-#transactions-table > tbody > tr > td.trans-type > span {
-    display: flex;
 }
 
 #transactions-table {
     margin-bottom: 0px !important;
+}
+
+@media (max-width: 1000px) {
+    #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
+        width: 94px;
+    }
 }
 
 @media (max-width: 680px) {
@@ -1159,16 +1162,10 @@ img.syncing-spinner  {
         padding-top: 6px !important;
         padding-bottom: 6px !important;
     }
-
-    #transactions-table > thead > tr > th.trans-status {
-        width:20px !important;
-        padding-left:1px !important;
+    #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
+        width: 72px;
     }
-    #transactions-table > tbody > tr > td.trans-status {
-        width: 20px !important;
-        padding-left: 2px !important;
-    }
-    #transactions-table > tbody > tr > td.trans-status > i, #transactions-table > tbody > tr > td.trans-type > img {
+    #transactions-table > tbody > tr > td.trans-status > i, #transactions-table > tbody > tr > td.trans-type-icon > img {
         margin-top: 2px;
     }
 }
@@ -1180,12 +1177,17 @@ img.syncing-spinner  {
 }
 
 @media (max-width: 480px) {
-    #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
-        width: 64px !important;
+    #transactions-table > thead > tr > th {
+        font-size: 11px;
     }
-
-    #transactions-table > tbody > tr > td.trans-type > img {
-        margin-right: 8px;
+    #transactions-table > thead > tr > th.trans-status, #transactions-table > tbody > tr > td.trans-status {
+        width:22px !important;
+    }
+    #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
+        width: 60px;
+    }
+    #transactions-table > thead > tr > th.trans-type-icon, #transactions-table > tbody > tr > td.trans-type-icon  {
+        width: 28px;
     }
 }
 
