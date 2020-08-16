@@ -1,3 +1,8 @@
+Number.prototype.countDecimals = function () {
+  if(Math.floor(this.valueOf()) === this.valueOf()) return 0;
+  return this.toString().split(".")[1].length || 0;
+}
+
 function invalid(name, color) {
   return color === true ? name.css("background", "").css("color", "") : name.css("background", "#155b9a").css("color", "white"), 1 == color;
 }
@@ -909,7 +914,9 @@ var unit = {
       default:
         value /= 1E8;
     }
-    return value = stripTrailingZeros ? value.toString() : value.toFixed(this.mask(arg)), void 0 == results ? value : void results.val(value);
+    let mask = this.mask(arg);
+    return value = stripTrailingZeros && mask >= 2 ? value.countDecimals() > 2 ? value.toString() : value.toFixed(2) :
+        value.toFixed(mask), void 0 == results ? value : void results.val(value);
   },
   parse : function(value, text) {
     var results = $.isNumeric(value) ? null : $(value);
