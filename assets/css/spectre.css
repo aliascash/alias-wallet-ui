@@ -1136,7 +1136,7 @@ progress::-webkit-progress-value {
 }
 
 #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
-    width: 110px;
+    width: 127px;
 }
 
 #transactions-table > thead > tr > th.amount{
@@ -1161,7 +1161,7 @@ progress::-webkit-progress-value {
 
 @media (max-width: 1000px) {
     #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
-        width: 94px;
+        width: 110px;
     }
 }
 
