@@ -5511,7 +5511,7 @@ form legend {
     position: absolute;
     left: 0;
     background-color: #F0F1F3;
-    border: 1px solid #8a8c8e
+    border: 1px solid rgba(0, 0, 0, .07);
 }
 
 .checkbox input[type=checkbox]:focus + label:before, .checkbox input[type=radio][disabled] + label:after, .radio input[type=radio]:focus + label:before {
