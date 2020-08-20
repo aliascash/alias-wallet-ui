@@ -178,9 +178,6 @@
                             <div id=status class=b-grey>
                                 <ul class="no-margin no-style p-l-0 p-r-0 p-b-10">
                                     <li class="inline">
-                                        <progress id=syncProgressBar max=100 value=1 data-title="Catching up... downloaded 0 blocks of history..."></progress>
-                                    </li>
-                                    <li class="inline">
                                         <img id="tor" class="tor" data-title="Tor+OBFS4 connection online">
                                     </li>
                                     <li class="inline">
@@ -193,8 +190,8 @@
                                         <img id=connectionsIcon class="connection-0" data-title="0 active connection(s) to Alias network">
                                     </li>
                                     <li class="inline">
-                                        <img id=syncingIcon class="fa-spin syncing-spinner" data-title="Wallet is syncing">
-                                        <img id=blocksIcon class="no-syncing none" data-title="Wallet is synced">
+                                        <img id=syncingIcon class="fa-spin syncing" data-title="Wallet is syncing" src="assets/svg/syncing-95.svg">
+                                        <span id="syncingIconText">99%</span>
                                     </li>
                                 </ul>
                             </div>

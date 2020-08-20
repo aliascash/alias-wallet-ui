@@ -73,13 +73,6 @@
 /*------------------------------------------------------------------
 [Icons]
 */
-#status img {
-    height: 28px;
-    margin-left: 12px;
-    margin-top: -6px;
-    vertical-align: top;
-}
-
 img.staking {
     content:url("../svg/staking.svg");
 }
@@ -102,6 +95,7 @@ img.encryption-stake {
 
 img.tor {
     content:url("../svg/tor.svg");
+    margin-right: -5px;
 }
 
 img.no-tor {
@@ -158,14 +152,6 @@ img.connection-11 {
 
 img.connection-12 {
     content:url('../svg/connection-12.svg');
-}
-
-img.no-syncing {
-    content:url('../svg/synced.svg');
-}
-
-img.syncing-spinner  {
-    content:url("../svg/syncing.svg");
 }
 
 .heading-selected {
@@ -239,6 +225,59 @@ img.syncing-spinner  {
  */
 .header {
     position: static !important;
+    padding-right: 35px;
+}
+
+.header ul > li {
+    padding-left: 0px;
+}
+
+#status img {
+    height: 32px;
+    margin-left: 15px;
+    margin-top: -8px;
+    vertical-align: top;
+    transition: all 0.5s;
+}
+
+#syncingIconText {
+    display: none;
+    pointer-events: none;
+    pointer: none;
+}
+
+@media (min-width: 768px) {
+    #syncingIcon.syncing {
+        height: 42px !important;
+        margin-top: -13px !important;
+        float: left;
+    }
+    #syncingIconText {
+        display: inline-block;
+        color: orange;
+        font-size: 11px;
+        font-weight: bold;
+        position: relative;
+        left: -41px;
+        top: -4px;
+        width: 41px;
+        margin-right: -41px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 767px) {
+    .header {
+        padding-right: 20px;
+    }
+    .header, .header .header-inner {
+        height: 51px !important;
+    }
+    #status img {
+        height: 28px;
+        margin-left: 12px;
+        margin-top: -6px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -249,15 +288,10 @@ img.syncing-spinner  {
         padding-right: 5px;
     }
     #status img {
-        margin-left: 6px;
+        margin-left: 10px;
     }
 }
 
-@media (max-width: 767px) {
-    .header, .header .header-inner {
-        height: 51px !important;
-    }
-}
 
 
 /*------------------------------------------------------------------
