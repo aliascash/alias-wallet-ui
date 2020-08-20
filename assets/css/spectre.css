@@ -247,19 +247,19 @@ img.connection-12 {
 }
 
 @media (min-width: 768px) {
-    #syncingIcon.syncing {
-        height: 42px !important;
-        margin-top: -13px !important;
+    img#syncingIcon.syncing {
+        height: 42px;
+        margin-top: -13px;
         float: left;
     }
     #syncingIconText {
         display: inline-block;
         color: orange;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: bold;
         position: relative;
         left: -41px;
-        top: -4px;
+        top: -5px;
         width: 41px;
         margin-right: -41px;
         text-align: center;
