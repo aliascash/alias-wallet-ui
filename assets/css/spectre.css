@@ -245,6 +245,15 @@ img.connection-12 {
     pointer-events: none;
     pointer: none;
     transition: all 0.5s;
+    color: orange;
+    font-size: 9px;
+    font-weight: bold;
+    position: relative;
+    left: -31px;
+    top: -5px;
+    width: 31px;
+    margin-right: -31px;
+    text-align: center;
 }
 
 @media (min-width: 768px) {
@@ -257,21 +266,11 @@ img.connection-12 {
     }
     #syncingIconText {
         display: inline-block;
-        color: orange;
-        font-size: 9px;
-        font-weight: bold;
-        position: relative;
-        left: -31px;
-        top: -5px;
-        width: 31px;
-        margin-right: -31px;
-        text-align: center;
     }
 
     #syncingIconText.syncing {
         font-size: 12px;
         left: -41px;
-        top: -5px;
         width: 41px;
         margin-right: -41px;
     }
