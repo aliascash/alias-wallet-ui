@@ -1336,7 +1336,11 @@ body.fixed-header {
 }
 
 .page-sidebar .sidebar-menu > .menu-items > li ul.sub-menu > li {
-    padding: 0 5px 0 40px !important;
+    padding: 0 5px 0 0px !important;
+}
+
+.page-sidebar .sidebar-menu > .menu-items > li ul.sub-menu > li > a {
+    padding-left: 40px !important;
 }
 
 .page-sidebar .sidebar-menu > *:not(.scroll-wrapper) .icon-thumbnail {
