@@ -9,7 +9,7 @@ $(function() {
       qrlabel.val(label);
     }
     handler.clear();
-    var e = encodeURI("spectrecoin:" + qraddress.val() + "?label=" + qrlabel.val() + "&narration=" + qrnarration.val() + "&amount=" + unit.format(unit.parse($("#qramount").val(), $("#qrunit").val()),0));
+    var e = encodeURI("alias:" + qraddress.val() + "?label=" + qrlabel.val() + "&narration=" + qrnarration.val() + "&amount=" + unit.format(unit.parse($("#qramount").val(), $("#qrunit").val()),0));
     errors.text(e);
     handler.makeCode(e);
   }
