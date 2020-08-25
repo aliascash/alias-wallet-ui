@@ -244,7 +244,7 @@ img.connection-12 {
     display: none;
     pointer-events: none;
     pointer: none;
-    transition: all 0.5s;
+    transition: height 0.5s, width 0.5s, font-size 0.5s, left 0.5s, margin-right 0.5s;
     color: orange;
     font-size: 9px;
     font-weight: bold;
