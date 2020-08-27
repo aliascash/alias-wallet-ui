@@ -1690,7 +1690,7 @@ window.onload = function() {
 
   var urlParams = new URLSearchParams(window.location.search);
 
-  var baseUrl = "ws://127.0.0.1:" + (urlParams.has('websocketport') ? urlParams.get('websocketport') : 52471);
+  var baseUrl = "ws://127.0.0.1:" + (urlParams.has('websocketport') ? urlParams.get('websocketport') : 52471) + "/?token=" + urlParams.get('token');
   console.log("Connecting to WebSocket server at " + baseUrl + ".");
   var socket = new WebSocket(baseUrl);
   socket.onopen = function()
