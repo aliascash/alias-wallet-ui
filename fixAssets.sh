@@ -36,7 +36,6 @@ assets/plugins/bootstrapv3/css/bootstrap.css
 assets/plugins/jquery-scrollbar/jquery.scrollbar.js
 assets/plugins/qrcode/qrcode.js
 assets/css/font-awesome-buttons.css
-assets/css/framework-icons.css
 assets/css/framework.css
 assets/css/spectre.css
 assets/js/navigation.js
