@@ -186,6 +186,23 @@ img.connection-12 {
     color: #f28321
 }
 
+/* Fix sidebar padding on MacOS (without jquery-scrollbar ) */
+.page-sidebar .sidebar-menu > .menu-items > li > ul.sub-menu li > a > .arrow:before {
+    margin-right: 3px !important;
+}
+
+.page-sidebar .sidebar-menu > .menu-items > li ul.sub-menu > li {
+    padding: 0 5px 0 0px !important;
+}
+
+.page-sidebar .sidebar-menu > .menu-items > li ul.sub-menu > li > a {
+    padding-left: 40px !important;
+}
+
+.page-sidebar .sidebar-menu > *:not(.scroll-wrapper) .icon-thumbnail {
+    margin-right: 0px !important;
+}
+
 .panel.panel-default {
     border: 1px solid rgba(0, 0, 0, .07);
     background: #fff
@@ -291,9 +308,6 @@ img.connection-12 {
 }
 
 @media (max-width: 480px) {
-    #tor {
-        display: none;
-    }
     .header {
         padding-right: 5px;
     }
@@ -1289,6 +1303,11 @@ body.fixed-header {
     word-break: break-word;
 }
 
+
+/*------------------------------------------------------------------
+[Chain Data]
+*/
+
 /* Make tbody scrollable */
 #chaindata-table > thead {
     display: table;
@@ -1330,19 +1349,3 @@ body.fixed-header {
     }
 }
 
-/* Fix sidebar padding on MacOS (without jquery-scrollbar ) */
-.page-sidebar .sidebar-menu > .menu-items > li > ul.sub-menu li > a > .arrow:before {
-    margin-right: 3px !important;
-}
-
-.page-sidebar .sidebar-menu > .menu-items > li ul.sub-menu > li {
-    padding: 0 5px 0 0px !important;
-}
-
-.page-sidebar .sidebar-menu > .menu-items > li ul.sub-menu > li > a {
-    padding-left: 40px !important;
-}
-
-.page-sidebar .sidebar-menu > *:not(.scroll-wrapper) .icon-thumbnail {
-    margin-right: 0px !important;
-}
