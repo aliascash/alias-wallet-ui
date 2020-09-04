@@ -1,26 +1,22 @@
+<!-- SPDX-FileCopyrightText: © 2020 Alias Developers -->
+<!-- SPDX-FileCopyrightText: © 2016 SpectreCoin Developers -->
+<!-- SPDX-License-Identifier: MIT -->
 <RCC>
     <qresource prefix="/">
         <file alias="src/qt/res/index.html">src/qt/res/index.html</file>
     </qresource>
-    <qresource prefix="/icons">
-        <file alias="spectre">src/qt/res/assets/icons/spectrecoin.ico</file>
-        <file alias="spectre_testnet">src/qt/res/assets/icons/spectrecoin.ico</file>
+       <qresource prefix="/icons">
         <file alias="export">src/qt/res/icons/export.png</file>
         <file alias="remove">src/qt/res/icons/remove.png</file>
-        <file alias="tx_staked">src/qt/res/icons/tx_staked.png</file>
-        <file alias="tx_donated">src/qt/res/icons/tx_donated.png</file>
-        <file alias="tx_contributed">src/qt/res/icons/tx_contributed.png</file>
-        <file alias="tx_input">src/qt/res/icons/tx_input.png</file>
-        <file alias="tx_output">src/qt/res/icons/tx_output.png</file>
-        <file alias="tx_inout">src/qt/res/icons/tx_inout.png</file>
         <file alias="key">src/qt/res/icons/key.png</file>
         <file alias="debugwindow">src/qt/res/icons/debugwindow.png</file>
         <file alias="qrcode">src/qt/res/icons/qrcode.png</file>
-        <file alias="history">src/qt/res/icons/history.png</file>
-    </qresource>
-    <qresource prefix="/images">
-        <file alias="about">src/qt/res/images/about.png</file>
-        <file alias="splash">src/qt/res/images/splash.png</file>
+        <file alias="alias-app">src/qt/res/icons/alias-app.ico</file>
+        <file alias="alias-app_testnet">src/qt/res/icons/alias-app.ico</file>
+        <file alias="cmd_request">src/qt/res/icons/cmd_request.png</file>
+        <file alias="cmd_reply">src/qt/res/icons/cmd_reply.png</file>
+        <file alias="cmd_error">src/qt/res/icons/cmd_reply.png</file>
+        <file alias="cmd_misc">src/qt/res/icons/cmd_misc.png</file>
     </qresource>
     <qresource prefix="/translations">
         <file alias="af_ZA">src/qt/locale/spectrecoin_af_ZA.qm</file>
@@ -90,5 +86,8 @@
         <file alias="zh_CN">src/qt/locale/spectrecoin_zh_CN.qm</file>
         <file alias="zh_HK">src/qt/locale/spectrecoin_zh_HK.qm</file>
         <file alias="zh_TW">src/qt/locale/spectrecoin_zh_TW.qm</file>
+    </qresource>
+    <qresource prefix="/qml">
+        <file alias="main">src/qt/res/qml/main.qml</file>
     </qresource>
 </RCC>

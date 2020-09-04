@@ -1,4 +1,11 @@
 #!/bin/bash
+# ===========================================================================
+#
+# SPDX-FileCopyrightText: © 2020 Alias Developers
+# SPDX-FileCopyrightText: © 2016 SpectreCoin Developers
+# SPDX-License-Identifier: MIT
+#
+# ===========================================================================
 
 # Special sed syntax on Mac:
 unameOut="$(uname -s)"
@@ -24,12 +31,11 @@ mv build/index.min.html build/index.html
 IFS=$'\n'
 MINIFY="
 assets/plugins/framework/framework.js
-assets/plugins/boostrapv3/js/bootstrap.js
-assets/plugins/boostrapv3/css/bootstrap.css
+assets/plugins/bootstrapv3/js/bootstrap.js
+assets/plugins/bootstrapv3/css/bootstrap.css
 assets/plugins/jquery-scrollbar/jquery.scrollbar.js
 assets/plugins/qrcode/qrcode.js
 assets/css/font-awesome-buttons.css
-assets/css/framework-icons.css
 assets/css/framework.css
 assets/css/spectre.css
 assets/js/navigation.js
@@ -50,7 +56,7 @@ for file in ${MINIFY} ; do
 done
 
 cd build
-assets=`find assets/ -type f|sort`
+assets=$(find assets/ -type f|sort)
 cd ..
 
 while read line ; do
@@ -70,7 +76,7 @@ while read line ; do
     [[ "$line" == '<qresource prefix="/">' ]] && RES=true
     [[ "$line" == '</qresource>' ]] && break
     if [[ "$RES" = true ]] ; then
-        line=`echo ${line} | sed 's^<file alias="\(.*\)">.*</file>^\1^'`
+        line=$(echo ${line} | sed 's^<file alias="\(.*\)">.*</file>^\1^')
         ALIASES+=(${line})
         FILES+=("build/${line}")
     fi
@@ -80,15 +86,15 @@ for index in ${!FILES[*]} ; do
     file=${FILES[$index]}
     alias=${ALIASES[$index]}
     if [[ ${file} == *".css" ]] && [[ $(fgrep "url(" ${file} -l) ]] ; then
-        DIR=`dirname ${alias}`
-        PREVDIR=`dirname ${DIR}`
+        DIR=$(dirname ${alias})
+        PREVDIR=$(dirname ${DIR})
         REPLACE=$(fgrep "url(" ${file} | grep -o 'url(['\''"]\?\([^'\''")]\+\)["'\'']\?)' | sed 's/url(\|["'\'']\|)//g' | sed 's/&/\\&/g')
         for filename in ${REPLACE} ; do
             [[ ${filename} == "qrc:"* ]] && continue
             [[ ${filename} == "data:image"* ]] && continue
 
             if [[ ${filename} == "../"* ]] ; then
-                replacement=`echo ${filename} | sed 's!^..!qrc:///'${PREVDIR}'!'`
+                replacement=$(echo ${filename} | sed 's!^..!qrc:///'${PREVDIR}'!')
 #               sed -i ${backupFileSuffix} 's^url(['\''"]\?'${filename}'['\''"]\?)^url('${replacement}')^g' ${file}
                 sed -i ${backupFileSuffix} "s^url(['\"]\?${filename}['\"]\?)^url(${replacement})^g" ${file}
             else
@@ -101,9 +107,9 @@ for index in ${!FILES[*]} ; do
     fi
 
     if [[ ${file} == *".js" ]] && [[ $(fgrep "assets" ${file} -l) ]] ; then
-        sed -i ${backupFileSuffix} 's^\(assets/\(js\|icons\|img\|plugins\)\)^qrc:///\1^g' ${file}
+        sed -i ${backupFileSuffix} 's^\(assets/\(js\|icons\|img\|plugins\|svg\)\)^qrc:///\1^g' ${file}
         sed -i ${backupFileSuffix} 's^\./qrc:///^qrc:///^g' ${file}
-        sed -i ${backupFileSuffix} 's^\(qtwebchannel/\(js\|icons\|img\|plugins\)\)^qrc:///\1^g' ${file}
+        sed -i ${backupFileSuffix} 's^\(qtwebchannel/\(js\|icons\|img\|plugins\|svg\)\)^qrc:///\1^g' ${file}
 
         echo ${file}
     fi

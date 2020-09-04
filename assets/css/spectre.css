@@ -33,24 +33,28 @@
     padding-right: 15px;
 }
 
+
 /*------------------------------------------------------------------
 [FA]
 */
+.fa.black {
+    color: #282829
+}
 
 .fa.green {
     color: #499749
 }
 
 .fa.grey {
-    color: #898989
+    color: #8a8c8e
 }
 
 .fa.red {
-    color: #E3223C
+    color: #f84444
 }
 
 .fa.yellow {
-    color: #c3de00
+    color: #fbaa26
 }
 
 .fa.lightgreen {
@@ -62,7 +66,108 @@
 }
 
 .fa.orange {
-    color: #f39347
+    color: #f28321
+}
+
+
+/*------------------------------------------------------------------
+[Icons]
+*/
+img.staking {
+    content:url("../svg/staking.svg");
+}
+
+img.not-staking {
+    content:url("../svg/staking_off.svg");
+}
+
+img.encryption {
+    content:url("../svg/lock.svg");
+}
+
+img.no-encryption {
+    content:url("../svg/lock_off.svg");
+}
+
+img.encryption-stake {
+    content:url("../svg/lock_stake.svg");
+}
+
+img.tor {
+    content:url("../svg/tor.svg");
+    margin-right: -5px;
+}
+
+img.no-tor {
+    content:url('../svg/tor_off.svg');
+}
+
+img.connection-0 {
+    content:url('../svg/connection-0.svg');
+}
+
+img.connection-1 {
+    content:url('../svg/connection-1.svg');
+}
+
+img.connection-2 {
+    content:url('../svg/connection-2.svg');
+}
+
+img.connection-3 {
+    content:url('../svg/connection-3.svg');
+}
+
+img.connection-4 {
+    content:url('../svg/connection-4.svg');
+}
+
+img.connection-5 {
+    content:url('../svg/connection-5.svg');
+}
+
+img.connection-6 {
+    content:url('../svg/connection-6.svg');
+}
+
+img.connection-7 {
+    content:url('../svg/connection-7.svg');
+}
+
+img.connection-8 {
+    content:url('../svg/connection-8.svg');
+}
+
+img.connection-9 {
+    content:url('../svg/connection-9.svg');
+}
+
+img.connection-10 {
+    content:url('../svg/connection-10.svg');
+}
+
+img.connection-11 {
+    content:url('../svg/connection-11.svg');
+}
+
+img.connection-12 {
+    content:url('../svg/connection-12.svg');
+}
+
+.heading-selected {
+    margin: 0;
+    color: #313131
+}
+
+.heading-deselected {
+    margin: 0;
+    color: #999
+}
+
+@media (max-width: 480px) {
+    .fa-2x {
+        font-size:1.66666666em;
+    }
 }
 
 /*------------------------------------------------------------------
@@ -78,7 +183,7 @@
 }
 
 .page-sidebar .sidebar-menu .menu-items > li ul.sub-menu > li:hover > .icon-thumbnail {
-    color: #1481c3
+    color: #f28321
 }
 
 .panel.panel-default {
@@ -114,43 +219,89 @@
     }
 }
 
-@media (max-width: 480px) {
-    .table.table-condensed thead tr th {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
+
+/*------------------------------------------------------------------
+[Header]
+ */
+.header {
+    position: static !important;
+    padding-right: 35px;
+}
+
+.header ul > li {
+    padding-left: 0px;
+}
+
+#status img {
+    height: 32px;
+    margin-left: 15px;
+    margin-top: -8px;
+    vertical-align: top;
+    transition: all 0.5s;
+}
+
+#syncingIconText {
+    display: none;
+    pointer-events: none;
+    pointer: none;
+    transition: height 0.5s, width 0.5s, font-size 0.5s, left 0.5s, margin-right 0.5s;
+    color: orange;
+    font-size: 9px;
+    font-weight: bold;
+    position: relative;
+    left: -31px;
+    top: -5px;
+    width: 31px;
+    margin-right: -31px;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    img#syncingIcon {
+        float: left;
+    }
+    img#syncingIcon.syncing {
+        height: 42px;
+        margin-top: -13px;
+    }
+    #syncingIconText {
+        display: inline-block;
+    }
+
+    #syncingIconText.syncing {
+        font-size: 12px;
+        left: -41px;
+        width: 41px;
+        margin-right: -41px;
     }
 }
 
-@media (max-height: 920px) {
-    .panel {
-        margin-bottom: 5px !important;
-    }
-    .panel .panel-body {
-        padding-top: 0px !important;
-        padding-bottom: 0px !important;
-    }
-}
-
-@media (max-height: 600px) {
-    .table > tbody > tr > td, .table > thead > tr > th {
-        padding-top: 10px !important;
-        padding-bottom: 10px !important;
-    }
-
+@media (max-width: 767px) {
     .header {
-        height: 49px !important;
+        padding-right: 20px;
+    }
+    .header, .header .header-inner {
+        height: 51px !important;
+    }
+    #status img {
+        height: 28px;
+        margin-left: 12px;
+        margin-top: -6px;
     }
 }
 
-@media (max-width: 700px) {
-    .padding-right-forms {
-        margin-right: 0
+@media (max-width: 480px) {
+    #tor {
+        display: none;
     }
-
-    .hide-this-icon {
-        display: none
+    .header {
+        padding-right: 5px;
+    }
+    #status img {
+        margin-left: 10px;
     }
 }
+
 
 
 /*------------------------------------------------------------------
@@ -222,14 +373,9 @@ nav.navbar + div.row {
     }
 }
 
-@media (max-height: 920px) {
+@media (max-height: 680px) {
     nav.navbar {
         margin-bottom: 5px !important;
-    }
-}
-
-@media (max-height: 600px) {
-    nav.navbar {
         padding-top: 0px !important;
         padding-bottom: 0px !important;
     }
@@ -243,16 +389,21 @@ nav.navbar + div.row {
 #tooltip {
     font-size: .8em;
     color: #fff;
-    background: #131218;
+    background: #382b3f;
     position: absolute;
     z-index: 99999999;
     padding: 10px;
     line-height: 15px;
-    border-radius: 4px
+    border-radius: 4px;
+    border-style: solid;
+    border-width: thin;
+    border-color: #8a8c8e;
+    pointer-events: none;
+    pointer: none;
 }
 
 .light-red, .syncing {
-    color: #1481c3
+    color: #f28321
 }
 
 #tooltip:after {
@@ -260,7 +411,7 @@ nav.navbar + div.row {
     height: 0;
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
-    border-top: 10px solid #131218;
+    border-top: 10px solid #382b3f;
     content: '';
     position: absolute;
     left: 50%;
@@ -270,7 +421,7 @@ nav.navbar + div.row {
 
 #tooltip.top:after {
     border-top-color: transparent;
-    border-bottom: 10px solid #131218;
+    border-bottom: 10px solid #382b3f;
     top: -20px;
     bottom: auto
 }
@@ -303,7 +454,7 @@ nav.navbar + div.row {
 }
 
 .transaction-overview span {
-    color: #131218
+    color: #382b3f
 }
 
 .transaction-overview span.date {
@@ -325,65 +476,18 @@ nav.navbar + div.row {
 
 
 /*------------------------------------------------------------------
-[Footable]
-*/
-
-.footable-row-detail-group {
-    font-weight: 700
-}
-
-.footable-row-detail-name {
-    font-weight: 700;
-}
-
-.footable > tfoot > tr > td{
-    padding-bottom: 0px !important;
-}
-
-.footable-row-detail-value {
-    white-space: normal;
-    overflow-wrap: anywhere;
-}
-
-@media (max-width: 480px) {
-    .footable > tbody > tr > td, .footable > thead > tr > th {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
-    }
-}
-
-
-/*------------------------------------------------------------------
-[Send]
+[<Forms & Inputs>]
 */
 
 .warning {
     font-size: .8em;
-    color: #F51E3E;
+    color: #f84444;
     padding: 5px
-}
-
-table.dataTable thead td, table.dataTable thead th {
-    padding: 10px 18px;
-    border-bottom: 1px solid blue
-}
-
-td {
-    max-width: 0;
-    white-space: nowrap
-}
-
-table {
-    width: 100%
-}
-
-.table {
-    color: #898989
 }
 
 button, input, optgroup, select, textarea {
     background: transparant;
-    font-family: Helvetica, Verdana, Helvetica, sans-serif;
+    font-family: Montserrat, sans-serif;
     font-size: 13px;
     color: #000
 }
@@ -427,11 +531,16 @@ button {
     -webkit-appearance: none;
     -moz-appearance: none;
     font-size: 13px;
-    height: 35px
+    height: 35px;
+}
+
+select.unit[disabled] {
+    appearance: none !important;
+    border: none !important;
 }
 
 ::-webkit-input-placeholder, :placeholder-shown {
-    color: #626262
+    color: #282829
 }
 
 .padding-right-forms {
@@ -468,13 +577,189 @@ button {
     font-size: 14px;
     font-weight: 400;
     min-height: 35px;
-    -webkit-box-spectre: none;
-    box-spectre: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
     -webkit-transition: background .2s linear 0s;
     transition: background .2s linear 0s
+}
+
+.small.hint-text {
+    opacity: 1;
+}
+
+@media (min-width: 768px) {
+    .panel .btn-primary {
+        margin-right: 25px;
+    }
+}
+
+@media (max-width: 700px) {
+    .padding-right-forms {
+        margin-right: 0
+    }
+
+    .hide-this-icon {
+        display: none
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Table]
+*/
+
+td {
+    max-width: 0;
+    white-space: nowrap
+}
+
+table {
+    width: 100%
+}
+
+.table {
+    color: #282829
+}
+
+@media (max-width: 480px) {
+    .table thead tr th {
+        font-size: 12px;
+    }
+
+    .table.table-condensed thead tr th {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
+    .table tbody tr td {
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+}
+
+@media (max-height: 680px) {
+    .table > tbody > tr > td, .table > thead > tr > th {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+}
+
+@media (min-width: 1001px) {
+    .table tbody tr td {
+        font-size: 12px;
+    }
+}
+@media (min-width: 1401px) {
+    .table tbody tr td {
+        font-size: 13px;
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Footable]
+*/
+
+.footable-row-detail-group {
+    font-weight: 700
+}
+
+.footable-row-detail-name {
+    font-weight: 700;
+}
+
+.footable > tfoot > tr > td{
+    padding-bottom: 0px !important;
+}
+
+.footable-row-detail-value {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+@media (max-width: 480px) {
+    .footable > tbody > tr > td, .footable > thead > tr > th {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Overview]
+*/
+.wallet {
+    min-height: 307px;
+    padding-top: 8px;
+}
+
+#balances td {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+#recenttxns-container {
+    height: 424px;
+}
+
+#recenttxns thead tr th, #recenttxns tbody tr td {
+    text-align: center;
+}
+
+.overview_date {
+    white-space: normal !important;
+}
+
+#overview .table tbody tr td, #overview .table tbody tr td * {
+    font-size: 13px;
+    white-space: normal;
+}
+#overview .table tbody tr td span {
+    white-space: nowrap;
+    vertical-align: baseline;
+}
+
+@media (max-height: 680px) {
+    .wallet {
+        min-height: 360px;
+    }
+}
+
+@media (max-width: 991px) {
+    .wallet {
+        min-height: 0px;
+    }
+}
+
+@media (max-height: 680px), (max-width: 767px) {
+    .panel {
+        margin-bottom: 5px !important;
+    }
+    .panel .panel-body {
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
+    #balances {
+        margin-bottom: 0px;
+    }
+}
+
+@media (max-width: 480px) {
+    .panel .panel-heading, #balances td {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    #overview .table tbody tr td, #overview .table tbody tr td * {
+        font-size: 11px;
+    }
+    #overview .table tbody tr td .unit {
+        display: table;
+        width: 100%;
+    }
 }
 
 
@@ -486,6 +771,10 @@ button {
     margin-bottom: 10px;
 }
 
+#receive .table > tbody > tr > td {
+    vertical-align: middle;
+}
+
 @media (max-width: 767px) {
     #receive .center-div > a.btn {
         width: 145px;
@@ -494,12 +783,34 @@ button {
     }
 }
 
+@media (min-width: 531px) {
+    #receive tbody > tr > td:first-child, #receive thead > tr > th:first-child {
+        display: none!important;
+    }
+}
+
+@media (max-width: 530px) {
+    #receive tbody > tr > td:first-child, #receive thead > tr > th:first-child {
+        display: table-cell;
+        width: 32px;
+        padding-left: 7px !important;
+    }
+
+    #receive tbody > tr > td:nth-child(2), #receive thead > tr > th:nth-child(2) {
+        padding-left: 0px !important;
+    }
+}
 
 /*------------------------------------------------------------------
 [Addressbook]
 */
 .address {
     overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+#addressbook .table > tbody > tr > td {
+    vertical-align: middle;
 }
 
 #addressbook .center-div {
@@ -513,6 +824,49 @@ button {
         margin-top: 5px;
         margin-bottom: 5px;
     }
+}
+
+@media (min-width: 531px) {
+    #addressbook tbody > tr > td:first-child, #addressbook thead > tr > th:first-child {
+        display: none!important;
+    }
+}
+
+@media (max-width: 530px) {
+    #addressbook tbody > tr > td:first-child, #addressbook thead > tr > th:first-child {
+        width: 32px;
+        display: table-cell;
+        padding-left: 7px !important;
+    }
+
+    #addressbook tbody > tr > td:nth-child(2), #addressbook thead > tr > th:nth-child(2) {
+        padding-left: 0px !important;
+    }
+}
+
+#address-lookup-table tbody > tr > td:first-child, #address-lookup-table thead > tr > th:first-child {
+    display: none;
+}
+
+
+/*------------------------------------------------------------------
+[Blockdata]
+*/
+#blk-hash, #txn-hash {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+#block-info-modal td:first-child, #block-info-modal th:first-child, #blkexp-txn-modal td:first-child, #blkexp-txn-modal th:first-child {
+    width: 30%;
+}
+
+#block-info-modal td, #blkexp-txn-modal td{
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+    padding-top: 12px;
+    padding-bottom: 12px;
 }
 
 
@@ -532,9 +886,9 @@ button {
     border-radius: 5px;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
-    box-spectre: 0 0 4px rgba(0, 0, 0, .7);
-    -webkit-box-spectre: 0 0 4px rgba(0, 0, 0, .7);
-    -moz-box-spectre: 0 0 4px rgba(0, 0, 0, .7);
+    box-shadow: 0 0 4px rgba(0, 0, 0, .7);
+    -webkit-box-shadow: 0 0 4px rgba(0, 0, 0, .7);
+    -moz-box-shadow: 0 0 4px rgba(0, 0, 0, .7);
     display: none;
     position: absolute
 }
@@ -597,7 +951,7 @@ button {
 
 .contributor-mark {
     color: #fff;
-    background-color: #f11426;
+    background-color: #f84444;
     border-radius: 15px;
     padding: 5px
 }
@@ -636,7 +990,7 @@ textarea {
     font-family: sans-serif;
     font-size: 18px;
     appearance: none;
-    box-spectre: none;
+    box-shadow: none;
     border-radius: none
 }
 
@@ -646,7 +1000,7 @@ textarea {
 
 .heading-deselected, .heading-selected {
     font-size: 1em;
-    font-family: Helvetica, Verdana, sans-serif;
+    font-family: Montserrat, sans-serif;
     text-decoration: none;
     cursor: pointer
 }
@@ -708,20 +1062,16 @@ textarea {
     margin-bottom: 2px
 }
 
-.connect-1, .connect-2, .connect-3, .connect-4, .connect-5, .connect-6, .encryption, .encryption-stake, .i2p, .no-encryption, .no-i2p, .no-syncing, .no-tor, .not-staking, .staking, .syncing-spinner, .tor {
-    height: 16px
-}
-
 progress::-webkit-progress-bar {
     background: #131218;
     border-radius: 50px;
     padding: 2px;
-    box-spectre: 0 1px 0 0 rgba(255, 255, 255, .2)
+    box-shadow: 0 1px 0 0 rgba(255, 255, 255, .2)
 }
 
 progress::-webkit-progress-value {
     border-radius: 50px;
-    box-spectre: inset 0 1px 1px 0 rgba(255, 255, 255, .4);
+    box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, .4);
     background: -webkit-linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, .1) 33%, rgba(0, 0, 0, .1) 66%, transparent 66%), -webkit-linear-gradient(top, rgba(255, 255, 255, .25), rgba(0, 0, 0, .2)), -webkit-linear-gradient(left, #e5203d, #e41c39);
     background-size: 25px 14px, 100% 100%, 100% 100%;
     -webkit-animation: animateprogress 5s linear 0 infinite;
@@ -737,111 +1087,6 @@ progress::-webkit-progress-value {
     }
 }
 
-
-/*------------------------------------------------------------------
-[Icons]
-*/
-
-.staking {
-    background: url('../icons/staking.png');
-    width: 26px
-}
-
-.not-staking {
-    background: url('../icons/staking_off.png');
-    width: 26px
-}
-
-.encryption {
-    background: url('../icons/lock.png');
-    width: 26px
-}
-
-.no-encryption {
-    background: url('../icons/lock_off.png');
-    width: 26px
-}
-
-.encryption-stake {
-    background: url('../icons/lock_stake.png');
-    width: 26px
-}
-
-.i2p {
-    background: url('../icons/i2p.png');
-    width: 26px
-}
-
-.no-i2p {
-    background: url('../icons/i2p_off.png');
-    width: 26px
-}
-
-.tor {
-    background: url('../icons/tor.png');
-    width: 26px
-}
-
-.no-tor {
-    background: url('../icons/tor_off.png');
-    width: 26px
-}
-
-.connect-0 {
-    background: url('../icons/connect_0.png');
-    height: 16px;
-    width: 26px
-}
-
-.connect-1 {
-    background: url('../icons/connect_1.png');
-    width: 26px
-}
-
-.connect-2 {
-    background: url('../icons/connect_2.png');
-    width: 26px
-}
-
-.connect-3 {
-    background: url('../icons/connect_3.png');
-    width: 26px
-}
-
-.connect-4 {
-    background: url('../icons/connect_4.png');
-    width: 26px
-}
-
-.connect-5 {
-    background: url('../icons/connect_5.png');
-    width: 26px
-}
-
-.connect-6 {
-    background: url('../icons/connect_6.png');
-    width: 26px
-}
-
-.no-syncing {
-    background: url('../icons/synced.png');
-    width: 26px
-}
-
-.syncing-spinner {
-    background: url('../icons/syncing.gif');
-    width: 16px
-}
-
-.heading-selected {
-    margin: 0;
-    color: #313131
-}
-
-.heading-deselected {
-    margin: 0;
-    color: #999
-}
 
 /*------------------------------------------------------------------
 [HD key wizzard]
@@ -882,7 +1127,7 @@ progress::-webkit-progress-value {
 }
 
 .red-circle {
-    color: #F51E3E
+    color: #f84444
 }
 
 
@@ -918,30 +1163,66 @@ progress::-webkit-progress-value {
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
-#transactions-table > thead > tr > th:first-child {
-    width:16px !important;
-    padding-left:1px !important;
+#transactions-table > thead > tr > th.trans-status {
+    width:28px !important;
+    padding-left:5px !important;
+}
+#transactions-table > tbody > tr > td.trans-status {
+    width: 28px !important;
+    padding-left: 6px !important;
+    overflow: visible;
+}
+#transactions-table > tbody > tr > td.trans-status > i {
+    margin-top: -4px;
+    margin-bottom: -4px;
+    font-size:1.66666666em;
+    vertical-align: middle;
 }
 
-#transactions-table > tbody > tr > td:first-child {
-    width: 16px !important;
-    padding-left: 2px !important;
-    overflow: visible;
+#transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
+    width: 127px;
+}
+
+#transactions-table > thead > tr > th.amount{
+    text-align: right;
+}
+#transactions-table > tbody > tr > td.amount {
+    text-align: right;
+}
+
+#transactions-table > thead > tr > th.trans-type-icon, #transactions-table > tbody > tr > td.trans-type-icon  {
+    width: 38px;
+}
+
+#transactions-table > tbody > tr > td.trans-type-icon img {
+    margin-top: -4px;
+    margin-bottom: -4px;
 }
 
 #transactions-table {
-   margin-bottom: 0px !important;
+    margin-bottom: 0px !important;
 }
 
-@media (max-width: 767px) and (min-height: 600px) {
+@media (max-width: 1000px) {
+    #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
+        width: 110px;
+    }
+}
+
+@media (max-width: 680px) {
     #transactions-table > tbody > tr > td {
         white-space: normal !important;
         overflow-wrap: break-word;
     }
-
     #transactions-table > tbody > tr > td, #transactions-table > thead > tr > th {
         padding-top: 6px !important;
         padding-bottom: 6px !important;
+    }
+    #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
+        width: 72px;
+    }
+    #transactions-table > tbody > tr > td.trans-status > i, #transactions-table > tbody > tr > td.trans-type-icon > img {
+        margin-top: 2px;
     }
 }
 
@@ -952,8 +1233,17 @@ progress::-webkit-progress-value {
 }
 
 @media (max-width: 480px) {
-    #transactions-table > thead > tr > th:nth-child(2), #transactions-table > tbody > tr > td:nth-child(2){
-        width: 62px !important;
+    #transactions-table > thead > tr > th {
+        font-size: 11px;
+    }
+    #transactions-table > thead > tr > th.trans-status, #transactions-table > tbody > tr > td.trans-status {
+        width:22px !important;
+    }
+    #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
+        width: 60px;
+    }
+    #transactions-table > thead > tr > th.trans-type-icon, #transactions-table > tbody > tr > td.trans-type-icon  {
+        width: 28px;
     }
 }
 
@@ -963,15 +1253,11 @@ body.fixed-header {
     overflow-y: hidden;
 }
 
-.header {
-    position: static !important;
-}
-
 #network-alert {
     display: flex;
     height: 100%;
     align-items: center;
-    color: rgb(200,0,0);
+    color: #f84444;
     font-weight: bold;
 }
 
@@ -984,21 +1270,23 @@ body.fixed-header {
 
 #transaction-info dt {
     float: left;
-    width: 18%;
+    width: 22%;
     padding: 0;
     margin: 0
 }
 
 #transaction-info dd {
     overflow-wrap: anywhere;
+    word-break: break-word;
     float: left;
-    width: 82%;
+    width: 78%;
     padding: 0;
     margin: 0
 }
 
 #transaction-info a {
     overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 /* Make tbody scrollable */
@@ -1020,16 +1308,41 @@ body.fixed-header {
     table-layout: fixed; /* even columns width , fix width of table too*/
 }
 
+#chaindata-table tbody > tr > td {
+    vertical-align: middle;
+}
+
+@media (min-width: 531px) {
+    #chaindata-table tbody > tr > td:first-child, #chaindata-table thead > tr > th:first-child {
+        display: none!important;
+    }
+}
+
+@media (max-width: 530px) {
+    #chaindata-table tbody > tr > td:first-child, #chaindata-table thead > tr > th:first-child {
+        width: 32px;
+        display: table-cell;
+        padding-left: 7px !important;
+    }
+
+    #chaindata-table tbody > tr > td:nth-child(2), #chaindata-table thead > tr > th:nth-child(2) {
+        padding-left: 0px !important;
+    }
+}
+
 /* Fix sidebar padding on MacOS (without jquery-scrollbar ) */
 .page-sidebar .sidebar-menu > .menu-items > li > ul.sub-menu li > a > .arrow:before {
     margin-right: 3px !important;
 }
 
 .page-sidebar .sidebar-menu > .menu-items > li ul.sub-menu > li {
-    padding: 0 5px 0 40px !important;
+    padding: 0 5px 0 0px !important;
+}
+
+.page-sidebar .sidebar-menu > .menu-items > li ul.sub-menu > li > a {
+    padding-left: 40px !important;
 }
 
 .page-sidebar .sidebar-menu > *:not(.scroll-wrapper) .icon-thumbnail {
-    margin-right: 0px !important; 
+    margin-right: 0px !important;
 }
-
