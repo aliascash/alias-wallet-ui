@@ -2551,10 +2551,11 @@ hr.dotted {
     padding-left: 17px;
     padding-right: 17px
 }
-
-.btn:hover {
-    background-color: #fafafa;
-    border: 1px solid rgba(98, 98, 98, .27)
+@media (hover: hover) {
+    .btn:hover {
+        background-color: #fafafa;
+        border: 1px solid rgba(98, 98, 98, .27)
+    }
 }
 
 .btn.active {
@@ -2747,10 +2748,18 @@ hr.dotted {
     color: #fff
 }
 
-.btn-danger.hover, .btn-danger:hover, .open .dropdown-toggle.btn-danger {
+.open .dropdown-toggle.btn-danger {
     background-color: #382b3f;
     border-color: #382b3f;
     color: #fbaa26
+}
+
+@media (hover: hover) {
+    .btn-danger.hover, .btn-danger:hover {
+        background-color: #382b3f;
+        border-color: #382b3f;
+        color: #fbaa26
+    }
 }
 
 .btn-danger.active:hover {
