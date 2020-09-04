@@ -53,7 +53,7 @@ body.mobile .sidebar-menu > ul {
     -webkit-overflow-scrolling: touch !important
 }
 
-body.mobile .page-sidebar .sidebar-menu .menu-items li:hover a {
+/*body.mobile .page-sidebar .sidebar-menu .menu-items li:hover a {
     color: #8a8c8e
 }
 
