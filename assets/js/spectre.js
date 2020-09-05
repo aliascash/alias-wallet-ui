@@ -188,7 +188,7 @@ function copy(obj, v) {
   if (!(void 0 != message && void 0 == v)) {
     message = "copy" == v ? obj : $(obj).attr(v);
   }
-  bridge.copy(message);
+  clientBridge.copy(message);
 }
 function networkAlert(time) {
   $("#network-alert span").text(time).toggle("" !== time);
@@ -300,7 +300,7 @@ function getAddressLabelResult(result) {
     return $("#new-send-address-error").text('Error: address already in addressbook under "' + g + '"'), void $("#new-send-address").addClass("inputError");
   }
   var camelKey = 0;
-  bridge.newAddress(name, camelKey, udataCur, true);
+  clientBridge.newAddress(name, camelKey, udataCur, true);
 }
 function newAddressResult(success, errorMsg, address, send) {
   if (success) {
@@ -1701,7 +1701,7 @@ window.onload = function() {
   });
 
   $("[href='#about']").on("click", function () {
-    bridge.userAction(["aboutClicked"]);
+    clientBridge.userAction(["aboutClicked"]);
   });
 
   $(".footable > tbody tr").selection();
