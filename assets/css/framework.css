@@ -2552,7 +2552,7 @@ hr.dotted {
     padding-right: 17px
 }
 @media (hover: hover) {
-    .btn:hover {
+    body:not(.mobile) .btn:hover {
         background-color: #fafafa;
         border: 1px solid rgba(98, 98, 98, .27)
     }
@@ -2755,7 +2755,7 @@ hr.dotted {
 }
 
 @media (hover: hover) {
-    .btn-danger.hover, .btn-danger:hover {
+    body:not(.mobile) .btn-danger.hover, body:not(.mobile) .btn-danger:hover {
         background-color: #382b3f;
         border-color: #382b3f;
         color: #fbaa26
