@@ -260,8 +260,17 @@ img.connection-12 {
     transition: all 0.5s;
 }
 
+img#syncingIcon {
+    float: left;
+    margin-bottom: -5px;
+}
+img#syncingIcon.syncing {
+    height: 42px;
+    margin-top: -13px;
+}
+
 #syncingIconText {
-    display: none;
+    display: inline-block;
     pointer-events: none;
     pointer: none;
     transition: height 0.5s, width 0.5s, font-size 0.5s, left 0.5s, margin-right 0.5s;
@@ -269,31 +278,19 @@ img.connection-12 {
     font-size: 9px;
     font-weight: bold;
     position: relative;
-    left: -31px;
-    top: -5px;
+    left: -29px;
+    top: -4px;
     width: 31px;
     margin-right: -31px;
+    margin-bottom: -5px;
     text-align: center;
 }
 
-@media (min-width: 768px) {
-    img#syncingIcon {
-        float: left;
-    }
-    img#syncingIcon.syncing {
-        height: 42px;
-        margin-top: -13px;
-    }
-    #syncingIconText {
-        display: inline-block;
-    }
-
-    #syncingIconText.syncing {
-        font-size: 12px;
-        left: -41px;
-        width: 41px;
-        margin-right: -41px;
-    }
+#syncingIconText.syncing {
+    font-size: 12px;
+    left: -41px;
+    width: 41px;
+    margin-right: -41px;
 }
 
 @media (max-width: 767px) {
