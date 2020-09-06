@@ -105,58 +105,6 @@ img.no-tor {
     content:url('../svg/tor_off.svg');
 }
 
-img.connection-0 {
-    content:url('../svg/connection-0.svg');
-}
-
-img.connection-1 {
-    content:url('../svg/connection-1.svg');
-}
-
-img.connection-2 {
-    content:url('../svg/connection-2.svg');
-}
-
-img.connection-3 {
-    content:url('../svg/connection-3.svg');
-}
-
-img.connection-4 {
-    content:url('../svg/connection-4.svg');
-}
-
-img.connection-5 {
-    content:url('../svg/connection-5.svg');
-}
-
-img.connection-6 {
-    content:url('../svg/connection-6.svg');
-}
-
-img.connection-7 {
-    content:url('../svg/connection-7.svg');
-}
-
-img.connection-8 {
-    content:url('../svg/connection-8.svg');
-}
-
-img.connection-9 {
-    content:url('../svg/connection-9.svg');
-}
-
-img.connection-10 {
-    content:url('../svg/connection-10.svg');
-}
-
-img.connection-11 {
-    content:url('../svg/connection-11.svg');
-}
-
-img.connection-12 {
-    content:url('../svg/connection-12.svg');
-}
-
 .heading-selected {
     margin: 0;
     color: #313131
