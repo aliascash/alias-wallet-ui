@@ -172,7 +172,7 @@ $(function() {
             sendPage.toggleCoinControl(ok < 0);
 
             $(".advanced_controls").toggle(!isSendMain);
-            $("#add_recipient").toggle($("#send-main").is(":visible"));
+            $("#add_recipient").toggle($("#send-main").hasClass("active"));
 
             if (!isSendMain) {
                 init();
