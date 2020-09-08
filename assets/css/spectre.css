@@ -208,6 +208,28 @@ img.no-tor {
     transition: all 0.5s;
 }
 
+img#connectionsIcon {
+    float: left;
+    margin-bottom: -5px;
+}
+
+#connectionsIconText {
+    display: inline-block;
+    pointer-events: none;
+    pointer: none;
+    transition: height 0.5s, width 0.5s, font-size 0.5s, left 0.5s, margin-right 0.5s;
+    color: orange;
+    font-size: 10px;
+    font-weight: bold;
+    position: relative;
+    text-align: center;
+    top: -5px;
+    left: -33px;
+    width: 33px;
+    margin-right: -33px;
+    margin-bottom: -5px;
+}
+
 img#syncingIcon {
     float: left;
     margin-bottom: -5px;
@@ -226,12 +248,12 @@ img#syncingIcon.syncing {
     font-size: 9px;
     font-weight: bold;
     position: relative;
-    left: -29px;
-    top: -4px;
+    text-align: center;
+    top: -5px;
+    left: -31px;
     width: 31px;
     margin-right: -31px;
     margin-bottom: -5px;
-    text-align: center;
 }
 
 #syncingIconText.syncing {
@@ -252,6 +274,31 @@ img#syncingIcon.syncing {
         height: 28px;
         margin-left: 12px;
         margin-top: -6px;
+    }
+
+    #connectionsIconText {
+        font-size: 9px;
+        left: -28px;
+        width: 28px;
+        margin-right: -28px;
+    }
+
+    img#syncingIcon.syncing {
+        height: 38px;
+        margin-top: -11px;
+    }
+
+    #syncingIconText {
+        left: -27px;
+        width: 27px;
+        margin-right: -27px;
+    }
+
+    #syncingIconText.syncing {
+        font-size: 11px;
+        left: -37px;
+        width: 37px;
+        margin-right: -37px;
     }
 }
 
