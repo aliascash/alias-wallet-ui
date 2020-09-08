@@ -279,9 +279,16 @@ a {
     text-decoration: none
 }
 
-a:focus, a:hover {
+a:focus {
     color: #23527c;
     text-decoration: underline
+}
+
+@media (hover: hover) {
+    body:not(.mobile) .btn:hover {
+        color: #23527c;
+        text-decoration: underline
+    }
 }
 
 a:focus {
@@ -2238,9 +2245,16 @@ select[multiple].form-group-lg .form-control, textarea.form-group-lg .form-contr
     outline: 0
 }
 
-.btn.focus, .btn:focus, .btn:hover {
+.btn.focus, .btn:focus {
     color: #282829;
     text-decoration: none
+}
+
+@media (hover: hover) {
+    body:not(.mobile) .btn:hover {
+        color: #282829;
+        text-decoration: none
+    }
 }
 
 .btn.active, .btn:active {
@@ -2285,10 +2299,18 @@ select[multiple].form-group-lg .form-control, textarea.form-group-lg .form-contr
     border-color: #2e6da4
 }
 
-.btn-primary.active, .btn-primary.focus, .btn-primary:active, .btn-primary:focus, .btn-primary:hover, .open > .dropdown-toggle.btn-primary {
+.btn-primary.active, .btn-primary.focus, .btn-primary:active, .btn-primary:focus, .open > .dropdown-toggle.btn-primary {
     color: #fff;
     background-color: #286090;
     border-color: #204d74
+}
+
+@media (hover: hover) {
+    body:not(.mobile) .btn-primary:hover {
+        color: #fff;
+        background-color: #286090;
+        border-color: #204d74
+    }
 }
 
 .btn-primary.disabled, .btn-primary.disabled.active, .btn-primary.disabled.focus, .btn-primary.disabled:active, .btn-primary.disabled:focus, .btn-primary.disabled:hover, .btn-primary[disabled], .btn-primary[disabled].active, .btn-primary[disabled].focus, .btn-primary[disabled]:active, .btn-primary[disabled]:focus, .btn-primary[disabled]:hover, fieldset[disabled] .btn-primary, fieldset[disabled] .btn-primary.active, fieldset[disabled] .btn-primary.focus, fieldset[disabled] .btn-primary:active, fieldset[disabled] .btn-primary:focus, fieldset[disabled] .btn-primary:hover {
