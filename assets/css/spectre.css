@@ -76,33 +76,45 @@
 /*------------------------------------------------------------------
 [Icons]
 */
-img.staking {
-    content:url("../svg/staking.svg");
+span.staking {
+    background-image:url("../svg/staking.svg");
 }
 
-img.not-staking {
-    content:url("../svg/staking_off.svg");
+span.not-staking {
+    background-image:url("../svg/staking_off.svg");
 }
 
-img.encryption {
-    content:url("../svg/lock.svg");
+span.encryption {
+    background-image:url("../svg/lock.svg");
 }
 
-img.no-encryption {
-    content:url("../svg/lock_off.svg");
+span.no-encryption {
+    background-image:url("../svg/lock_off.svg");
 }
 
-img.encryption-stake {
-    content:url("../svg/lock_stake.svg");
+span.encryption-stake {
+    background-image:url("../svg/lock_stake.svg");
 }
 
-img.tor {
-    content:url("../svg/tor.svg");
+span.tor {
+    background-image:url("../svg/tor.svg");
     margin-right: -5px;
 }
 
-img.no-tor {
-    content:url('../svg/tor_off.svg');
+span.no-tor {
+    background-image:url('../svg/tor_off.svg');
+}
+
+span.spinner {
+    background-image:url('../svg/spinner.svg');
+}
+
+span.connection-0 {
+    background-image:url('../svg/connection-0.svg');
+}
+
+span.syncing-0 {
+    background-image:url('../svg/syncing-0.svg');
 }
 
 .heading-selected {
@@ -196,118 +208,84 @@ img.no-tor {
     padding-right: 35px;
 }
 
-.header ul > li {
-    padding-left: 0px;
-}
-
-#status img {
-    height: 32px;
-    margin-left: 15px;
-    margin-top: -8px;
-    vertical-align: top;
-    transition: all 0.5s;
-}
-
-img#connectionsIcon {
-    float: left;
-    margin-bottom: -5px;
-}
-
-#connectionsIconText {
-    display: inline-block;
-    pointer-events: none;
-    pointer: none;
-    transition: height 0.5s, width 0.5s, font-size 0.5s, left 0.5s, margin-right 0.5s;
-    color: orange;
-    font-size: 10px;
-    font-weight: bold;
-    position: relative;
-    text-align: center;
-    top: -5px;
-    left: -33px;
-    width: 33px;
-    margin-right: -33px;
-    margin-bottom: -5px;
-}
-
-img#syncingIcon {
-    float: left;
-    margin-bottom: -5px;
-}
-img#syncingIcon.syncing {
+#status {
+    margin-top: 10px;
     height: 42px;
-    margin-top: -13px;
+    display: flex;
+    align-items: center;
 }
 
-#syncingIconText {
-    display: inline-block;
+#status > * {
+    line-height: 32px;
+    height: 32px;
+    width: 32px;
+    margin-left: 15px;
+    transition: all 0.5s;
+    color: orange;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    transition: height 0.5s, width 0.5s, font-size 0.5s, left 0.5s, margin-right 0.5s;
+}
+
+#status > .icon-overlay {
+    transform: translateX(-100%);
+    margin-left: 0px;
+    margin-right: -32px;
     pointer-events: none;
     pointer: none;
-    transition: height 0.5s, width 0.5s, font-size 0.5s, left 0.5s, margin-right 0.5s;
-    color: orange;
-    font-size: 9px;
-    font-weight: bold;
-    position: relative;
-    text-align: center;
-    top: -5px;
-    left: -31px;
-    width: 31px;
-    margin-right: -31px;
-    margin-bottom: -5px;
 }
 
-#syncingIconText.syncing {
+#status > .syncing {
     font-size: 12px;
-    left: -41px;
-    width: 41px;
-    margin-right: -41px;
+    line-height: 42px;
+    width: 42px;
+    height: 42px;
+}
+#status > #syncingIconText.syncing {
+    margin-right: -42px;
 }
 
 @media (max-width: 767px) {
     .header {
         padding-right: 20px;
+        margin-bottom: 1px;
     }
     .header, .header .header-inner {
         height: 51px !important;
     }
-    #status img {
-        height: 28px;
-        margin-left: 12px;
-        margin-top: -6px;
-    }
 
-    #connectionsIconText {
-        font-size: 9px;
-        left: -28px;
-        width: 28px;
-        margin-right: -28px;
-    }
-
-    img#syncingIcon.syncing {
+    #status {
+        margin-top: 6px;
         height: 38px;
-        margin-top: -11px;
     }
 
-    #syncingIconText {
-        left: -27px;
-        width: 27px;
-        margin-right: -27px;
+    #status > * {
+        line-height: 29px;
+        height: 29px;
+        width: 29px;
+        margin-left: 12px;
+        font-size: 10px;
     }
 
-    #syncingIconText.syncing {
+    #status > .icon-overlay {
+        margin-right: -29px;
+    }
+
+    #status > .syncing {
         font-size: 11px;
-        left: -37px;
-        width: 37px;
-        margin-right: -37px;
+        line-height: 38px;
+        width: 38px;
+        height: 38px;
+    }
+    #status > #syncingIconText.syncing {
+        margin-right: -38px;
     }
 }
 
 @media (max-width: 480px) {
     .header {
         padding-right: 5px;
-    }
-    #status img {
-        margin-left: 10px;
     }
 }
 
@@ -472,11 +450,6 @@ nav.navbar + div.row {
 
 .overview_date {
     letter-spacing: 1px
-}
-
-#status {
-    margin-top: 5px;
-    padding-top: 3px
 }
 
 .network-alerts-icon {
