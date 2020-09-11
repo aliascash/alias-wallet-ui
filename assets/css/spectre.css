@@ -222,14 +222,14 @@ span.syncing-0 {
     margin-left: 15px;
     transition: all 0.5s;
     color: orange;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: bold;
     text-align: center;
     transition: height 0.5s, width 0.5s, font-size 0.5s, left 0.5s, margin-right 0.5s;
 }
 
 #status > .icon-overlay {
-    transform: translateX(-100%);
+    transform: translateX(-100%) translateY(1%);
     margin-left: 0px;
     margin-right: -32px;
     pointer-events: none;
@@ -237,7 +237,6 @@ span.syncing-0 {
 }
 
 #status > .syncing {
-    font-size: 12px;
     line-height: 42px;
     width: 42px;
     height: 42px;
@@ -261,19 +260,18 @@ span.syncing-0 {
     }
 
     #status > * {
-        line-height: 29px;
-        height: 29px;
-        width: 29px;
+        line-height: 28px;
+        height: 28px;
+        width: 28px;
+        font-size: 11px;
         margin-left: 12px;
-        font-size: 10px;
     }
 
     #status > .icon-overlay {
-        margin-right: -29px;
+        margin-right: -28px;
     }
 
     #status > .syncing {
-        font-size: 11px;
         line-height: 38px;
         width: 38px;
         height: 38px;
