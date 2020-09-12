@@ -236,6 +236,12 @@ span.syncing-0 {
     pointer: none;
 }
 
+@media  only screen and (min-width: 768px) {
+    #status > .icon-overlay {
+        transform: translateX(-100%) translateY(0.1ex);
+    }
+}
+
 #status > .syncing {
     line-height: 42px;
     width: 42px;
