@@ -14,7 +14,7 @@ $(function() {
     handler.makeCode(e);
   }
   var handler = new QRCode("qrcode", {
-    colorDark: "#E51C39",
+    colorDark: "#282829",
     colorLight: "#ffffff",
     correctLevel: QRCode.CorrectLevel.H,
     width: 220,
