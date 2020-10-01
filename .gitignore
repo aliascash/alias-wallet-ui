@@ -7,6 +7,6 @@
 .*.swp
 build/
 *.iml
-spectrecoin-ui-assets.tgz
+alias-ui-assets.tgz
 
 *.DS_Store

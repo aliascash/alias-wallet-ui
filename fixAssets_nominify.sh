@@ -87,5 +87,5 @@ for index in ${!FILES[*]} ; do
     fi
 done
 cd build
-tar czf ../spectrecoin-ui-assets.tgz .
+tar czf ../alias-ui-assets.tgz .
 cd -
