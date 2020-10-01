@@ -43,7 +43,7 @@ pipeline {
                             ./fixAssets.sh
                         """
                 )
-                archiveArtifacts allowEmptyArchive: true, artifacts: "spectrecoin-ui-assets.tgz"
+                archiveArtifacts allowEmptyArchive: true, artifacts: "alias-ui-assets.tgz.tgz"
             }
         }
     }
