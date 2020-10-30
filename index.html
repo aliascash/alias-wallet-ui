@@ -157,7 +157,7 @@
                     <li><a href=# data-target=#verify-sign-message-modal data-toggle=modal
                            onclick='$("#verify-href").click(),$("#verify-address")'><span class=translate>Verify Message</span>
                         <span class=icon-thumbnail><i class="fa fa-check-square-o"></i></span></a></li>
-                    <li><a href=# onclick='clientBridge.userAction(["debugClicked"])'><span
+                    <li class="only-desktop"><a href=# onclick='clientBridge.userAction(["debugClicked"])'><span
                             class=translate>Debug</span> <span class=icon-thumbnail><i class="fa fa-bug"></i></span></a>
                     </li>
                     <li><a href=#b onclick='clientBridge.userAction(["aboutClicked"])'><span class=translate>About Alias</span>
@@ -885,7 +885,7 @@
                         <div>
                             <h4 class="translate uppercase" style=font-weight:bolder>Send</h4>
                         </div>
-                        <div class="show-advanced-controls">
+                        <div class="show-advanced-controls only-desktop">
                             <div class="show-coin-control">
                                 <button class="btn btn-default btn-cons translate"
                                         onclick='$(this).toggleClass("active"),sendPage.toggleCoinControl()'>
