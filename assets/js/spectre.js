@@ -11,6 +11,15 @@ function updateValue(button) {
     var $field = $(".newval");
     if (0 !== $field.length) {
       button.html(names.replace(name, $field.val().trim()));
+      if (void 0 !== button.parent("td").data("label")) {
+        button.parent("td").data("label", $field.val().trim());
+      } else if (void 0 !== button.parent("td").data("value")) {
+        button.parent("td").data("value", $field.val().trim());
+      } else if (void 0 !== button.data("label")) {
+        button.data("label", $field.val().trim());
+      } else if (void 0 !== button.data("value")) {
+        button.data("value", $field.val().trim());
+      }
     }
   }
   $("#tooltip").remove();
