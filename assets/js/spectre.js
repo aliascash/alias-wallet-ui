@@ -10,28 +10,19 @@ function updateValue(button) {
   function complete(status) {
     var $field = $(".newval");
     if (0 !== $field.length) {
-      button.html(names.replace(name, $field.val().trim()));
-      if (void 0 !== button.parent("td").data("label")) {
-        button.parent("td").data("label", $field.val().trim());
-      } else if (void 0 !== button.parent("td").data("value")) {
-        button.parent("td").data("value", $field.val().trim());
-      } else if (void 0 !== button.data("label")) {
-        button.data("label", $field.val().trim());
-      } else if (void 0 !== button.data("value")) {
-        button.data("value", $field.val().trim());
-      }
+      button.html($field.val().trim());
+      button.parent("td").data("label", $field.val().trim());
     }
   }
   $("#tooltip").remove();
-  var names = button.html();
-  var name = void 0 !== button.parent("td").data("label") ? button.parent("td").data("label") : void 0 !== button.parent("td").data("value") ? button.parent("td").data("value") : void 0 !== button.data("label") ? button.data("label") : void 0 !== button.data("value") ? button.data("value") : button.text();
+  var label = void 0 !== button.parent("td").data("label") && button.parent("td").data("label").length > 0 ? button.parent("td").data("label") : "";
   var result = button.parents(".selected").find(".address");
   var selected = button.parents(".selected").find(".addresstype");
   result = result.data("value") ? result.data("value") : result.text();
   if (1 === selected.length) {
     selected = selected.data("value") ? selected.data("value") : selected.text();
   }
-  button.html('<input class="newval" type="text" onchange="bridge.updateAddressLabel(\'' + result + '\', this.value);" value="' + name + '" size=60 />');
+  button.html('<input class="newval" type="text" onchange="bridge.updateAddressLabel(\'' + result + '\', this.value);" value="' + label + '" size=60 />');
   $(".newval").focus().on("contextmenu", function(event) {
     event.stopPropagation();
   }).keyup(function(e) {
