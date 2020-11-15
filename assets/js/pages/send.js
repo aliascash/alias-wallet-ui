@@ -67,13 +67,14 @@ $(function() {
         }
         function fillAndSend(address, label, narration, amount) {
             reset();
+            $("[href=#send]").click();
+            $('[href=#send-main]').click();
             let trxTypeFrom = address.length < 76 ? "public" : "private";
-            $("input[name=transaction_type_from][value=" + trxTypeFrom + "]").prop("checked", true);
+            $("input[name=transaction_type_from][value=" + trxTypeFrom + "]").prop("checked", true).change();
             $("#recipient" + num.toString() + " .pay_to").val(address).change();
             $("#recipient" + num.toString() + " .pay_to_label").val(label).change();
             $("#recipient" + num.toString() + " .amount").val(amount / 1E8).change();
             $("#recipient" + num.toString() + " .narration").val(narration).change();
-            $("[href=#send]").click();
         }
         function reset() {
             $("#recipients").html("");
