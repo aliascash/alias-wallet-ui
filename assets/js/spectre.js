@@ -1032,7 +1032,7 @@ var overviewPage = {
       this.stake.data("orig", stakeVal);
       this.spectreStake.data("orig", spectreStakeVal);
       this.unconfirmed.data("orig", unconfirmedVal);
-      this.spectreUnconfirmed.data("orig", unconfirmedVal);
+      this.spectreUnconfirmed.data("orig", spectreUnconfirmedVal);
       this.immature.data("orig", immatureVal);
       this.spectreImmature.data("orig", spectreImmatureVal);
     }
