@@ -64,6 +64,7 @@ $(function() {
             if (typeof(clientBridge) != "undefined") {
                 clientBridge.userAction(["clearRecipients"]);
             }
+            $("#recipients .scan-qr-code").toggle($("#recipients").children().length == 1);
         }
         function fillAndSend(address, label, narration, amount) {
             reset();
@@ -93,6 +94,7 @@ $(function() {
                 }
                 element.remove();
                 $("#tooltip").remove();
+                $("#recipients .scan-qr-code").toggle($("#recipients").children().length == 1);
             }
         }
         function resetGlobalVariables() {

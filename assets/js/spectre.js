@@ -190,6 +190,9 @@ function copy(obj, v) {
   }
   clientBridge.copy(message);
 }
+function scanQRCode() {
+  clientBridge.scanQRCode();
+}
 function networkAlert(time) {
   $("#network-alert span").text(time).toggle("" !== time);
 }
