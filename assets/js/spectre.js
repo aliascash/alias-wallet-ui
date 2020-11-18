@@ -174,7 +174,7 @@ function pasteValue(coords) {
 }
 function paste(vim) {
   pasteTo = vim;
-  bridge.paste();
+  clientBridge.paste();
   if (!(0 != pasteTo.indexOf("#pay_to") && "#change_address" != pasteTo)) {
     base58.check(pasteTo);
   }
