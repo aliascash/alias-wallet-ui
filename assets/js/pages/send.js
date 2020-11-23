@@ -76,6 +76,7 @@ $(function() {
             $("#recipient" + num.toString() + " .pay_to_label").val(label).change();
             $("#recipient" + num.toString() + " .amount").val(amount / 1E8).change();
             $("#recipient" + num.toString() + " .narration").val(narration).change();
+            document.querySelector("#send-main").scrollIntoView({behavior: 'smooth'});
         }
         function reset() {
             $("#recipients").html("");
