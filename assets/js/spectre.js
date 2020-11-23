@@ -15,7 +15,8 @@ function updateValue(button) {
     }
   }
   $("#tooltip").remove();
-  var label = void 0 !== button.parent("td").data("label") && button.parent("td").data("label").length > 0 ? button.parent("td").data("label") : "";
+  var label = void 0 !== button.parent("td").data("label") && button.parent("td").data("label").length > 0 ? button.parent("td").data("label") :
+      void 0 !== button.data("value") && button.data("value").length > 0 ? button.data("value") : "";
   var result = button.parents(".selected").find(".address");
   var selected = button.parents(".selected").find(".addresstype");
   result = result.data("value") ? result.data("value") : result.text();
