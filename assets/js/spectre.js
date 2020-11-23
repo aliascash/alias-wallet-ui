@@ -150,7 +150,7 @@ function updateRowsPerPage(pageSize) {
   });
 }
 function pasteValue(coords) {
-  $(pasteTo).val(coords);
+  $(pasteTo).val(coords).change();
 }
 function paste(vim) {
   pasteTo = vim;
