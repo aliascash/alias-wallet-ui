@@ -238,6 +238,10 @@ function receivePageInit() {
       filter : $("#receive-filter").val()
     });
   });
+  $("#receive .footable tbody").on("click", "tr.footable-row-detail", function() {
+    $(this).prev().siblings().removeClass("selected");
+    $(this).prev().addClass("selected");
+  });
 }
 function clearRecvAddress() {
   $("#new-address-label").val("");
@@ -355,6 +359,10 @@ function addressBookInit() {
     $table.trigger("footable_filter", {
       filter : $("#addressbook-filter").val()
     });
+  });
+  $("#addressbook .footable tbody").on("click", "tr.footable-row-detail", function() {
+    $(this).prev().siblings().removeClass("selected");
+    $(this).prev().addClass("selected");
   });
 }
 function appendAddresses(err) {
