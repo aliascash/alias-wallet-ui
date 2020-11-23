@@ -417,6 +417,12 @@ function appendAddresses(err) {
     }
   });
   $("#addressbook .footable, #receive .footable").trigger("footable_setup_paging");
+  if ($("#addressbook .footable tbody tr.selected").length === 0) {
+    $("#addressbook .footable tbody tr:first").addClass("selected");
+  }
+  if ($("#receive .footable tbody tr.selected").length === 0) {
+    $("#receive .footable tbody tr:first").addClass("selected");
+  }
 }
 function addressLookup(pair, dataAndEvents, coords) {
   function clear() {
