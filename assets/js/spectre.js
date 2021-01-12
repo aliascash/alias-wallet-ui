@@ -861,7 +861,7 @@ function translateStrings() {
 //      console.log("template is " + template)
 //      console.log("Translated template is " + bridge.translateHtmlString(template.trim()))
 //    $(this).text(template.replace(template, bridge.translateHtmlString(template.trim())));
-        var template = $(this).text();
+        var template = $(this).text().replace(/\s+/g,' ');
         console.log("template is " + template)
         bridge.translateHtmlString(template.trim());
     });
@@ -872,7 +872,7 @@ function translateStrings() {
 //      console.log("Translated title is " + bridge.translateHtmlString(title.trim()))
 
 //    $(this).attr("data-title", title.replace(title, bridge.translateHtmlString(title.trim())));
-        var title = $(this).attr("data-title");
+        var title = $(this).attr("data-title").replace(/\s+/g,' ');
         console.log("title is " + title)
         bridge.translateHtmlString(title.trim());
     });
@@ -880,14 +880,14 @@ function translateStrings() {
 
 function translateElement(sourceString, translatedString) {
   $(".translate").each(function (dataAndEvents) {
-    var template = $(this).text();
+    var template = $(this).text().replace(/\s+/g,' ');
     if(template.trim() === sourceString) {
       $(this).text(translatedString);
       console.log("Replaced text '" + sourceString + "' with '" + translatedString + "'")
     }
   });
   $("[data-title]").each(function(dataAndEvents) {
-    var title = $(this).attr("data-title");
+    var title = $(this).attr("data-title").replace(/\s+/g,' ');
     if(title.trim() === sourceString) {
       $(this).attr("data-title", title.replace(title, translatedString));
       console.log("Replaced title '" + sourceString + "' with '" + translatedString + "'")
