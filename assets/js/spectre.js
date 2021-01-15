@@ -858,32 +858,45 @@ function dumpStrings() {
 function translateStrings() {
     $(".translate").each(function(dataAndEvents) {
         var template = $(this).text().replace(/\s+/g,' ');
-        console.log("template is " + template)
+//        console.log("template is " + template)
         bridge.translateHtmlString(template.trim());
     });
 
     $("[data-title]").each(function(dataAndEvents) {
         var title = $(this).attr("data-title").replace(/\s+/g,' ');
-        console.log("title is " + title)
+//        console.log("title is " + title)
         bridge.translateHtmlString(title.trim());
+    });
+
+    $("[placeholder]").each(function(dataAndEvents) {
+        var placeholder = $(this).attr("placeholder").replace(/\s+/g,' ');
+//        console.log("placeholder is " + placeholder)
+        bridge.translateHtmlString(placeholder.trim());
     });
 }
 
 function translateElement(sourceString, translatedString) {
-  $(".translate").each(function (dataAndEvents) {
-    var template = $(this).text().replace(/\s+/g,' ');
-    if(template.trim() === sourceString) {
-      $(this).text(translatedString);
-      console.log("Replaced text '" + sourceString + "' with '" + translatedString + "'")
-    }
-  });
-  $("[data-title]").each(function(dataAndEvents) {
-    var title = $(this).attr("data-title").replace(/\s+/g,' ');
-    if(title.trim() === sourceString) {
-      $(this).attr("data-title", title.replace(title, translatedString));
-      console.log("Replaced title '" + sourceString + "' with '" + translatedString + "'")
-    }
-  });
+    $(".translate").each(function (dataAndEvents) {
+        var template = $(this).text().replace(/\s+/g,' ');
+        if(template.trim() === sourceString) {
+            $(this).text(translatedString);
+//            console.log("Replaced text '" + sourceString + "' with '" + translatedString + "'")
+        }
+    });
+    $("[data-title]").each(function(dataAndEvents) {
+        var title = $(this).attr("data-title").replace(/\s+/g,' ');
+        if(title.trim() === sourceString) {
+            $(this).attr("data-title", title.replace(title, translatedString));
+//            console.log("Replaced title '" + sourceString + "' with '" + translatedString + "'")
+        }
+    });
+    $("[placeholder]").each(function(dataAndEvents) {
+        var placeholder = $(this).attr("placeholder").replace(/\s+/g,' ');
+        if(placeholder.trim() === sourceString) {
+            $(this).attr("placeholder", placeholder.replace(placeholder, translatedString));
+//            console.log("Replaced title '" + sourceString + "' with '" + translatedString + "'")
+        }
+    });
 }
 
 var breakpoint = 906;
