@@ -67,7 +67,7 @@ function connectSignals() {
   optionsPage.connectSignals();
   chainDataPage.connectSignals();
 
-  bridge.translateElement.connect(translateElement);
+  bridge.updateElement.connect(updateElement);
   bridge.validateAddressResult.connect(validateAddressResult);
   bridge.addRecipientResult.connect(addRecipientResult);
   bridge.sendCoinsResult.connect(sendCoinsResult);
@@ -875,7 +875,7 @@ function translateStrings() {
     });
 }
 
-function translateElement(sourceString, translatedString) {
+function updateElement(sourceString, translatedString) {
     $(".translate").each(function (dataAndEvents) {
         var template = $(this).text().replace(/\s+/g,' ');
         if(template.trim() === sourceString) {
@@ -894,7 +894,7 @@ function translateElement(sourceString, translatedString) {
         var placeholder = $(this).attr("placeholder").replace(/\s+/g,' ');
         if(placeholder.trim() === sourceString) {
             $(this).attr("placeholder", placeholder.replace(placeholder, translatedString));
-//            console.log("Replaced title '" + sourceString + "' with '" + translatedString + "'")
+//            console.log("Replaced placeholder '" + sourceString + "' with '" + translatedString + "'")
         }
     });
 }
