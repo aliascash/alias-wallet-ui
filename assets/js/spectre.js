@@ -5,6 +5,14 @@ Number.prototype.countDecimals = function () {
 
 var TYPE_PRIVATE = "Private"
 var TYPE_PUBLIC = "Public"
+var TYPE_ORPHAN = "Orphan"
+var TYPE_RECEIVED = "Received"
+var TYPE_SENT = "Sent"
+var TYPE_IN_OUT = "In-Out"
+var TYPE_STAKE = "Stake"
+var TYPE_DONATED = "Donated"
+var TYPE_CONTRIBUTED = "Contributed"
+var TYPE_OTHER = "Other"
 
 function invalid(name, color) {
   return color === true ? name.css("background", "").css("color", "") : name.css("background", "#155b9a").css("color", "white"), 1 == color;
@@ -907,6 +915,30 @@ function updateElement(sourceString, translatedString) {
     if (TYPE_PUBLIC === sourceString) {
         TYPE_PUBLIC = translatedString
     }
+    if (TYPE_ORPHAN === sourceString) {
+        TYPE_ORPHAN = translatedString
+    }
+    if (TYPE_RECEIVED === sourceString) {
+        TYPE_RECEIVED = translatedString
+    }
+    if (TYPE_SENT === sourceString) {
+        TYPE_SENT = translatedString
+    }
+    if (TYPE_IN_OUT === sourceString) {
+        TYPE_IN_OUT = translatedString
+    }
+    if (TYPE_STAKE === sourceString) {
+        TYPE_STAKE = translatedString
+    }
+    if (TYPE_DONATED === sourceString) {
+        TYPE_DONATED = translatedString
+    }
+    if (TYPE_CONTRIBUTED === sourceString) {
+        TYPE_CONTRIBUTED = translatedString
+    }
+    if (TYPE_OTHER === sourceString) {
+        TYPE_OTHER = translatedString
+    }
 }
 
 var breakpoint = 906;
@@ -1144,8 +1176,8 @@ var overviewPage = {
   },
   updateTransaction : function(message) {
     var update = function(data) {
-      var label = (8 === data.s_i || 9 === data.s_i) ? "Orphan" :
-          "input" == data.t ? "Received" : "output" == data.t ? "Sent" : "inout" == data.t ? "In-Out" : "staked" == data.t ? "Stake" : "donated" == data.t ? "Donated" : "contributed" == data.t ? "Contributed" : "other" == data.t ? "Other" : data.t;
+      var label = (8 === data.s_i || 9 === data.s_i) ? TYPE_ORPHAN :
+          "input" == data.t ? TYPE_RECEIVED : "output" == data.t ? TYPE_SENT : "inout" == data.t ? TYPE_IN_OUT : "staked" == data.t ? TYPE_STAKE : "donated" == data.t ? TYPE_DONATED : "contributed" == data.t ? TYPE_CONTRIBUTED : "other" == data.t ? TYPE_OTHER : data.t;
       return "<tr><td width='30%' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;' data-title='" + data.tt + "'>" +
           "<label style='margin-top:6px;' class='label label-important inline fs-12'>" + label + "</label></td>" +
           "<td style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><a id='" + data.id.substring(data.id.length - 20) + "' href='#' onclick='$(\"#navitems [href=#transactions]\").click();$(\"#" + data.id + " > td.amount\").click();'> " +
