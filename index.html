@@ -970,22 +970,30 @@
                                                                                    oninput=base58.check(this)
                                                                                    placeholder="Enter a Alias address (e.g. SXywGBZBowrppUwwNUo1GCRDTibzJi7g2M)">
                                                         </div>
-                                                        <div class="btn-group col-sm-3 sm-m-t-10"><a
+                                                        <div class="btn-group col-sm-3 sm-m-t-10">
+                                                            <a
                                                                 id=cust-add-lkp
                                                                 data-title="Choose from address book"
                                                                 data-toggle=modal
-                                                                data-target=#address-lookup-modal href=#
-                                                                onclick='addressLookup("change_address",!0, "Public")'
-                                                                class="btn btn-default"><i
-                                                                class="fa fa-book"></i> </a><a
+                                                                data-target=#address-lookup-modal
+                                                                href=#
+                                                                onclick='addressLookup("change_address",!0, TYPE_PUBLIC)'
+                                                                class="btn btn-default">
+                                                                    <i class="fa fa-book"></i>
+                                                            </a>
+                                                            <a
                                                                 data-title="Paste address from clipboard"
                                                                 class="btn btn-default"
-                                                                onclick='paste("#change_address")'><i
-                                                                class="fa fa-files-o"></i> </a><a
+                                                                onclick='paste("#change_address")'>
+                                                                <i class="fa fa-files-o"></i>
+                                                            </a>
+                                                            <a
                                                                 data-title="Remove this recipient"
                                                                 class="btn btn-default"
-                                                                onclick='$("#change_address").val("").css("background","").css("color","")'><i
-                                                                class="fa fa-close"></i></a></div>
+                                                                onclick='$("#change_address").val("").css("background","").css("color","")'>
+                                                                <i class="fa fa-close"></i>
+                                                            </a>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1085,7 +1093,7 @@
                                                                         data-target=#address-lookup-modal
                                                                         href=#
                                                                         onclick='addressLookup("recipient-template .pay_to,recipient-template .pay_to_label",!1,
-                                                                         $("[name=transaction_type_from]:checked").val() === "private" ? "Private" : "Public")'
+                                                                         $("[name=transaction_type_from]:checked").val() === "private" ? TYPE_PRIVATE : TYPE_PUBLIC)'
                                                                         class="btn btn-default"><i
                                                                         class="fa fa-lg fa-book"></i> </a><a
                                                                         data-title="Paste address from clipboard"

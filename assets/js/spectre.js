@@ -3,6 +3,9 @@ Number.prototype.countDecimals = function () {
   return this.toString().split(".")[1].length || 0;
 }
 
+var TYPE_PRIVATE = "Private"
+var TYPE_PUBLIC = "Public"
+
 function invalid(name, color) {
   return color === true ? name.css("background", "").css("color", "") : name.css("background", "#155b9a").css("color", "white"), 1 == color;
 }
@@ -391,8 +394,8 @@ function appendAddresses(err) {
     var param = "S" == item.type;
     var common = "n/a" !== item.pubkey;
     if (0 == revisionCheckbox.length) {
-      $(target + " .footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "'> <td data-toggle=true></td>     <td>           <span class='label2 editable' data-value='" + item.label_value + "'>" + item.label + "</span> </td>                <td class='address'>" + item.address + "</td>                 <td class='pubkey'>" + item.pubkey + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? "Private" : "Public") + "</td></tr>");
-      $("#address-lookup-table.footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "' class='addressType"+ item.type +"'> <td data-toggle=true></td>                 <td><span class='label2' data-value='" + item.label_value + "'>" + item.label + "</span></td>                 <td class='address'>" + item.address + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? "Private" : "Public") + "</td></tr>");
+      $(target + " .footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "'> <td data-toggle=true></td>     <td>           <span class='label2 editable' data-value='" + item.label_value + "'>" + item.label + "</span> </td>                <td class='address'>" + item.address + "</td>                 <td class='pubkey'>" + item.pubkey + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? TYPE_PRIVATE : TYPE_PUBLIC) + "</td></tr>");
+      $("#address-lookup-table.footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "' class='addressType"+ item.type +"'> <td data-toggle=true></td>                 <td><span class='label2' data-value='" + item.label_value + "'>" + item.label + "</span></td>                 <td class='address'>" + item.address + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? TYPE_PRIVATE : TYPE_PUBLIC) + "</td></tr>");
       $(target + " #" + item.address).selection("tr").find(".editable").on("dblclick", function(event) {
         event.stopPropagation();
         updateValue($(this));
@@ -897,6 +900,13 @@ function updateElement(sourceString, translatedString) {
 //            console.log("Replaced placeholder '" + sourceString + "' with '" + translatedString + "'")
         }
     });
+
+    if (TYPE_PRIVATE === sourceString) {
+        TYPE_PRIVATE = translatedString
+    }
+    if (TYPE_PUBLIC === sourceString) {
+        TYPE_PUBLIC = translatedString
+    }
 }
 
 var breakpoint = 906;
