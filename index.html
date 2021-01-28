@@ -1512,7 +1512,7 @@
                     <nav class="navbar navbar-default nav-sub-menu"
                          role=navigation>
                         <div>
-                            <h4 style=font-weight:bolder class="translate uppercase">OPTIONS</h4>
+                            <h4 style=font-weight:bolder class="translate uppercase">Options</h4>
                         </div>
                     </nav>
                     <div class="row">
@@ -1521,13 +1521,17 @@
                                  style="border-bottom:1px solid rgba(230,230,230,.7)">
                                 <form autocomplete=off class=form-horizontal id=form-work name=form-work>
                                     <ul class="nav nav-tabs nav-tabs-simple nav-tabs-simple-bg">
-                                        <li class=active style=font-weight:bolder;color:#333><a
-                                                data-toggle=tab href=#tab1main>Main</a>
-                                        <li style="font-weight:bolder;color:#333" class="only-desktop"><a data-toggle=tab
-                                                                                                          href=#tab1window>Window</a>
-                                        <li style=font-weight:bolder;color:#333><a data-toggle=tab
-                                                                                   href=#tab1display>Display</a>
-                                            <!-- <li style=font-weight:bolder;color:#333><a data-toggle=tab href=#tab1i2p>I2P</a>  <li style=font-weight:bolder;color:#333><a data-toggle=tab href=#tab1tor>Tor</a> -->
+                                        <li class=active style=font-weight:bolder;color:#333>
+                                            <a data-toggle=tab href=#tab1main><span class="translate">Main</span></a>
+                                        </li>
+                                        <li style="font-weight:bolder;color:#333" class="only-desktop">
+                                            <a data-toggle=tab href=#tab1window><span class="translate">Window</span></a>
+                                        </li>
+                                        <li style=font-weight:bolder;color:#333>
+                                            <a data-toggle=tab href=#tab1display><span class="translate">Display</span></a>
+                                        </li>
+                                            <!-- <li style=font-weight:bolder;color:#333><a data-toggle=tab href=#tab1i2p>I2P</a></li> -->
+                                            <!-- <li style=font-weight:bolder;color:#333><a data-toggle=tab href=#tab1tor>Tor</a></li> -->
                                     </ul>
                                     <div class=tab-content>
                                         <div class="tab-pane active" id=tab1main>
@@ -1535,7 +1539,7 @@
                                                 <div class=col-md-12>
                                                     <div id=options-main>
                                                         <div class="form-group only-desktop"><label
-                                                                class="col-sm-3 control-label p-l-20"
+                                                                class="col-sm-3 control-label p-l-20 translate"
                                                                 for=optStartAtStartup>Start Alias on
                                                             system login</label>
                                                             <div class=col-sm-9>
@@ -1546,7 +1550,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="form-group only-desktop"><label
-                                                                class="col-sm-3 control-label p-l-20"
+                                                                class="col-sm-3 control-label p-l-20 translate"
                                                                 for=optDetachDatabases>Detach databases at
                                                             shutdown</label>
                                                             <div class=col-sm-9>
@@ -1559,15 +1563,15 @@
                                                         </div>
                                                         <div class=form-group>
                                                             <label
-                                                                    class="col-sm-3 control-label option p-l-20"
-                                                                    for=optFee>Pay transaction fee:
+                                                                    class="col-sm-3 control-label option p-l-20 translate"
+                                                                    for=optFee>Pay transaction fee
                                                             </label>
                                                             <div class="col-sm-9">
-                                                                <p class="small hint-text">Transaction fee per kB. A higher fee makes
+                                                                <p class="small hint-text"><span class="title translate">Transaction fee per kB. A higher fee makes
                                                                     sure your transactions are processed
-                                                                    quickly in times of high transaction volume.
-                                                                <p class="small hint-text">Most transactions
-                                                                    are 1kB. The minimal fee is 0.0001 </p>
+                                                                    quickly in times of high transaction volume.</span>
+                                                                <p class="small hint-text"><span class="title translate">Most transactions
+                                                                are 1kB. The minimal fee is 0.0001</span></p>
                                                                 <div class="row">
                                                                     <div class="col-lg-3 col-sm-4 col-xs-6">
                                                                         <input
@@ -1593,10 +1597,10 @@
                                                             </div>
                                                         </div>
                                                         <div class=form-group><label
-                                                                class="col-sm-3 control-label p-l-20"
+                                                                class="col-sm-3 control-label p-l-20 translate"
                                                                 for=optStaking>Enable Staking</label>
                                                             <div class=col-sm-9>
-                                                                <p class="small hint-text">Enables or disables the staking process. If your wallet is encrypted, you will need to unlock it for staking.</p>
+                                                                <p class="small hint-text"><span class="translate">Enables or disables the staking process. If your wallet is encrypted, you will need to unlock it for staking.</span></p>
                                                                 <div class="checkbox option check-danger">
                                                                     <input data-linked="optReserveBalance"
                                                                            id=optStaking type=checkbox><label
@@ -1605,11 +1609,11 @@
                                                             </div>
                                                         </div>
                                                         <div class="form-group"><label
-                                                                class="col-sm-3 control-label p-l-20"
+                                                                class="col-sm-3 control-label p-l-20 translate"
                                                                 for="optStakingDonation">Staking
                                                             Donation</label>
                                                             <div class="col-sm-9">
-                                                                <p class="small hint-text">Every sixth block
+                                                                <p class="small hint-text"><span class="translate">Every sixth block
                                                                     on the blockchain is a development
                                                                     contribution block (DCB). Staking rewards
                                                                     of DCBs are contributed to the development
@@ -1617,7 +1621,7 @@
                                                                     setting. Please feel free to additionally
                                                                     donate from your remaining stake rewards
                                                                     by defining a donation chance. Thank
-                                                                    you.</p>
+                                                                    you.</span></p>
                                                                 <input id="optStakingDonation"
                                                                        class="form-control-options-page"
                                                                        placeholder="15" step="1" type="number"
@@ -1625,12 +1629,12 @@
                                                             </div>
                                                         </div>
                                                         <div class=form-group><label
-                                                                class="col-sm-3 control-label option p-l-20"
-                                                                for=optReserveBalance>Reserve:</label>
+                                                                class="col-sm-3 control-label option p-l-20 translate"
+                                                                for=optReserveBalance>Reserve</label>
                                                             <div class=col-sm-9>
-                                                                <p class="small hint-text">Reserved amount
+                                                                <p class="small hint-text"><span class="translate">Reserved amount
                                                                     does not participate in staking and is
-                                                                    therefore spendable at any time.</p>
+                                                                    therefore spendable at any time.</span></p>
                                                                 <div class="row">
                                                                     <div class="col-lg-3 col-sm-4 col-xs-6">
                                                                         <input
@@ -1657,7 +1661,7 @@
                                                             </div>
                                                         </div>
                                                         <div class=form-group><label
-                                                                class="col-sm-3 control-label option p-l-20"
+                                                                class="col-sm-3 control-label option p-l-20 translate"
                                                                 for=optMinStakeInterval
                                                                 title="Minimum time in seconds between successful stakes">Minimum
                                                             Stake Interval</label>
@@ -1742,7 +1746,7 @@
                                                 <div class=col-md-12>
                                                     <div id=options-window>
                                                         <div class=form-group><label
-                                                                class="col-sm-3 control-label p-l-20"
+                                                                class="col-sm-3 control-label p-l-20 translate"
                                                                 for=optMinimizeToTray>Minimize to the tray
                                                             instead of the taskbar</label>
                                                             <div class=col-sm-9>
@@ -1753,7 +1757,7 @@
                                                             </div>
                                                         </div>
                                                         <div class=form-group><label
-                                                                class="col-sm-3 control-label p-l-20"
+                                                                class="col-sm-3 control-label p-l-20 translate"
                                                                 for=optMinimizeOnClose>Minimize on
                                                             close</label>
                                                             <div class=col-sm-9>
@@ -1773,9 +1777,9 @@
                                                 <div class=col-md-12>
                                                     <div id=options-display>
                                                         <div class=form-group><label
-                                                                class="col-sm-3 control-label p-l-20"
+                                                                class="col-sm-3 control-label p-l-20 translate"
                                                                 for=optLanguage>User Interface
-                                                            language:</label>
+                                                            language</label>
                                                             <div class=col-sm-9>
                                                                 <div class=option><select
                                                                         class=select-drop-down
@@ -1783,9 +1787,9 @@
                                                             </div>
                                                         </div>
                                                         <div class="form-group hide"><label
-                                                                class="col-sm-3 control-label p-l-20"
+                                                                class="col-sm-3 control-label p-l-20 translate"
                                                                 for=optDisplayUnit>Unit to show amounts
-                                                            in:</label>
+                                                            in</label>
                                                             <div class=col-sm-9>
                                                                 <div class=option><select
                                                                         class=select-drop-down
@@ -1801,8 +1805,8 @@
                                                             </div>
                                                         </div>
                                                         <div class=form-group><label
-                                                                class="col-sm-3 control-label option p-l-20"
-                                                                for=optRowsPerPage>Rows per page:</label>
+                                                                class="col-sm-3 control-label option p-l-20 translate"
+                                                                for=optRowsPerPage>Rows per page</label>
                                                             <div class=col-sm-9>
                                                                 <div class=option><input
                                                                         class=form-control-options-page
@@ -1811,7 +1815,7 @@
                                                             </div>
                                                         </div>
                                                         <div class=form-group><label
-                                                                class="col-sm-3 control-label p-l-20"
+                                                                class="col-sm-3 control-label p-l-20 translate"
                                                                 for=optDisplayAddresses>Display addresses in
                                                             transaction list</label>
                                                             <div class=col-sm-9>
@@ -1823,8 +1827,8 @@
                                                             </div>
                                                         </div>
                                                         <div class=form-group><label
-                                                                class="col-sm-3 control-label p-l-20"
-                                                                for=optNotifications>Notifications:</label>
+                                                                class="col-sm-3 control-label p-l-20 translate"
+                                                                for=optNotifications>Notifications</label>
                                                             <div class=col-sm-9>
                                                                 <div class="option select-multiple"><select
                                                                         class="option cs-select cs-skin-slide"
@@ -1834,9 +1838,9 @@
                                                             </div>
                                                         </div>
                                                         <div class=form-group><label
-                                                                class="col-sm-3 control-label p-l-20"
+                                                                class="col-sm-3 control-label p-l-20 translate"
                                                                 for=optVisibleTransactions>Visible Transaction
-                                                            Types:</label>
+                                                            Types</label>
                                                             <div class=col-sm-9><select
                                                                     class="option cs-select cs-skin-slide"
                                                                     class=form-control-options-page
@@ -1863,16 +1867,24 @@
                                         </div>
                                     </div>
                                     <div class="center-div m-t-25 m-b-25 p-t-25"
-                                         style="border-top:1px solid rgba(230,230,230,.7)"><a
-                                            class="btn btn-default btn-cons" id=options-cancel
-                                            onclick=optionsPage.update(),prevPage.click()><i
-                                            class="fa fa-times"></i> Cancel</a> <a
-                                            class="btn btn-default btn-cons" id=options-apply
-                                            onclick='this.className.indexOf("disabled")==-1&&optionsPage.save()'>Apply
-                                        <i class="fa fa-check"></i> </a><a class="btn btn-default btn-cons"
-                                                                           id=options-ok
-                                                                           onclick='this.className.indexOf("disabled")==-1&&(optionsPage.save(),prevPage.click())'>Ok
-                                        <i class="fa fa-check"></i></a></div>
+                                         style="border-top:1px solid rgba(230,230,230,.7)">
+                                        <a class="btn btn-default btn-cons" id=options-cancel
+                                            onclick=optionsPage.update(),prevPage.click()>
+                                            <i class="fa fa-times"></i>
+                                            <span class="translate">Cancel</span>
+                                        </a>
+                                        <a class="btn btn-default btn-cons" id=options-apply
+                                            onclick='this.className.indexOf("disabled")==-1&&optionsPage.save()'>
+                                            <span class="translate">Apply</span>
+                                            <i class="fa fa-check"></i>
+                                        </a>
+                                        <a class="btn btn-default btn-cons"
+                                           id=options-ok
+                                           onclick='this.className.indexOf("disabled")==-1&&(optionsPage.save(),prevPage.click())'>
+                                            <span class="translate">Ok</span>
+                                            <i class="fa fa-check"></i>
+                                        </a>
+                                    </div>
                                 </form>
                             </div>
                         </div>
