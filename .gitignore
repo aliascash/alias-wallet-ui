@@ -6,6 +6,7 @@
 *.bak
 .*.swp
 build/
+.idea/
 *.iml
 alias-ui-assets.tgz
 
