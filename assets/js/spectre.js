@@ -89,8 +89,6 @@ function connectSignals() {
   optionsPage.update();
   chainDataPage.updateAnonOutputs();
 
-  translateStrings();
-
   bridge.jsReady();
 }
 
@@ -120,6 +118,8 @@ function connectClientSignals() {
   clientBridge.sendCoinsResult.connect(sendCoinsResult);
 
   clientBridge.newAddressResult.connect(newAddressResult);
+
+  translateStrings();
 
   sendPage.init();
 }
@@ -894,19 +894,19 @@ function translateStrings() {
     $(".translate").each(function(dataAndEvents) {
         var template = $(this).text().replace(/\s+/g,' ');
 //        console.log("template is " + template)
-        bridge.translateHtmlString(template.trim());
+        clientBridge.translateHtmlString(template.trim());
     });
 
     $("[data-title]").each(function(dataAndEvents) {
         var title = $(this).attr("data-title").replace(/\s+/g,' ');
 //        console.log("title is " + title)
-        bridge.translateHtmlString(title.trim());
+        clientBridge.translateHtmlString(title.trim());
     });
 
     $("[placeholder]").each(function(dataAndEvents) {
         var placeholder = $(this).attr("placeholder").replace(/\s+/g,' ');
 //        console.log("placeholder is " + placeholder)
-        bridge.translateHtmlString(placeholder.trim());
+        clientBridge.translateHtmlString(placeholder.trim());
     });
 }
 
