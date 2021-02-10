@@ -17,7 +17,7 @@ pipeline {
     environment {
         // In case another branch beside master or develop should be deployed, enter it here
         BRANCH_TO_DEPLOY = 'xyz'
-        DISCORD_WEBHOOK = credentials('991ce248-5da9-4068-9aea-8a6c2c388a19')
+        DISCORD_WEBHOOK = credentials('DISCORD_WEBHOOK')
     }
     stages {
         stage('Notification') {
@@ -27,12 +27,12 @@ pipeline {
                 discordSend(
                         description: "Started build #$env.BUILD_NUMBER",
                         image: '',
-                        link: "$env.BUILD_URL",
+                        //link: "$env.BUILD_URL",
                         successful: true,
                         result: "ABORTED",
                         thumbnail: 'https://wiki.jenkins-ci.org/download/attachments/2916393/headshot.png',
                         title: "$env.JOB_NAME",
-                        webhookURL: "${DISCORD_WEBHOOK}"
+                        webhookURL: DISCORD_WEBHOOK
                 )
             }
         }
@@ -43,7 +43,7 @@ pipeline {
                             ./fixAssets.sh
                         """
                 )
-                archiveArtifacts allowEmptyArchive: true, artifacts: "alias-ui-assets.tgz.tgz"
+                archiveArtifacts allowEmptyArchive: true, artifacts: "alias-ui-assets.tgz"
             }
         }
     }
@@ -62,11 +62,11 @@ pipeline {
                 discordSend(
                         description: "Build #$env.BUILD_NUMBER finished successfully",
                         image: '',
-                        link: "$env.BUILD_URL",
+                        //link: "$env.BUILD_URL",
                         successful: true,
                         thumbnail: 'https://wiki.jenkins-ci.org/download/attachments/2916393/headshot.png',
                         title: "$env.JOB_NAME",
-                        webhookURL: "${DISCORD_WEBHOOK}"
+                        webhookURL: DISCORD_WEBHOOK
                 )
             }
         }
@@ -81,12 +81,12 @@ pipeline {
             discordSend(
                     description: "Build #$env.BUILD_NUMBER finished unstable",
                     image: '',
-                    link: "$env.BUILD_URL",
+                    //link: "$env.BUILD_URL",
                     successful: true,
                     result: "UNSTABLE",
                     thumbnail: 'https://wiki.jenkins-ci.org/download/attachments/2916393/headshot.png',
                     title: "$env.JOB_NAME",
-                    webhookURL: "${DISCORD_WEBHOOK}"
+                    webhookURL: DISCORD_WEBHOOK
             )
         }
         failure {
@@ -100,23 +100,23 @@ pipeline {
             discordSend(
                     description: "Build #$env.BUILD_NUMBER failed!",
                     image: '',
-                    link: "$env.BUILD_URL",
+                    //link: "$env.BUILD_URL",
                     successful: false,
                     thumbnail: 'https://wiki.jenkins-ci.org/download/attachments/2916393/headshot.png',
                     title: "$env.JOB_NAME",
-                    webhookURL: "${DISCORD_WEBHOOK}"
+                    webhookURL: DISCORD_WEBHOOK
             )
         }
         aborted {
             discordSend(
                     description: "Build #$env.BUILD_NUMBER was aborted",
                     image: '',
-                    link: "$env.BUILD_URL",
+                    //link: "$env.BUILD_URL",
                     successful: true,
                     result: "ABORTED",
                     thumbnail: 'https://wiki.jenkins-ci.org/download/attachments/2916393/headshot.png',
                     title: "$env.JOB_NAME",
-                    webhookURL: "${DISCORD_WEBHOOK}"
+                    webhookURL: DISCORD_WEBHOOK
             )
         }
     }
