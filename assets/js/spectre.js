@@ -73,7 +73,6 @@ function connectSignals() {
   optionsPage.connectSignals();
   chainDataPage.connectSignals();
 
-  bridge.updateElement.connect(updateElement);
   bridge.validateAddressResult.connect(validateAddressResult);
   bridge.transactionDetailsResult.connect(transactionDetailsResult);
 
@@ -119,6 +118,7 @@ function connectClientSignals() {
 
   clientBridge.newAddressResult.connect(newAddressResult);
 
+  clientBridge.updateElement.connect(updateElement);
   translateStrings();
 
   sendPage.init();
