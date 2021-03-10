@@ -6,8 +6,9 @@
 *.bak
 .*.swp
 build/
+.idea/
 *.iml
-alias-ui-assets.tgz.tgz
+alias-ui-assets.tgz
 
 *.DS_Store
 

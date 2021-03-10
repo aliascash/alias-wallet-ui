@@ -3,6 +3,17 @@ Number.prototype.countDecimals = function () {
   return this.toString().split(".")[1].length || 0;
 }
 
+var TYPE_PRIVATE = "Private"
+var TYPE_PUBLIC = "Public"
+var TYPE_ORPHAN = "Orphan"
+var TYPE_RECEIVED = "Received"
+var TYPE_SENT = "Sent"
+var TYPE_IN_OUT = "In-Out"
+var TYPE_STAKE = "Stake"
+var TYPE_DONATED = "Donated"
+var TYPE_CONTRIBUTED = "Contributed"
+var TYPE_OTHER = "Other"
+
 function invalid(name, color) {
   return color === true ? name.css("background", "").css("color", "") : name.css("background", "#155b9a").css("color", "white"), 1 == color;
 }
@@ -77,8 +88,6 @@ function connectSignals() {
   optionsPage.update();
   chainDataPage.updateAnonOutputs();
 
-  translateStrings();
-
   bridge.jsReady();
 }
 
@@ -108,6 +117,9 @@ function connectClientSignals() {
   clientBridge.sendCoinsResult.connect(sendCoinsResult);
 
   clientBridge.newAddressResult.connect(newAddressResult);
+
+  clientBridge.updateElement.connect(updateElement);
+  translateStrings();
 
   sendPage.init();
 }
@@ -414,8 +426,8 @@ function appendAddresses(err) {
     var param = "S" == item.type;
     var common = "n/a" !== item.pubkey;
     if (0 == revisionCheckbox.length) {
-      $(target + " .footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "'> <td data-toggle=true></td>     <td>           <span class='label2 editable' data-value='" + item.label_value + "'>" + item.label + "</span> </td>                <td class='address'>" + item.address + "</td>                 <td class='pubkey'>" + item.pubkey + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? "Private" : "Public") + "</td></tr>");
-      $("#address-lookup-table.footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "' class='addressType"+ item.type +"'> <td data-toggle=true></td>                 <td><span class='label2' data-value='" + item.label_value + "'>" + item.label + "</span></td>                 <td class='address'>" + item.address + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? "Private" : "Public") + "</td></tr>");
+      $(target + " .footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "'> <td data-toggle=true></td>     <td>           <span class='label2 editable' data-value='" + item.label_value + "'>" + item.label + "</span> </td>                <td class='address'>" + item.address + "</td>                 <td class='pubkey'>" + item.pubkey + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? TYPE_PRIVATE : TYPE_PUBLIC) + "</td></tr>");
+      $("#address-lookup-table.footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "' class='addressType"+ item.type +"'> <td data-toggle=true></td>                 <td><span class='label2' data-value='" + item.label_value + "'>" + item.label + "</span></td>                 <td class='address'>" + item.address + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? TYPE_PRIVATE : TYPE_PUBLIC) + "</td></tr>");
       $(target + " #" + item.address).selection("tr").find(".editable").on("dblclick", function(event) {
         event.stopPropagation();
         updateValue($(this));
@@ -877,22 +889,82 @@ function dumpStrings() {
   });
   console.log(data);
 }
-//TODO: Update the translation function in a way that support QtWebEngine, QtWebEngine does not support calling a function that return results immediatly, it have to be done in a non blocking way using signals and slots
-function translateStrings() {
-//  $(".translate").each(function(dataAndEvents) {
-//    var template = $(this).text();
-//      console.log("template is " + template)
-//      console.log("Translated template is " + bridge.translateHtmlString(template.trim()))
-//    $(this).text(template.replace(template, bridge.translateHtmlString(template.trim())));
-//  });
-//  $("[data-title]").each(function(dataAndEvents) {
-//    var title = $(this).attr("data-title");
-//      console.log("Title is " + title)
-//      console.log("Translated title is " + bridge.translateHtmlString(title.trim()))
 
-//    $(this).attr("data-title", title.replace(title, bridge.translateHtmlString(title.trim())));
-//  });
+function translateStrings() {
+    $(".translate").each(function(dataAndEvents) {
+        var template = $(this).text().replace(/\s+/g,' ');
+//        console.log("template is " + template)
+        clientBridge.translateHtmlString(template.trim());
+    });
+
+    $("[data-title]").each(function(dataAndEvents) {
+        var title = $(this).attr("data-title").replace(/\s+/g,' ');
+//        console.log("title is " + title)
+        clientBridge.translateHtmlString(title.trim());
+    });
+
+    $("[placeholder]").each(function(dataAndEvents) {
+        var placeholder = $(this).attr("placeholder").replace(/\s+/g,' ');
+//        console.log("placeholder is " + placeholder)
+        clientBridge.translateHtmlString(placeholder.trim());
+    });
 }
+
+function updateElement(sourceString, translatedString) {
+    $(".translate").each(function (dataAndEvents) {
+        var template = $(this).text().replace(/\s+/g,' ');
+        if(template.trim() === sourceString) {
+            $(this).text(translatedString);
+//            console.log("Replaced text '" + sourceString + "' with '" + translatedString + "'")
+        }
+    });
+    $("[data-title]").each(function(dataAndEvents) {
+        var title = $(this).attr("data-title").replace(/\s+/g,' ');
+        if(title.trim() === sourceString) {
+            $(this).attr("data-title", title.replace(title, translatedString));
+//            console.log("Replaced title '" + sourceString + "' with '" + translatedString + "'")
+        }
+    });
+    $("[placeholder]").each(function(dataAndEvents) {
+        var placeholder = $(this).attr("placeholder").replace(/\s+/g,' ');
+        if(placeholder.trim() === sourceString) {
+            $(this).attr("placeholder", placeholder.replace(placeholder, translatedString));
+//            console.log("Replaced placeholder '" + sourceString + "' with '" + translatedString + "'")
+        }
+    });
+
+    if (TYPE_PRIVATE === sourceString) {
+        TYPE_PRIVATE = translatedString
+    }
+    if (TYPE_PUBLIC === sourceString) {
+        TYPE_PUBLIC = translatedString
+    }
+    if (TYPE_ORPHAN === sourceString) {
+        TYPE_ORPHAN = translatedString
+    }
+    if (TYPE_RECEIVED === sourceString) {
+        TYPE_RECEIVED = translatedString
+    }
+    if (TYPE_SENT === sourceString) {
+        TYPE_SENT = translatedString
+    }
+    if (TYPE_IN_OUT === sourceString) {
+        TYPE_IN_OUT = translatedString
+    }
+    if (TYPE_STAKE === sourceString) {
+        TYPE_STAKE = translatedString
+    }
+    if (TYPE_DONATED === sourceString) {
+        TYPE_DONATED = translatedString
+    }
+    if (TYPE_CONTRIBUTED === sourceString) {
+        TYPE_CONTRIBUTED = translatedString
+    }
+    if (TYPE_OTHER === sourceString) {
+        TYPE_OTHER = translatedString
+    }
+}
+
 var breakpoint = 906;
 var base58 = {
   base58Chars : "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz",
@@ -1128,8 +1200,8 @@ var overviewPage = {
   },
   updateTransaction : function(message) {
     var update = function(data) {
-      var label = (8 === data.s_i || 9 === data.s_i) ? "Orphan" :
-          "input" == data.t ? "Received" : "output" == data.t ? "Sent" : "inout" == data.t ? "In-Out" : "staked" == data.t ? "Stake" : "donated" == data.t ? "Donated" : "contributed" == data.t ? "Contributed" : "other" == data.t ? "Other" : data.t;
+      var label = (8 === data.s_i || 9 === data.s_i) ? TYPE_ORPHAN :
+          "input" == data.t ? TYPE_RECEIVED : "output" == data.t ? TYPE_SENT : "inout" == data.t ? TYPE_IN_OUT : "staked" == data.t ? TYPE_STAKE : "donated" == data.t ? TYPE_DONATED : "contributed" == data.t ? TYPE_CONTRIBUTED : "other" == data.t ? TYPE_OTHER : data.t;
       return "<tr><td width='30%' style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;' data-title='" + data.tt + "'>" +
           "<label style='margin-top:6px;' class='label label-important inline fs-12'>" + label + "</label></td>" +
           "<td style='border-top: 1px solid rgba(230, 230, 230, 0.7);border-bottom: none;'><a id='" + data.id.substring(data.id.length - 20) + "' href='#' onclick='$(\"#navitems [href=#transactions]\").click();$(\"#" + data.id + " > td.amount\").click();'> " +
