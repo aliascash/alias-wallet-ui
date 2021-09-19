@@ -598,7 +598,6 @@ select.unit[disabled] {
 */
 
 td {
-    max-width: 0;
     white-space: nowrap
 }
 
@@ -838,6 +837,10 @@ table {
 /*------------------------------------------------------------------
 [Blockdata]
 */
+#blockdata td {
+    max-width: 0;
+}
+
 #blk-hash, #txn-hash {
     overflow-wrap: anywhere;
     word-break: break-word;
