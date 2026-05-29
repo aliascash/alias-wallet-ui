@@ -30,6 +30,7 @@
     },
     "files": [
       "src/**/*",
+      "build/icon.png",
       "!**/*.md"
     ],
     "extraResources": [

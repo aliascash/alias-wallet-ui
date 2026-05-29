@@ -8,10 +8,38 @@ const { spawn } = require('child_process');
 const axios = require('axios');
 const crypto = require('crypto');
 const os = require('os');
+const Store = require('electron-store');
 
 const isDev      = process.argv.includes('--dev');
 const forceSetup = process.argv.includes('--first-run');  // dev: force-show wizard
 const skipSetup  = process.argv.includes('--skip-wizard'); // dev: skip wizard even if first launch
+
+// ---------- single-instance lock ----------
+//
+// Two wallet processes on the same datadir corrupt wallet.dat. requestSingleInstanceLock
+// returns false when another instance already holds the lock; in that case quit
+// immediately. When a second copy is launched, the first receives 'second-instance'
+// and focuses its main window.
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+  process.exit(0);
+}
+app.on('second-instance', () => {
+  const win = mainWindow || wizardWindow;
+  if (win) {
+    if (win.isMinimized()) win.restore();
+    win.focus();
+  }
+});
+
+// ---------- persistent settings ----------
+//
+// Saved at <userData>/config.json. Currently tracks window bounds so the app
+// reopens at the user's last size/position.
+const settings = new Store({
+  name: 'config',
+  defaults: { mainBounds: { width: 1280, height: 720 } },
+});
 
 const RPC_PORT = 36657;
 const RPC_HOST = '127.0.0.1';
@@ -21,6 +49,9 @@ const RPC_PASS = crypto.randomBytes(24).toString('hex');
 let daemonProc = null;
 let mainWindow = null;
 let wizardWindow = null;
+
+// App icon — resolved against the project root in dev, the app.asar in prod.
+const APP_ICON = path.join(__dirname, '..', '..', 'build', 'icon.png');
 
 function getDaemonPath() {
   if (isDev) {
@@ -140,6 +171,45 @@ ipcMain.handle('alias:wizard-cancel', () => {
   app.quit();
 });
 
+// ---------- passphrase dialog ----------
+//
+// `alias:open-passphrase` opens a small modal child of mainWindow. Resolves
+// with the user-entered payload, or null on cancel/close. Mirrors the
+// original Qt AskPassphraseDialog modes.
+
+let passphrasePending = null;
+ipcMain.handle('alias:open-passphrase', (_event, mode) => {
+  return new Promise((resolve) => {
+    if (passphrasePending) { resolve(null); return; }
+    passphrasePending = resolve;
+    const win = new BrowserWindow({
+      width: 440, height: 200, useContentSize: true,
+      parent: mainWindow || wizardWindow || undefined,
+      modal: true,
+      resizable: false, minimizable: false, maximizable: false,
+      title: 'Alias',
+      icon: APP_ICON,
+      webPreferences: {
+        preload: path.join(__dirname, '..', 'preload.js'),
+        contextIsolation: true,
+        nodeIntegration: false,
+      },
+    });
+    const url = `file://${path.join(__dirname, '..', 'renderer', 'passphrase', 'index.html').replace(/\\/g, '/')}#${mode}`;
+    win.loadURL(url);
+    win.on('closed', () => { if (passphrasePending) { passphrasePending(null); passphrasePending = null; } });
+    attachDevHooks(win);
+    win.__resolvePassphrase = (payload) => {
+      if (passphrasePending) { passphrasePending(payload); passphrasePending = null; }
+      win.close();
+    };
+  });
+});
+ipcMain.handle('alias:passphrase-result', (event, payload) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win && typeof win.__resolvePassphrase === 'function') win.__resolvePassphrase(payload);
+});
+
 // ---------- windows ----------
 
 function attachDevHooks(win) {
@@ -183,7 +253,13 @@ function attachScreenshotHook(win) {
           console.log('[exec-js result]', JSON.stringify(r));
           await new Promise(r => setTimeout(r, 3000));
         }
-        const img = await win.webContents.capturePage();
+        // If exec-js opened a modal child window (passphrase dialog,
+        // wizard, etc.), capture that one instead of the main.
+        const all = BrowserWindow.getAllWindows();
+        const target = all.find((w) => w !== win && w.webContents.getURL().includes('/passphrase/'))
+                    || all.find((w) => w !== win && w.webContents.getURL().includes('/wizard/'))
+                    || win;
+        const img = await target.webContents.capturePage();
         const buf = img.toPNG();
         if (!buf || buf.length === 0) {
           console.error('[screenshot] capturePage returned empty buffer');
@@ -206,6 +282,7 @@ function createWizardWindow() {
     height: 456,
     useContentSize: true,
     title: 'Alias Wallet Setup',
+    icon: APP_ICON,
     resizable: false,
     minimizable: false,
     maximizable: false,
@@ -224,11 +301,15 @@ function createWizardWindow() {
 function createMainWindow() {
   // Match the original Alias v4.4.0 client window: ~1280×720 content area
   // (1296×759 outer with Windows chrome — 16:9).
+  const saved = settings.get('mainBounds') || { width: 1280, height: 720 };
   mainWindow = new BrowserWindow({
-    width: 1280,
-    height: 720,
+    width:  saved.width,
+    height: saved.height,
+    x:      Number.isFinite(saved.x) ? saved.x : undefined,
+    y:      Number.isFinite(saved.y) ? saved.y : undefined,
     useContentSize: true,
     title: 'Alias - Client',
+    icon: APP_ICON,
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload.js'),
       contextIsolation: true,
@@ -236,6 +317,13 @@ function createMainWindow() {
     },
   });
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+  // Persist bounds on close so the next launch reopens at the same size/spot.
+  mainWindow.on('close', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      const b = mainWindow.getContentBounds();
+      settings.set('mainBounds', b);
+    }
+  });
   mainWindow.on('closed', () => { mainWindow = null; });
   attachDevHooks(mainWindow);
   attachScreenshotHook(mainWindow);
@@ -280,4 +368,9 @@ app.on('window-all-closed', () => {
   if (daemonProc) daemonProc.kill();
   if (process.platform !== 'darwin') app.quit();
 });
-app.on('before-quit', () => { if (daemonProc) daemonProc.kill(); });
+app.on('before-quit', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    try { settings.set('mainBounds', mainWindow.getContentBounds()); } catch (_) {}
+  }
+  if (daemonProc) daemonProc.kill();
+});

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Passphrase</title>
+  <link rel="stylesheet" href="passphrase.css">
+</head>
+<body>
+  <main class="dialog">
+    <p class="intro" id="intro">Enter passphrase.</p>
+
+    <!-- Three optional rows; passphrase.js shows/hides per mode. -->
+    <div class="row" id="row-old" hidden>
+      <label for="pp-old">Old passphrase</label>
+      <input type="password" id="pp-old" autocomplete="off" autofocus>
+    </div>
+
+    <div class="row" id="row-new">
+      <label for="pp-new" id="pp-new-label">Passphrase</label>
+      <input type="password" id="pp-new" autocomplete="off" autofocus>
+    </div>
+
+    <div class="row" id="row-confirm" hidden>
+      <label for="pp-confirm">Repeat passphrase</label>
+      <input type="password" id="pp-confirm" autocomplete="off">
+    </div>
+
+    <label class="staking-row" id="staking-row" hidden>
+      <input type="checkbox" id="pp-staking" checked>
+      For staking only
+    </label>
+
+    <p id="caps-warn" class="caps-warn" hidden>Warning: Caps Lock is on.</p>
+    <p id="error" class="error" hidden></p>
+
+    <footer>
+      <button id="btn-cancel" class="btn">Cancel</button>
+      <button id="btn-ok" class="btn btn-default-action">OK</button>
+    </footer>
+  </main>
+
+  <script src="passphrase.js"></script>
+</body>
+</html>

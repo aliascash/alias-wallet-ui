@@ -71,6 +71,82 @@
     console.warn('[shim] ' + label + ' failed:', err && err.message ? err.message : err);
   }
 
+  // ---------- encryption helpers ----------
+
+  // Returns 0 = Unencrypted, 1 = Unlocked, 2 = Locked (matches the UI's enum).
+  async function getEncryptionStatus() {
+    try {
+      const info = await rpc('getinfo', []);
+      if (!info || info.unlocked_until === undefined) return 0;
+      return info.unlocked_until > 0 ? 1 : 2;
+    } catch (_) { return 0; }
+  }
+
+  // Open the passphrase dialog and await user input.
+  // Resolves to the payload returned by passphrase.js, or null on cancel.
+  // Tests can set window.__aliasShim.askPassphraseOverride to bypass the
+  // modal dialog and supply a payload directly.
+  function askPassphrase(mode) {
+    const override = window.__aliasShim && window.__aliasShim.askPassphraseOverride;
+    if (typeof override === 'function') return Promise.resolve(override(mode));
+    if (!window.aliasBridge || !window.aliasBridge.openPassphrase) return Promise.resolve(null);
+    return window.aliasBridge.openPassphrase(mode);
+  }
+
+  // Run an action that requires an unlocked wallet. Mirrors the original
+  // C++ WalletModel::UnlockContext: prompt if needed, restore lock when done.
+  async function withUnlock(action) {
+    const status = await getEncryptionStatus();
+    if (status === 0 || status === 1) return await action();  // unencrypted or already unlocked
+    const r = await askPassphrase('unlock');
+    if (!r || !r.passphrase) throw new Error('cancelled');
+    try {
+      // walletpassphrase <passphrase> <timeout> [stakingOnly]
+      await rpc('walletpassphrase', [r.passphrase, 60]);
+    } catch (e) {
+      throw new Error('Wallet unlock failed: ' + (e.message || e));
+    }
+    try { return await action(); }
+    finally { try { await rpc('walletlock', []); } catch (_) {} }
+  }
+
+  // Sidebar userAction handlers (matches askpassphrasedialog.cpp invocation
+  // points in spectregui.cpp encryptWallet/changePassphrase/unlockWallet).
+  async function actionEncryptWallet() {
+    const status = await getEncryptionStatus();
+    if (status !== 0) { console.warn('[shim] wallet already encrypted'); return; }
+    const r = await askPassphrase('encrypt');
+    if (!r || !r.passphrase) return;
+    try {
+      await rpc('encryptwallet', [r.passphrase]);
+    } catch (e) {
+      // encryptwallet typically restarts the daemon — connection drops mid-call.
+      console.warn('[shim] encryptwallet returned/threw (expected at restart):', e.message);
+    }
+  }
+  async function actionChangePassphrase() {
+    const r = await askPassphrase('changepass');
+    if (!r) return;
+    try {
+      await rpc('walletpassphrasechange', [r.oldPass, r.newPass]);
+    } catch (e) {
+      logRpcError('walletpassphrasechange', e);
+    }
+  }
+  async function actionToggleLock() {
+    const status = await getEncryptionStatus();
+    if (status === 0) { console.warn('[shim] wallet is not encrypted'); return; }
+    if (status === 1) {
+      try { await rpc('walletlock', []); } catch (e) { logRpcError('walletlock', e); }
+      return;
+    }
+    // status === 2: locked → prompt to unlock
+    const r = await askPassphrase('unlock');
+    if (!r || !r.passphrase) return;
+    try { await rpc('walletpassphrase', [r.passphrase, 60]); }
+    catch (e) { logRpcError('walletpassphrase', e); }
+  }
+
   // ---------- bridge ----------
   //
   // Each method here corresponds to a Q_INVOKABLE in src/qt/spectrebridge.h.
@@ -202,7 +278,7 @@
     },
     signMessage: async function (address, message) {
       try {
-        const sig = await rpc('signmessage', [address, message]);
+        const sig = await withUnlock(() => rpc('signmessage', [address, message]));
         dispatch('bridge', 'signMessageResult', true, sig);
       } catch (e) {
         logRpcError('signmessage', e);
@@ -252,12 +328,14 @@
         2: 'sendprivate',   3: 'sendprivatetopublic',
       })[t] || 'sendtoaddress';
       try {
-        for (const r of queue) {
-          const params = [r.address, r.amount];
-          if (r.narration) params.push(r.label, r.narration);
-          else if (r.label) params.push(r.label);
-          await rpc(rpcFor(r.txnType), params);
-        }
+        await withUnlock(async () => {
+          for (const r of queue) {
+            const params = [r.address, r.amount];
+            if (r.narration) params.push(r.label, r.narration);
+            else if (r.label) params.push(r.label);
+            await rpc(rpcFor(r.txnType), params);
+          }
+        });
         dispatch('bridge', 'sendCoinsResult', true);
       } catch (e) {
         logRpcError('sendCoins', e);
@@ -267,18 +345,25 @@
 
     // --- generic catch-all ---
     //
-    // Three observed shapes:
+    // Four observed shapes:
     //   userAction("aboutClicked")              — string action name
     //   userAction(["clearRecipients"])         — array, first element is action name
     //   userAction({command: ["foo", arg1, ..]}) — explicit RPC pass-through
     //
-    // The named string/array actions are UI-side directives (clearRecipients,
-    // aboutClicked, etc.). The original C++ bridge dispatched these to native
-    // handlers; in the Electron port the UI handles its own state, so we
-    // noop named actions and only RPC-forward the {command:[...]} form.
+    // The named string/array actions are UI-side directives. A few of them
+    // map to the original Qt's AskPassphraseDialog — handle those by opening
+    // our passphrase modal. Everything else is a noop (the UI handles its own
+    // state in the Electron port).
     userAction: async function (action) {
-      if (typeof action === 'string') return; // UI action — noop
-      if (Array.isArray(action)) return;      // UI action — noop
+      const name = typeof action === 'string' ? action
+                 : Array.isArray(action) ? action[0]
+                 : null;
+      if (name === 'encryptWallet')     return await actionEncryptWallet();
+      if (name === 'changePassphrase')  return await actionChangePassphrase();
+      if (name === 'toggleLock')        return await actionToggleLock();
+      if (name === 'aboutClicked')      return;  // about dialog — future
+      if (typeof action === 'string') return;
+      if (Array.isArray(action)) return;
       if (action && Array.isArray(action.command)) {
         const [method, ...params] = action.command;
         return await rpc(method, params);
