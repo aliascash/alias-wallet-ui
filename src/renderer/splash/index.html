@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Alias</title>
+  <link rel="stylesheet" href="splash.css">
+</head>
+<body>
+  <main class="splash">
+    <!-- Logo positioned per the original Qt splash:
+         rect (62, 87, 476, 476) inside a 600x686 canvas, so the
+         logo's box sits 87px from the top and 62px from the left,
+         spanning 476px square. -->
+    <img class="logo" src="../assets/svg/Alias-Stacked-Reverse.svg" alt="Alias">
+
+    <!-- Bottom-center status text — matches the original InitMessage:
+         showMessage("v<version>\n<message>\n", AlignBottom|AlignHCenter, #8a8c8e). -->
+    <div class="status">
+      <div id="version">v4.4.1</div>
+      <div id="message"></div>
+    </div>
+  </main>
+
+  <script src="splash.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+/* Mirror editaddressdialog.ui: 457×129, QFormLayout (Label : LineEdit). */
+
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: "Segoe UI", "Tahoma", sans-serif;
+  font-size: 13px;
+  color: #1e1e1e;
+  background: #f0f0f0;
+  overflow: hidden;
+}
+
+.dialog {
+  display: flex; flex-direction: column;
+  padding: 9px;
+  height: 100vh; box-sizing: border-box;
+  gap: 4px;
+}
+
+.row { display: flex; align-items: center; margin: 2px 0; }
+.row label {
+  min-width: 110px;
+  text-align: right; padding-right: 6px;
+}
+.row input {
+  flex: 1;
+  min-height: 21px;
+  padding: 1px 4px;
+  border: 1px solid #a0a0a0; border-radius: 0;
+  font-family: inherit; font-size: 13px;
+  background: #fff;
+}
+.row input:focus { outline: none; border-color: #0078d4; }
+.row input[disabled] { background: #eaeaea; color: #555; }
+
+[hidden] { display: none !important; }
+
+.checkbox-row {
+  display: flex; align-items: center; gap: 6px;
+  margin-left: 116px;  /* aligned with the input column */
+  font-size: 13px;
+}
+
+.key-mnem { text-decoration: underline; }
+
+.error {
+  margin: 4px 0 0;
+  font-size: 12px; color: #a8312e; min-height: 14px;
+}
+
+footer {
+  margin-top: auto;
+  padding-top: 6px;
+  display: flex; gap: 6px; justify-content: flex-end;
+}
+.btn {
+  min-width: 72px;
+  padding: 3px 12px;
+  font-family: inherit; font-size: 13px;
+  background: #f5f5f5;
+  border: 1px solid #a0a0a0; border-radius: 0;
+  cursor: pointer; color: #1e1e1e;
+}
+.btn:hover  { background: #ececec; }
+.btn:active { background: #d8d8d8; }
+.btn.btn-default-action {
+  border: 2px solid #0078d4;
+  padding: 2px 11px;
+}

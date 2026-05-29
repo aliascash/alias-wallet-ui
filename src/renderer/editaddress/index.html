@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Edit Address</title>
+  <link rel="stylesheet" href="editaddress.css">
+</head>
+<body>
+  <main class="dialog">
+    <div class="row" id="row-label">
+      <label for="labelEdit"><span class="key-mnem">L</span>abel</label>
+      <input type="text" id="labelEdit" autocomplete="off" autofocus
+             title="The label associated with this address book entry">
+    </div>
+
+    <div class="row" id="row-address">
+      <label for="addressEdit"><span class="key-mnem">A</span>ddress</label>
+      <input type="text" id="addressEdit" autocomplete="off"
+             title="The address associated with this address book entry. This can only be modified for sending addresses.">
+    </div>
+
+    <label class="checkbox-row" id="row-stealth" hidden>
+      <input type="checkbox" id="stealthCB">
+      <span class="key-mnem">S</span>tealth Address
+    </label>
+
+    <p id="error" class="error" hidden></p>
+
+    <footer>
+      <button id="btn-cancel" class="btn">Cancel</button>
+      <button id="btn-ok" class="btn btn-default-action">OK</button>
+    </footer>
+  </main>
+  <script src="editaddress.js"></script>
+</body>
+</html>

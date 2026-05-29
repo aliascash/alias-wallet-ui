@@ -49,6 +49,7 @@ const RPC_PASS = crypto.randomBytes(24).toString('hex');
 let daemonProc = null;
 let mainWindow = null;
 let wizardWindow = null;
+let splashWindow = null;
 
 // App icon — resolved against the project root in dev, the app.asar in prod.
 const APP_ICON = path.join(__dirname, '..', '..', 'build', 'icon.png');
@@ -178,14 +179,20 @@ ipcMain.handle('alias:wizard-cancel', () => {
 // original Qt AskPassphraseDialog modes.
 
 let passphrasePending = null;
-ipcMain.handle('alias:open-passphrase', (_event, mode) => {
+function openPassphraseDialog(mode) {
   return new Promise((resolve) => {
     if (passphrasePending) { resolve(null); return; }
     passphrasePending = resolve;
+    const parent = mainWindow || wizardWindow;
     const win = new BrowserWindow({
-      width: 440, height: 200, useContentSize: true,
-      parent: mainWindow || wizardWindow || undefined,
-      modal: true,
+      // Match original askpassphrasedialog.ui geometry: 598×209, min width 550.
+      width: 598, height: 209, useContentSize: true,
+      minWidth: 550,
+      // Modal requires a parent on Linux; if none yet (startup unlock), the
+      // dialog is a standalone always-on-top window.
+      parent: parent || undefined,
+      modal: !!parent,
+      alwaysOnTop: !parent,
       resizable: false, minimizable: false, maximizable: false,
       title: 'Alias',
       icon: APP_ICON,
@@ -204,10 +211,130 @@ ipcMain.handle('alias:open-passphrase', (_event, mode) => {
       win.close();
     };
   });
-});
+}
+ipcMain.handle('alias:open-passphrase', (_event, mode) => openPassphraseDialog(mode));
 ipcMain.handle('alias:passphrase-result', (event, payload) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (win && typeof win.__resolvePassphrase === 'function') win.__resolvePassphrase(payload);
+});
+ipcMain.handle('alias:quit', () => app.quit());
+
+// Coin Control — UTXO list. Read-only v1; selection not yet wired into sendCoins.
+let coinControlWindow = null;
+ipcMain.handle('alias:open-coin-control', () => {
+  if (coinControlWindow && !coinControlWindow.isDestroyed()) { coinControlWindow.focus(); return; }
+  coinControlWindow = new BrowserWindow({
+    width: 760, height: 480, useContentSize: true,
+    parent: mainWindow || undefined,
+    modal: false,
+    title: 'Coin Control',
+    icon: APP_ICON,
+    webPreferences: {
+      preload: path.join(__dirname, '..', 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  coinControlWindow.loadFile(path.join(__dirname, '..', 'renderer', 'coincontrol', 'index.html'));
+  coinControlWindow.on('closed', () => { coinControlWindow = null; });
+  attachDevHooks(coinControlWindow);
+});
+
+// About — non-modal info dialog (671×347) showing version + license text.
+let aboutWindow = null;
+ipcMain.handle('alias:open-about', () => {
+  if (aboutWindow && !aboutWindow.isDestroyed()) { aboutWindow.focus(); return; }
+  aboutWindow = new BrowserWindow({
+    width: 671, height: 347, useContentSize: true,
+    parent: mainWindow || undefined,
+    modal: false,
+    resizable: false, minimizable: false, maximizable: false,
+    title: 'About Alias',
+    icon: APP_ICON,
+    webPreferences: {
+      preload: path.join(__dirname, '..', 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  aboutWindow.loadFile(path.join(__dirname, '..', 'renderer', 'about', 'index.html'));
+  aboutWindow.on('closed', () => { aboutWindow = null; });
+  attachDevHooks(aboutWindow);
+});
+
+// Edit Address — modal dialog (457×129) returning {label, address, stealth} or null.
+let editAddressPending = null;
+ipcMain.handle('alias:open-edit-address', (_event, opts) => {
+  opts = opts || {};
+  return new Promise((resolve) => {
+    if (editAddressPending) { resolve(null); return; }
+    editAddressPending = resolve;
+    const mode = String(opts.mode || 'new-sending').toLowerCase();
+    const qp = new URLSearchParams({
+      label:   opts.label   || '',
+      address: opts.address || '',
+      stealth: opts.stealth ? '1' : '0',
+    }).toString();
+    const win = new BrowserWindow({
+      width: 457, height: 129, useContentSize: true,
+      parent: mainWindow || undefined,
+      modal: true,
+      resizable: false, minimizable: false, maximizable: false,
+      title: 'Edit Address',
+      icon: APP_ICON,
+      webPreferences: {
+        preload: path.join(__dirname, '..', 'preload.js'),
+        contextIsolation: true,
+        nodeIntegration: false,
+      },
+    });
+    const url = `file://${path.join(__dirname, '..', 'renderer', 'editaddress', 'index.html').replace(/\\/g, '/')}?${qp}#${mode}`;
+    win.loadURL(url);
+    win.on('closed', () => { if (editAddressPending) { editAddressPending(null); editAddressPending = null; } });
+    attachDevHooks(win);
+    win.__resolveEditAddress = (payload) => {
+      if (editAddressPending) { editAddressPending(payload); editAddressPending = null; }
+      win.close();
+    };
+  });
+});
+ipcMain.handle('alias:edit-address-result', (event, payload) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win && typeof win.__resolveEditAddress === 'function') win.__resolveEditAddress(payload);
+});
+
+// Backup wallet — file save dialog + dumpwallet RPC.
+ipcMain.handle('alias:backup-wallet', async () => {
+  const r = await dialog.showSaveDialog(mainWindow || undefined, {
+    title: 'Backup Wallet',
+    defaultPath: 'wallet.dat',
+    filters: [{ name: 'Wallet Data', extensions: ['dat'] }],
+  });
+  if (r.canceled || !r.filePath) return null;
+  try {
+    // backupwallet <destination> — Bitcoin-core RPC that copies wallet.dat
+    await rpc('backupwallet', [r.filePath]);
+    return r.filePath;
+  } catch (e) {
+    dialog.showErrorBox('Backup Failed', 'There was an error trying to save the wallet data to the new location.');
+    return null;
+  }
+});
+
+// Modal Yes/Cancel confirmation for send. Strings come from the renderer
+// (built by the bridge to mirror the original QMessageBox::question text).
+ipcMain.handle('alias:confirm-send', async (_event, opts) => {
+  opts = opts || {};
+  const r = await dialog.showMessageBox(mainWindow || splashWindow || undefined, {
+    type: 'question',
+    title: opts.title || 'Confirm send coins',
+    message: opts.message || 'Are you sure?',
+    buttons: ['Yes', 'Cancel'],
+    defaultId: 1, // Cancel default — matches the original QMessageBox::Cancel default
+    cancelId: 1,
+    noLink: true,
+  });
+  return r.response === 0;
 });
 
 // ---------- windows ----------
@@ -225,18 +352,19 @@ function attachDevHooks(win) {
 
 function attachScreenshotHook(win) {
   const ssIdx = process.argv.indexOf('--screenshot');
-  if (ssIdx === -1 || !process.argv[ssIdx + 1]) return;
-  const outPath = process.argv[ssIdx + 1];
-  // Optional --hash <tab> navigates to #<tab> (e.g. send / receive / transactions)
-  // before capturing, so we can screenshot any tab non-interactively.
+  const outPath = (ssIdx !== -1 && process.argv[ssIdx + 1]) ? process.argv[ssIdx + 1] : null;
+  // Optional --hash <tab> navigates to #<tab> (e.g. send / receive / transactions).
   const hIdx = process.argv.indexOf('--hash');
   const hash = (hIdx !== -1 && process.argv[hIdx + 1]) ? process.argv[hIdx + 1] : null;
-  // Optional --exec-js <jsFile> runs a JS file in the renderer before capture.
+  // Optional --exec-js <jsFile> runs a JS file in the renderer.
   const xIdx = process.argv.indexOf('--exec-js');
   const xFile = (xIdx !== -1 && process.argv[xIdx + 1]) ? process.argv[xIdx + 1] : null;
-  // Optional --settle <ms> overrides the default settle delay before capture.
+  // Optional --settle <ms> overrides the default settle delay before
+  // capture/quit. Either --screenshot or --exec-js must be present for the
+  // hook to run at all.
   const sIdx = process.argv.indexOf('--settle');
   const settleMs = (sIdx !== -1 && process.argv[sIdx + 1]) ? parseInt(process.argv[sIdx + 1], 10) : 10000;
+  if (!outPath && !xFile) return;
 
   win.webContents.once('did-finish-load', () => {
     setTimeout(async () => {
@@ -253,24 +381,62 @@ function attachScreenshotHook(win) {
           console.log('[exec-js result]', JSON.stringify(r));
           await new Promise(r => setTimeout(r, 3000));
         }
-        // If exec-js opened a modal child window (passphrase dialog,
-        // wizard, etc.), capture that one instead of the main.
-        const all = BrowserWindow.getAllWindows();
-        const target = all.find((w) => w !== win && w.webContents.getURL().includes('/passphrase/'))
-                    || all.find((w) => w !== win && w.webContents.getURL().includes('/wizard/'))
-                    || win;
-        const img = await target.webContents.capturePage();
-        const buf = img.toPNG();
-        if (!buf || buf.length === 0) {
-          console.error('[screenshot] capturePage returned empty buffer');
-        } else {
-          fs.writeFileSync(outPath, buf);
-          console.log(`[screenshot] wrote ${outPath} (${buf.length} bytes)`);
+        if (outPath) {
+          // If exec-js opened a modal child window (passphrase dialog,
+          // wizard, etc.), capture that one instead of the main.
+          const all = BrowserWindow.getAllWindows();
+          const target = all.find((w) => w !== win && /\/(passphrase|wizard|about|editaddress|coincontrol)\//.test(w.webContents.getURL()))
+                      || win;
+          const img = await target.webContents.capturePage();
+          const buf = img.toPNG();
+          if (!buf || buf.length === 0) {
+            console.error('[screenshot] capturePage returned empty buffer');
+          } else {
+            fs.writeFileSync(outPath, buf);
+            console.log(`[screenshot] wrote ${outPath} (${buf.length} bytes)`);
+          }
         }
-      } catch (e) { console.error('[screenshot] failed', e); }
+      } catch (e) { console.error('[screenshot/exec-js] failed', e); }
       app.quit();
     }, settleMs);
   });
+}
+
+// Splash — borderless 600×686 dark window with the ALIAS Stacked Reverse
+// logo, shown during daemon startup. Closed once the main window or wizard
+// has finished loading.
+function createSplashWindow() {
+  splashWindow = new BrowserWindow({
+    width: 600, height: 686, useContentSize: true,
+    frame: false,
+    resizable: false, minimizable: false, maximizable: false,
+    movable: false,
+    alwaysOnTop: true,
+    transparent: false,
+    title: 'Alias',
+    icon: APP_ICON,
+    backgroundColor: '#282829',
+    webPreferences: {
+      preload: path.join(__dirname, '..', 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  splashWindow.loadFile(path.join(__dirname, '..', 'renderer', 'splash', 'index.html'));
+  splashWindow.on('closed', () => { splashWindow = null; });
+}
+
+function splashStatus(text) {
+  if (splashWindow && !splashWindow.isDestroyed()) {
+    splashWindow.webContents.send('alias:splash-status', String(text || ''));
+  }
+}
+
+function closeSplash() {
+  if (splashWindow && !splashWindow.isDestroyed()) {
+    try { splashWindow.close(); } catch (_) {}
+  }
+  splashWindow = null;
 }
 
 function createWizardWindow() {
@@ -350,17 +516,68 @@ function isFirstLaunch() {
   return !fs.existsSync(walletPath);
 }
 
+// Long-lived session unlock — 24h. Matches the user expectation that they
+// unlock once at launch and the wallet stays usable until they close the app.
+const SESSION_UNLOCK_SECS = 86400;
+
+async function promptUnlockAtLogin() {
+  const r = await openPassphraseDialog('unlocklogin');
+  if (!r || !r.passphrase) return false;
+  try {
+    // walletpassphrase <pass> <timeout> [stakingOnly]
+    const params = [r.passphrase, SESSION_UNLOCK_SECS];
+    if (r.stakingOnly) params.push(true);
+    await rpc('walletpassphrase', params);
+    return true;
+  } catch (e) {
+    // Show the dialog again with a (TODO) error hint; for now retry once.
+    console.error('[startup] unlock failed:', e.message);
+    return await promptUnlockAtLogin();
+  }
+}
+
 async function routeStartup() {
   const firstLaunch = isFirstLaunch();
+  // Show splash immediately so the user has visible feedback while the daemon
+  // boots. Matches the original Alias QSplashScreen.
+  createSplashWindow();
+  splashStatus('Loading...');
   startDaemon();
+  splashStatus('Starting Tor and daemon...');
   const ready = await waitForRpcReady(20000);
-  if (!ready) { console.error('Daemon RPC never came up — opening main window anyway.'); createMainWindow(); return; }
+  if (!ready) {
+    console.error('Daemon RPC never came up — opening main window anyway.');
+    closeSplash();
+    createMainWindow();
+    return;
+  }
+
   if (firstLaunch) {
     console.log('[setup] no wallet.dat — opening Setup Wizard.');
+    splashStatus('Setup required.');
+    closeSplash();
     createWizardWindow();
-  } else {
-    createMainWindow();
+    return;
   }
+
+  // If wallet is encrypted + locked, prompt the user for the passphrase
+  // BEFORE opening the main window. Matches the original v4.4.0 launch flow.
+  try {
+    splashStatus('Update balance...');
+    const info = await rpc('getinfo', []);
+    const isEncrypted = info && info.unlocked_until !== undefined;
+    const isLocked    = isEncrypted && info.unlocked_until === 0;
+    if (isLocked) {
+      console.log('[startup] wallet encrypted+locked — prompting for passphrase.');
+      const ok = await promptUnlockAtLogin();
+      if (!ok) { console.log('[startup] unlock cancelled — quitting.'); app.quit(); return; }
+    }
+  } catch (e) { console.warn('[startup] getinfo failed during unlock check:', e.message); }
+
+  splashStatus('...Start UI...');
+  createMainWindow();
+  // Close splash once main window has finished loading.
+  mainWindow.webContents.once('did-finish-load', () => closeSplash());
 }
 
 app.whenReady().then(() => {

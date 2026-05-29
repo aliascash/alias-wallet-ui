@@ -2,40 +2,42 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Passphrase</title>
+  <title>Passphrase Dialog</title>
   <link rel="stylesheet" href="passphrase.css">
 </head>
 <body>
   <main class="dialog">
-    <p class="intro" id="intro">Enter passphrase.</p>
+    <!-- warningLabel — populated per mode. Supports HTML (Qt's RichText). -->
+    <p class="warning" id="warning"></p>
 
-    <!-- Three optional rows; passphrase.js shows/hides per mode. -->
-    <div class="row" id="row-old" hidden>
-      <label for="pp-old">Old passphrase</label>
-      <input type="password" id="pp-old" autocomplete="off" autofocus>
+    <!-- Three rows: passLabel1/passEdit1, passLabel2/passEdit2, passLabel3/passEdit3.
+         Original .ui defines them with these exact labels. -->
+    <div class="row" id="row-pass1">
+      <label for="pass1" id="passLabel1">Enter passphrase</label>
+      <input type="password" id="pass1" autocomplete="off">
     </div>
 
-    <div class="row" id="row-new">
-      <label for="pp-new" id="pp-new-label">Passphrase</label>
-      <input type="password" id="pp-new" autocomplete="off" autofocus>
+    <div class="row" id="row-pass2" hidden>
+      <label for="pass2" id="passLabel2">New passphrase</label>
+      <input type="password" id="pass2" autocomplete="off">
     </div>
 
-    <div class="row" id="row-confirm" hidden>
-      <label for="pp-confirm">Repeat passphrase</label>
-      <input type="password" id="pp-confirm" autocomplete="off">
+    <div class="row" id="row-pass3" hidden>
+      <label for="pass3" id="passLabel3">Repeat new passphrase</label>
+      <input type="password" id="pass3" autocomplete="off">
     </div>
 
-    <label class="staking-row" id="staking-row" hidden>
-      <input type="checkbox" id="pp-staking" checked>
-      For staking only
+    <p id="capsLabel" class="caps-label"></p>
+
+    <label class="staking-row" id="stakingRow" hidden
+           title="Serves to disable the trivial sendmoney when OS account compromised. Provides no real security.">
+      <input type="checkbox" id="stakingCheckBox">
+      <span id="stakingText">For staking only</span>
     </label>
-
-    <p id="caps-warn" class="caps-warn" hidden>Warning: Caps Lock is on.</p>
-    <p id="error" class="error" hidden></p>
 
     <footer>
       <button id="btn-cancel" class="btn">Cancel</button>
-      <button id="btn-ok" class="btn btn-default-action">OK</button>
+      <button id="btn-ok" class="btn btn-default-action" disabled>OK</button>
     </footer>
   </main>
 

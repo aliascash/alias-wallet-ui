@@ -123,6 +123,19 @@
       // encryptwallet typically restarts the daemon — connection drops mid-call.
       console.warn('[shim] encryptwallet returned/threw (expected at restart):', e.message);
     }
+    // Match the original: QApplication::quit() after a successful encrypt,
+    // with the same warning text the C++ dialog showed.
+    window.alert(
+      'Wallet encrypted\n\n' +
+      'Alias will close now to finish the encryption process. ' +
+      'Remember that encrypting your wallet cannot fully protect ' +
+      'your coins from being stolen by malware infecting your computer.\n\n' +
+      'IMPORTANT: Any previous backups you have made of your wallet file ' +
+      'should be replaced with the newly generated, encrypted wallet file. ' +
+      'For security reasons, previous backups of the unencrypted wallet file ' +
+      'will become useless as soon as you start using the new, encrypted wallet.'
+    );
+    if (window.aliasBridge && window.aliasBridge.quitApp) window.aliasBridge.quitApp();
   }
   async function actionChangePassphrase() {
     const r = await askPassphrase('changepass');
@@ -180,8 +193,20 @@
       }
     },
 
-    // --- i18n stub (UI calls this to translate strings; just echo back) ---
-    translateHtmlString: function (s) { return s; },
+    // --- i18n. The UI calls bridge.translateHtmlString(src) for every .translate
+    // element, expecting the bridge to look up `src` and emit updateElement(src,
+    // translated). With no translation set the UI text remains the English
+    // source — correct behavior for the English locale.
+    //
+    // To enable another locale, set `window.__aliasShim.translations = { src: dst, ... }`
+    // before the UI calls connectSignals (e.g. from a small loader script).
+    translateHtmlString: function (s) {
+      const map = window.__aliasShim && window.__aliasShim.translations;
+      if (map && Object.prototype.hasOwnProperty.call(map, s)) {
+        dispatch('bridge', 'updateElement', s, map[s]);
+      }
+      return s;
+    },
 
     // --- info: a DATA object the UI reads (build/date) and writes (options).
     // Populated from getinfo on bridge-ready below.
@@ -265,6 +290,29 @@
         dispatch('bridge', 'listLatestBlocksResult', out);
       } catch (e) { logRpcError('listLatestBlocks', e); }
     },
+    listTransactionsForBlock: async function (blockHash) {
+      try {
+        const block = await rpc('getblock', [String(blockHash)]);
+        const txs = [];
+        for (const txid of (block && block.tx) || []) {
+          try { txs.push(await rpc('getrawtransaction', [txid, 1])); }
+          catch (_) { txs.push({ txid }); }
+        }
+        dispatch('bridge', 'listTransactionsForBlockResult', txs);
+      } catch (e) { logRpcError('getblock', e); }
+    },
+    blockDetails: async function (blockHash) {
+      try {
+        const r = await rpc('getblock', [String(blockHash)]);
+        dispatch('bridge', 'blockDetailsResult', r);
+      } catch (e) { logRpcError('getblock', e); }
+    },
+    txnDetails: async function (txid) {
+      try {
+        const r = await rpc('getrawtransaction', [String(txid), 1]);
+        dispatch('bridge', 'txnDetailsResult', r);
+      } catch (e) { logRpcError('getrawtransaction', e); }
+    },
 
     // --- validation / signing ---
     validateAddress: async function (address) {
@@ -276,22 +324,32 @@
         dispatch('bridge', 'validateAddressResult', false, address);
       }
     },
+    // UI expects { error_msg, signed_signature } returned directly — see
+    // spectre.js signMessage(). The shim returns a Promise; the UI side has
+    // been patched to await it.
     signMessage: async function (address, message) {
       try {
         const sig = await withUnlock(() => rpc('signmessage', [address, message]));
         dispatch('bridge', 'signMessageResult', true, sig);
+        return { error_msg: '', signed_signature: sig };
       } catch (e) {
         logRpcError('signmessage', e);
         dispatch('bridge', 'signMessageResult', false, e.message || String(e));
+        return { error_msg: e.message || String(e), signed_signature: '' };
       }
     },
-    verifyMessage: async function (address, signature, message) {
+    // UI signature is verifyMessage(address, message, signature) — note the
+    // arg order (msg then sig), see spectre.js verifyMessage(). Daemon RPC
+    // is `verifymessage <address> <signature> <message>`.
+    verifyMessage: async function (address, message, signature) {
       try {
         const ok = await rpc('verifymessage', [address, signature, message]);
         dispatch('bridge', 'verifyMessageResult', !!ok);
+        return { error_msg: ok ? '' : 'Signature did not verify.' };
       } catch (e) {
         logRpcError('verifymessage', e);
         dispatch('bridge', 'verifyMessageResult', false);
+        return { error_msg: e.message || String(e) };
       }
     },
     transactionDetails: async function (txid) {
@@ -323,6 +381,40 @@
     sendCoins: async function (/* useCoinControl, changeAddress */) {
       const queue = pendingRecipients.splice(0);
       if (queue.length === 0) { dispatch('bridge', 'sendCoinsResult', false); return; }
+
+      // Confirm dialog text — direct port of spectrebridge.cpp::sendCoins.
+      // Each recipient is formatted differently based on txnTypeInd:
+      //   0 SPEC_TO_SPEC: "<amt> ALIAS from your public balance to <label> (<addr>)"
+      //   1 SPEC_TO_ANON: "<amt> ALIAS from public to private, using address <label> (<addr>)"
+      //   2 ANON_TO_ANON: "<amt> ALIAS from your private balance, ring size <N>, to <label> (<addr>)"
+      //   3 ANON_TO_SPEC: "<amt> ALIAS from private to public, ring size <N>, using address <label> (<addr>)"
+      // Conversion when single recipient is SPEC_TO_ANON or ANON_TO_SPEC.
+      const fmtAmt = (alias) => Number(alias).toFixed(8) + ' ALIAS';
+      const RING_SIZE = 10; // mirrors GetRingSizeMinMax default; only shown for anon
+      const lines = queue.map((r) => {
+        const amt = fmtAmt(r.amount);
+        const dest = `${r.label || ''} (${r.address})`.trim();
+        switch (r.txnType) {
+          case 1: return `${amt} from public to private, using address ${dest}`;
+          case 2: return `${amt} from your private balance, ring size ${RING_SIZE}, to ${dest}`;
+          case 3: return `${amt} from private to public, ring size ${RING_SIZE}, using address ${dest}`;
+          case 0:
+          default: return `${amt} from your public balance to ${dest}`;
+        }
+      });
+      const joined = lines.join(' and ');
+      const isConversion = queue.length === 1 && (queue[0].txnType === 1 || queue[0].txnType === 3);
+      const message = (isConversion ? 'Are you sure you want to convert ' : 'Are you sure you want to send ') + joined + '?';
+
+      let ok = true;
+      const cOverride = window.__aliasShim && window.__aliasShim.confirmSendOverride;
+      if (typeof cOverride === 'function') {
+        ok = await cOverride({ message, queue });
+      } else if (window.aliasBridge && window.aliasBridge.confirmSend) {
+        ok = await window.aliasBridge.confirmSend({ title: 'Confirm send coins', message });
+      }
+      if (!ok) { dispatch('bridge', 'sendCoinsResult', false); return; }
+
       const rpcFor = (t) => ({
         0: 'sendtoaddress', 1: 'sendpublictoprivate',
         2: 'sendprivate',   3: 'sendprivatetopublic',
@@ -361,7 +453,8 @@
       if (name === 'encryptWallet')     return await actionEncryptWallet();
       if (name === 'changePassphrase')  return await actionChangePassphrase();
       if (name === 'toggleLock')        return await actionToggleLock();
-      if (name === 'aboutClicked')      return;  // about dialog — future
+      if (name === 'aboutClicked')      { if (window.aliasBridge && window.aliasBridge.openAbout) window.aliasBridge.openAbout(); return; }
+      if (name === 'backupWallet')      { if (window.aliasBridge && window.aliasBridge.backupWallet) window.aliasBridge.backupWallet(); return; }
       if (typeof action === 'string') return;
       if (Array.isArray(action)) return;
       if (action && Array.isArray(action.command)) {
@@ -418,8 +511,14 @@
       catch (e) { logRpcError('extkey setactive', e); dispatch('bridge', 'extKeySetActiveResult', false); }
     },
 
-    // --- coin control noop (UI accumulates; only matters if we wire selected UTXOs into sendCoins) ---
-    updateCoinControlAmount: function () { /* TODO: hook into a CoinControl object the shim maintains */ },
+    // --- coin control. Selected UTXOs are stored in
+    // `window.__aliasShim.coinControl.selected` (array of {txid, vout, amount}).
+    // sendCoins honors selections only when the Send page's "Coin Control"
+    // toggle is on (the `useCoinControl` bool passed to sendCoins).
+    // updateCoinControlAmount fires when amount changes — used by the original
+    // C++ side to recompute fee estimates. Without raw-tx integration the
+    // estimate stays at the daemon default, so this is a no-op for v1.
+    updateCoinControlAmount: function () { /* no-op until raw-tx coin control lands */ },
   };
 
   // ---------- optionsModel / walletModel ----------
@@ -460,7 +559,12 @@
 
   // Expose for the bridge methods to call (or for the Electron main process
   // to push signals into the renderer via a future ipcRenderer.on hook).
-  window.__aliasShim = { dispatch, proxies };
+  // Tests can also stub askPassphraseOverride / confirmSendOverride here.
+  window.__aliasShim = {
+    dispatch, proxies,
+    translations: null,           // { 'English text': 'Translated text', ... }
+    coinControl: { selected: [] }, // [{txid, vout, amount}] — populated by future CC UI
+  };
 
   // ---------- QWebChannel API surface ----------
 

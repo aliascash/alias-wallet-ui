@@ -1,0 +1,85 @@
+/* Mirror aboutdialog.ui geometry: 671×347.
+   - Left pane: width sized to 96 (90 + 3 margins L/R), background #382b3f,
+     containing a 90×90 ALIAS Stacked Reverse logo
+   - Right pane: 20px outer margin, version row + scroll + OK */
+
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: "Segoe UI", "Tahoma", sans-serif;
+  font-size: 13px;
+  color: #1e1e1e;
+  background: #f0f0f0;
+  overflow: hidden;
+}
+
+.about {
+  display: flex;
+  width: 671px; height: 347px;
+  box-sizing: border-box;
+}
+
+.logo-pane {
+  width: 96px;
+  background: #382b3f;
+  display: flex; align-items: flex-start; justify-content: center;
+  flex-shrink: 0;
+  padding-top: 0;
+}
+.logo-pane img {
+  width: 90px; height: 90px;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.content {
+  flex: 1;
+  display: flex; flex-direction: column;
+  padding: 20px 5px 20px 20px;
+  box-sizing: border-box;
+}
+
+.version-row {
+  display: flex; gap: 8px; align-items: baseline;
+  margin-bottom: 16px;
+  cursor: text;
+  user-select: text;
+}
+.version-row b { font-weight: 700; }
+
+.scroll-area {
+  flex: 1; overflow-y: auto;
+  padding-right: 10px;
+  cursor: text;
+  user-select: text;
+}
+.copyright {
+  margin: 0 0 20px;
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+.license {
+  margin: 0 0 20px;
+  line-height: 1.4;
+}
+.license a { color: #0078d4; text-decoration: none; }
+.license a:hover { text-decoration: underline; }
+
+footer {
+  margin-top: 8px;
+  padding-right: 15px;
+  display: flex; justify-content: flex-end;
+}
+.btn {
+  min-width: 72px;
+  padding: 3px 12px;
+  font-family: inherit; font-size: 13px;
+  background: #f5f5f5;
+  border: 1px solid #a0a0a0; border-radius: 0;
+  cursor: pointer; color: #1e1e1e;
+}
+.btn:hover  { background: #ececec; }
+.btn:active { background: #d8d8d8; }
+.btn.btn-default-action {
+  border: 2px solid #0078d4;
+  padding: 2px 11px;
+}

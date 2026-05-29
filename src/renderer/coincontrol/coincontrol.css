@@ -1,0 +1,50 @@
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: "Segoe UI", "Tahoma", sans-serif;
+  font-size: 13px;
+  color: #1e1e1e;
+  background: #f0f0f0;
+  overflow: hidden;
+}
+.dialog {
+  display: flex; flex-direction: column;
+  padding: 12px;
+  height: 100vh; box-sizing: border-box;
+  gap: 8px;
+}
+h1 { margin: 0; font-size: 14px; font-weight: 700; }
+.totals { display: flex; gap: 24px; font-size: 13px; color: #444; }
+.totals b { color: #1e1e1e; }
+.table-wrap {
+  flex: 1;
+  border: 1px solid #c8c8c8;
+  background: #fff;
+  overflow: auto;
+}
+.utxos {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+.utxos thead th {
+  background: #ececec; text-align: left; padding: 4px 8px;
+  border-bottom: 1px solid #c8c8c8; font-weight: 600;
+}
+.utxos tbody td {
+  padding: 3px 8px; border-bottom: 1px solid #eee;
+  font-family: "Consolas", "Menlo", monospace;
+}
+.loading { color: #888; text-align: center; font-style: italic; }
+
+footer {
+  display: flex; justify-content: flex-end;
+}
+.btn {
+  min-width: 72px; padding: 3px 12px;
+  font-family: inherit; font-size: 13px;
+  background: #f5f5f5;
+  border: 1px solid #a0a0a0; border-radius: 0;
+  cursor: pointer; color: #1e1e1e;
+}
+.btn:hover  { background: #ececec; }
+.btn.btn-default-action {
+  border: 2px solid #0078d4; padding: 2px 11px;
+}

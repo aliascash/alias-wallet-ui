@@ -1,0 +1,37 @@
+/* Mirror the original QSplashScreen pixmap:
+   - 600 x 686
+   - background QColor(40, 40, 41)
+   - logo: ":/assets/svg/Alias-Stacked-Reverse.svg" in rect (62, 87, 476, 476)
+   - status text: bottom-center, color QColor(138, 140, 142). */
+
+html, body {
+  height: 100%; margin: 0;
+  background: rgb(40, 40, 41);
+  overflow: hidden;
+  font-family: "Segoe UI", "Tahoma", sans-serif;
+}
+
+.splash {
+  position: relative;
+  width:  600px;
+  height: 686px;
+}
+
+.logo {
+  position: absolute;
+  left: 62px; top: 87px;
+  width: 476px; height: 476px;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.status {
+  position: absolute;
+  left: 0; right: 0; bottom: 24px;
+  text-align: center;
+  color: rgb(138, 140, 142);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#version, #message { padding: 1px 0; }

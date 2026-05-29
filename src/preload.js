@@ -16,4 +16,13 @@ contextBridge.exposeInMainWorld('aliasBridge', {
   // Passphrase dialog
   openPassphrase:    (mode) => ipcRenderer.invoke('alias:open-passphrase', mode),
   passphraseResult:  (payload) => ipcRenderer.invoke('alias:passphrase-result', payload),
+  quitApp:           () => ipcRenderer.invoke('alias:quit'),
+  confirmSend:       (opts) => ipcRenderer.invoke('alias:confirm-send', opts),
+  openAbout:         () => ipcRenderer.invoke('alias:open-about'),
+  openEditAddress:   (opts) => ipcRenderer.invoke('alias:open-edit-address', opts),
+  editAddressResult: (payload) => ipcRenderer.invoke('alias:edit-address-result', payload),
+  backupWallet:      () => ipcRenderer.invoke('alias:backup-wallet'),
+  openCoinControl:   () => ipcRenderer.invoke('alias:open-coin-control'),
+  // Splash receives status updates pushed from main via send().
+  onSplashStatus:    (cb) => ipcRenderer.on('alias:splash-status', (_e, text) => cb(text)),
 });

@@ -738,7 +738,11 @@ function getIconTitle(value) {
   return "unverified" == value ? "fa fa-cross " : "verified" == value ? "fa fa-check " : "contributor" == value ? "fa fa-cog " : "spectreteam" == value ? "fa fa-code " : "";
 }
 
-function signMessage() {
+// Patched for the Electron port: bridge.signMessage / verifyMessage are async
+// (return Promise) — the original Qt WebChannel resolved them synchronously
+// via the Qt webchannel transport, which our shim can't replicate without
+// blocking. await is the minimal change that preserves the UI behavior.
+async function signMessage() {
   $("#sign-signature").val("");
   var message;
   var callback;
@@ -746,11 +750,10 @@ function signMessage() {
   var length = "";
   message = $("#sign-address").val().trim();
   callback = $("#sign-message").val().trim();
-    //TODO: SIGNAL bridge
-  var result = bridge.signMessage(message, callback);
+  var result = await bridge.signMessage(message, callback);
   return msg = result.error_msg, length = result.signed_signature, "" !== msg ? ($("#sign-result").removeClass("green"), $("#sign-result").addClass("red"), $("#sign-result").html(msg), false) : ($("#sign-signature").val(result.signed_signature), $("#sign-result").removeClass("red"), $("#sign-result").addClass("green"), $("#sign-result").html("Message signed successfully"), void 0);
 }
-function verifyMessage() {
+async function verifyMessage() {
   var message;
   var callback;
   var msg;
@@ -758,8 +761,7 @@ function verifyMessage() {
   message = $("#verify-address").val().trim();
   callback = $("#verify-message").val().trim();
   partials = $("#verify-signature").val().trim();
-    //TODO: SIGNAL bridge
-  var result = bridge.verifyMessage(message, callback, partials);
+  var result = await bridge.verifyMessage(message, callback, partials);
   return msg = result.error_msg, "" !== msg ? ($("#verify-result").removeClass("green"), $("#verify-result").addClass("red"), $("#verify-result").html(msg), false) : ($("#verify-result").removeClass("red"), $("#verify-result").addClass("green"), $("#verify-result").html("Message verified successfully"), void 0);
 }
 function iscrollReload(dataAndEvents) {

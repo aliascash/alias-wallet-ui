@@ -1,49 +1,73 @@
-/* Match the original AskPassphraseDialog's compact Qt look. Content area
-   ~440x180 — small, focused, modal. */
+/* Mirror the original askpassphrasedialog.ui:
+   - geometry 598×209 (min width 550)
+   - QVBoxLayout: warningLabel (wordWrap, RichText) → QFormLayout (3 rows
+     of label : password edit + capsLabel) → stakingCheckBox → OK/Cancel
+   - Form is center-aligned; password edits have minimum height 21px */
 
 html, body { height: 100%; margin: 0; }
 body {
   font-family: "Segoe UI", "Tahoma", sans-serif;
   font-size: 13px;
   color: #1e1e1e;
-  background: #f4f4f4;
+  background: #f0f0f0;
   overflow: hidden;
 }
 
 .dialog {
   display: flex; flex-direction: column;
-  padding: 14px 16px 10px;
+  padding: 9px 9px 9px;
   height: 100vh; box-sizing: border-box;
+  gap: 6px;
 }
 
-.intro { margin: 0 0 12px; line-height: 1.4; }
+/* warningLabel — Qt RichText, word-wrap, default left-aligned. */
+.warning {
+  margin: 0; padding: 0;
+  line-height: 1.35;
+}
+.warning b { font-weight: 700; }
 
-.row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
-/* [hidden] has the same specificity as a class selector; without this
-   explicit override the .row rule above wins and the row stays visible. */
-[hidden] { display: none !important; }
+/* QFormLayout rows: label-aligned-right + input growing.
+   formAlignment was AlignHCenter|AlignTop, so the rows are centered. */
+.row {
+  display: flex; align-items: center;
+  margin: 1px 0;
+  justify-content: center;
+}
 .row label {
-  width: 140px; flex-shrink: 0; text-align: right; font-size: 13px; color: #333;
+  text-align: right;
+  padding-right: 6px;
+  min-width: 150px;
 }
 .row input {
-  flex: 1; padding: 3px 6px; border: 1px solid #a0a0a0;
-  border-radius: 0; font-size: 13px; font-family: inherit; background: #fff;
+  flex: 0 1 360px;
+  min-height: 21px;
+  padding: 1px 4px;
+  border: 1px solid #a0a0a0; border-radius: 0;
+  font-family: inherit; font-size: 13px;
+  background: #fff;
 }
 .row input:focus { outline: none; border-color: #0078d4; }
 
-.staking-row {
-  margin: 6px 0 0 148px;  /* aligned with input column */
-  font-size: 13px; color: #333;
-  display: flex; align-items: center; gap: 6px;
+/* [hidden] specificity fix — see wizard.css for the same pattern. */
+[hidden] { display: none !important; }
+
+/* capsLabel — bold, centered (original .ui properties: weight=75 bold,
+   alignment=AlignCenter). */
+.caps-label {
+  margin: 2px 0 0; font-weight: 700; text-align: center; min-height: 14px;
+  color: #1e1e1e;
 }
 
-.caps-warn { margin: 6px 0 0; font-size: 12px; color: #a8531c; }
-.error     { margin: 6px 0 0; font-size: 12px; color: #a8312e; min-height: 14px; }
+.staking-row {
+  display: flex; align-items: center; gap: 6px;
+  justify-content: center;
+  font-size: 13px;
+}
 
 footer {
   margin-top: auto;
-  padding-top: 8px;
-  border-top: 1px solid #d8d8d8;
+  padding-top: 6px;
   display: flex; gap: 6px; justify-content: flex-end;
 }
 .btn {
@@ -54,9 +78,13 @@ footer {
   border: 1px solid #a0a0a0; border-radius: 0;
   cursor: pointer; color: #1e1e1e;
 }
-.btn:hover  { background: #ececec; }
-.btn:active { background: #d8d8d8; }
+.btn:hover    { background: #ececec; }
+.btn:active   { background: #d8d8d8; }
+.btn[disabled] { color: #999; background: #f0f0f0; cursor: not-allowed; }
 .btn.btn-default-action {
   border: 2px solid #0078d4;
   padding: 2px 11px;
+}
+.btn.btn-default-action[disabled] {
+  border-color: #c0c0c0;
 }
