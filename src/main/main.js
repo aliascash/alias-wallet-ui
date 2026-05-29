@@ -219,6 +219,13 @@ ipcMain.handle('alias:passphrase-result', (event, payload) => {
 });
 ipcMain.handle('alias:quit', () => app.quit());
 
+// Debug — opens Chromium DevTools on the main window. The original Qt had a
+// debug console window with command-line RPC entry; DevTools serves the same
+// purpose for the JS-side bridge + lets devs inspect renderer state.
+ipcMain.handle('alias:open-debug', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.openDevTools({ mode: 'detach' });
+});
+
 // Coin Control — UTXO list. Read-only v1; selection not yet wired into sendCoins.
 let coinControlWindow = null;
 ipcMain.handle('alias:open-coin-control', () => {

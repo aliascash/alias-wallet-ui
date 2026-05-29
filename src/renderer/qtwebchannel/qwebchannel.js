@@ -221,28 +221,38 @@
       try { return await rpc('getaccount', [address]) || ''; }
       catch (e) { logRpcError('getaccount', e); return ''; }
     },
+    // UI handler: function getAddressLabelResult(result) — single arg = label.
     getAddressLabelAsync: async function (address) {
       const label = await this.getAddressLabel(address);
-      dispatch('bridge', 'getAddressLabelResult', address, label);
+      dispatch('bridge', 'getAddressLabelResult', label);
     },
-    getAddressLabelForSelectorAsync: async function (address) {
+    // UI handler: function getAddressLabelForSelectorResult(result, selector, fallback).
+    // The original C++ side stored selector+fallback when getAddressLabelForSelectorAsync
+    // was called; we replicate by stashing them on the shim's pending map.
+    getAddressLabelForSelectorAsync: async function (address, selector, fallback) {
       const label = await this.getAddressLabel(address);
-      dispatch('bridge', 'getAddressLabelForSelectorResult', address, label);
+      dispatch('bridge', 'getAddressLabelForSelectorResult', label, selector || '', fallback || '');
     },
     updateAddressLabel: async function (address, label) {
       try { await rpc('setaccount', [address, label || '']); }
       catch (e) { logRpcError('setaccount', e); }
     },
-    newAddress: async function (label, addressType /*, address, send */) {
-      // addressType: 0=normal, 1=stealth, 2=BIP32 (see qt/walletmodel.h)
+    // addressType: 0=normal, 1=stealth, 2=BIP32 (see qt/walletmodel.h).
+    // UI handler: newAddressResult(success: bool, errorMsg: string,
+    //                              address: string, send: bool).
+    // `send` echoes back the 4th arg (true=for send-side new address,
+    // false=for receive-side); UI uses it to decide what to clear/show.
+    newAddress: async function (label, addressType, address /* unused */, send) {
       const cmd = (addressType === 1) ? 'getnewstealthaddress' : 'getnewaddress';
       try {
         const addr = await rpc(cmd, label ? [label] : []);
-        dispatch('bridge', 'newAddressResult', addr, label || '');
+        dispatch('bridge', 'newAddressResult', true, '', addr, !!send);
         return addr;
       } catch (e) {
         logRpcError(cmd, e);
-        dispatch('bridge', 'lastAddressErrorResult', e.message || String(e));
+        const msg = e.message || String(e);
+        dispatch('bridge', 'newAddressResult', false, msg, '', !!send);
+        dispatch('bridge', 'lastAddressErrorResult', msg);
         return '';
       }
     },
@@ -277,28 +287,61 @@
         dispatch('bridge', 'listAnonOutputsResult', r);
       } catch (e) { logRpcError('listanonoutputs', e); }
     },
+    // Remap raw getblock fields → UI-expected shape (block_hash, block_height,
+    // block_timestamp, block_transactions count). The UI's
+    // listLatestBlocksResult / findBlockResult / listTransactionsForBlockResult
+    // all read these specific keys.
     listLatestBlocks: async function (count) {
-      // Minimal: walk back from tip; UI ports may need full re-shape.
       try {
         const info = await rpc('getinfo', []);
         const tip = info && info.blocks;
         const out = [];
         for (let h = tip; h > Math.max(0, tip - (count || 10)); h--) {
           const hash = await rpc('getblockhash', [h]);
-          out.push(await rpc('getblock', [hash]));
+          const b = await rpc('getblock', [hash]);
+          out.push({
+            block_hash:         b.hash,
+            block_height:       b.height,
+            block_timestamp:    b.time,
+            block_transactions: Array.isArray(b.tx) ? b.tx.length : 0,
+          });
         }
         dispatch('bridge', 'listLatestBlocksResult', out);
       } catch (e) { logRpcError('listLatestBlocks', e); }
+    },
+    findBlock: async function (hashOrHeight) {
+      // UI handler reads result.error_msg / .block_hash / .block_height /
+      // .block_timestamp / .block_transactions.
+      try {
+        let hash = String(hashOrHeight);
+        if (/^\d+$/.test(hash)) hash = await rpc('getblockhash', [Number(hash)]);
+        const b = await rpc('getblock', [hash]);
+        dispatch('bridge', 'findBlockResult', {
+          error_msg: '',
+          block_hash:         b.hash,
+          block_height:       b.height,
+          block_timestamp:    b.time,
+          block_transactions: Array.isArray(b.tx) ? b.tx.length : 0,
+        });
+      } catch (e) {
+        logRpcError('getblock', e);
+        dispatch('bridge', 'findBlockResult', { error_msg: e.message || String(e) });
+      }
     },
     listTransactionsForBlock: async function (blockHash) {
       try {
         const block = await rpc('getblock', [String(blockHash)]);
         const txs = [];
         for (const txid of (block && block.tx) || []) {
-          try { txs.push(await rpc('getrawtransaction', [txid, 1])); }
-          catch (_) { txs.push({ txid }); }
+          let info = { txid };
+          try {
+            const r = await rpc('getrawtransaction', [txid, 1]);
+            info = { txid: r.txid, time: r.time, version: r.version };
+          } catch (_) {}
+          txs.push(info);
         }
-        dispatch('bridge', 'listTransactionsForBlockResult', txs);
+        // UI handler: listTransactionsForBlockResult(blkHash, result).
+        dispatch('bridge', 'listTransactionsForBlockResult', blockHash, txs);
       } catch (e) { logRpcError('getblock', e); }
     },
     blockDetails: async function (blockHash) {
@@ -454,7 +497,18 @@
       if (name === 'changePassphrase')  return await actionChangePassphrase();
       if (name === 'toggleLock')        return await actionToggleLock();
       if (name === 'aboutClicked')      { if (window.aliasBridge && window.aliasBridge.openAbout) window.aliasBridge.openAbout(); return; }
+      if (name === 'aboutQtClicked')    return;  // Qt-specific; no equivalent on Electron
       if (name === 'backupWallet')      { if (window.aliasBridge && window.aliasBridge.backupWallet) window.aliasBridge.backupWallet(); return; }
+      if (name === 'debugClicked')      { if (window.aliasBridge && window.aliasBridge.openDebug) window.aliasBridge.openDebug(); return; }
+      if (name === 'clearRecipients')   { pendingRecipients.length = 0; return; }
+      // The UI's Options save flow calls userAction({optionsChanged: {...}}).
+      // Full persistence (daemon-side RPCs + electron-store) is a TODO;
+      // for now stash the changes on bridge.info.options so the values
+      // round-trip within the session, and acknowledge the call cleanly.
+      if (action && typeof action === 'object' && action.optionsChanged) {
+        bridge.info.options = Object.assign(bridge.info.options || {}, action.optionsChanged);
+        return;
+      }
       if (typeof action === 'string') return;
       if (Array.isArray(action)) return;
       if (action && Array.isArray(action.command)) {
@@ -509,6 +563,12 @@
     extKeySetActive: async function (idHex, active) {
       try { await rpc('extkey', ['options', idHex, 'active', active ? '1' : '0']); dispatch('bridge', 'extKeySetActiveResult', true); }
       catch (e) { logRpcError('extkey setactive', e); dispatch('bridge', 'extKeySetActiveResult', false); }
+    },
+
+    // --- Open the standalone Coin Control window (Send page button calls
+    // bridge.openCoinControl() directly).
+    openCoinControl: function () {
+      if (window.aliasBridge && window.aliasBridge.openCoinControl) window.aliasBridge.openCoinControl();
     },
 
     // --- coin control. Selected UTXOs are stored in
@@ -670,6 +730,75 @@
     return info.unlocked_until > 0 ? 1 : 2;
   }
 
+  // Port of SpectreGUI::setNumConnections. Updates the connections icon
+  // (uses one of assets/svg/connection-N.svg up to N=12), the overlay text
+  // count, and the "Checking wallet state with network" syncing spinner.
+  function applyConnectionStateToDOM(connections) {
+    const $icon = $('#connectionsIcon');
+    const $txt  = $('#connectionsIconText');
+    const $sync = $('#syncingIcon');
+    const $syncTxt = $('#syncingIconText');
+    if (!$icon.length) return;
+    const n = Math.max(0, Math.min(12, Number(connections) || 0));
+    $icon.attr('src', 'assets/svg/connection-' + n + '.svg');
+    $icon.attr('data-title', n + ' active connection(s) to Alias network');
+    if (connections > 0) {
+      $icon.removeClass('fa-spin');
+      $txt.text(String(connections)).removeClass('none');
+      $sync.addClass('none');
+      $syncTxt.addClass('none');
+    } else {
+      $icon.addClass('fa-spin');
+      $txt.addClass('none');
+    }
+  }
+
+  // Port of SpectreGUI::setEncryptionStatus — directly manipulates DOM
+  // classes that the original C++ side touched via Qt's WebElement helper.
+  // Drives the top-right encryption icon + sidebar menu visibility.
+  function applyEncryptionStateToDOM(status, stakingOnly) {
+    const $icon          = $('#encryptionIcon');
+    const $encryptBtn    = $('#encryptWallet');
+    const $encryptMenu   = $('.encryptWallet');
+    const $changePass    = $('#changePassphrase');
+    const $toggleLock    = $('#toggleLock');
+    const $toggleLockIco = $('#toggleLockIcon');
+    if (!$icon.length) return;
+
+    if (status === 0) {                      // Unencrypted
+      $icon.addClass('none');
+      $changePass.addClass('none');
+      $toggleLock.addClass('none');
+      $encryptMenu.removeClass('none');
+      return;
+    }
+    if (status === 1) {                      // Unlocked
+      $encryptMenu.addClass('none');
+      $icon.removeClass('none').removeClass('encryption');
+      $toggleLockIco.removeClass('fa-unlock').removeClass('fa-unlock-alt').addClass('fa-lock');
+      if (stakingOnly) {
+        $icon.attr('data-title', 'Wallet is <b>encrypted</b> and currently <b>unlocked</b> for staking only')
+             .removeClass('no-encryption').addClass('encryption-stake');
+      } else {
+        $icon.attr('data-title', 'Wallet is <b>encrypted</b> and currently <b>unlocked</b>')
+             .removeClass('encryption-stake').addClass('no-encryption');
+      }
+      $encryptBtn.addClass('none');
+      $changePass.removeClass('none');
+      $toggleLock.removeClass('none');
+      return;
+    }
+    if (status === 2) {                      // Locked
+      $icon.removeClass('none').removeClass('no-encryption').removeClass('encryption-stake').addClass('encryption');
+      $toggleLockIco.removeClass('fa-lock').addClass('fa-unlock-alt');
+      $icon.attr('data-title', 'Wallet is <b>encrypted</b> and currently <b>locked</b>');
+      $encryptBtn.addClass('none');
+      $encryptMenu.addClass('none');
+      $changePass.removeClass('none');
+      $toggleLock.removeClass('none');
+    }
+  }
+
   window.addEventListener('alias:bridge-ready', function () {
     const seenTxids = new Set();
     let lastEncStatus = -1;
@@ -704,7 +833,19 @@
         if (enc !== lastEncStatus) {
           walletModel.encryptionStatus = enc;
           dispatch('walletModel', 'encryptionStatusChanged', enc);
+          applyEncryptionStateToDOM(enc, false /* stakingOnly: TODO track via walletpassphrase arg */);
           lastEncStatus = enc;
+        }
+        applyConnectionStateToDOM(info.connections);
+        // Heuristic sync check — mirrors SpectreGUI::setNumBlocks "Up to
+        // date" branch which hides all .outofsync elements. The daemon
+        // doesn't expose initialblockdownload via getinfo, so use
+        // "have peers + non-trivial height" as a proxy. Refine if a
+        // dedicated sync signal becomes available.
+        if (info.connections > 0 && info.blocks > 100) {
+          $('.outofsync').hide();
+          const $sync = $('#syncingIcon');
+          $sync.removeClass('fa-spin syncing').attr('src', 'assets/svg/synced.svg');
         }
       }
 
