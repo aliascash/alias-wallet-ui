@@ -218,8 +218,12 @@
 
     // --- address book ---
     getAddressLabel: async function (address) {
+      // Stealth addresses fail validateaddress server-side (CBitcoinAddress
+      // can't parse them) — skip silently rather than logging a 500 warning
+      // for every poll.
+      if (typeof address === 'string' && address.length > 60) return '';
       try { return await rpc('getaccount', [address]) || ''; }
-      catch (e) { logRpcError('getaccount', e); return ''; }
+      catch (_) { return ''; }
     },
     // UI handler: function getAddressLabelResult(result) — single arg = label.
     getAddressLabelAsync: async function (address) {
@@ -271,8 +275,14 @@
       catch (e) { logRpcError('getinfo', e); return null; }
     },
 
-    // --- options stub (UI calls bridge.getOptions, expects getOptionResult) ---
-    getOptions: function () { /* let optionsModel handle defaults */ },
+    // --- Options. Load persisted settings from main + dispatch getOptionResult.
+    getOptions: async function () {
+      try {
+        const opts = await window.aliasBridge.getOptions();
+        bridge.info.options = opts;
+        dispatch('bridge', 'getOptionResult', opts);
+      } catch (_) {}
+    },
 
     // --- block explorer (UI calls these; need RPC mapping to be useful) ---
     findBlock: async function (hashOrHeight) {
@@ -282,10 +292,15 @@
       } catch (e) { logRpcError('getblock', e); }
     },
     listAnonOutputs: async function () {
+      // listanonoutputs is the Qt-bridge in-process implementation; no daemon
+      // RPC equivalent. Dispatch an empty result so the ChainData page shows
+      // its empty-state instead of waiting forever.
       try {
         const r = await rpc('listanonoutputs', []);
         dispatch('bridge', 'listAnonOutputsResult', r);
-      } catch (e) { logRpcError('listanonoutputs', e); }
+      } catch (_) {
+        dispatch('bridge', 'listAnonOutputsResult', {});
+      }
     },
     // Remap raw getblock fields → UI-expected shape (block_hash, block_height,
     // block_timestamp, block_transactions count). The UI's
@@ -421,7 +436,7 @@
       });
       dispatch('bridge', 'addRecipientResult', true);
     },
-    sendCoins: async function (/* useCoinControl, changeAddress */) {
+    sendCoins: async function (useCoinControl, changeAddress) {
       const queue = pendingRecipients.splice(0);
       if (queue.length === 0) { dispatch('bridge', 'sendCoinsResult', false); return; }
 
@@ -462,15 +477,55 @@
         0: 'sendtoaddress', 1: 'sendpublictoprivate',
         2: 'sendprivate',   3: 'sendprivatetopublic',
       })[t] || 'sendtoaddress';
+
+      // Selected UTXOs from the Coin Control dialog (window.__aliasShim.coinControl.selected).
+      const selectedUtxos = (useCoinControl && window.__aliasShim && window.__aliasShim.coinControl
+        && Array.isArray(window.__aliasShim.coinControl.selected))
+          ? window.__aliasShim.coinControl.selected
+          : [];
+
+      // Only public→public sends support raw-tx coin control; anon RPCs build
+      // their own input selection internally.
+      const isPublicOnly = queue.every((r) => r.txnType === 0);
+      const useRawTx = useCoinControl && selectedUtxos.length > 0 && isPublicOnly;
+
       try {
-        await withUnlock(async () => {
-          for (const r of queue) {
-            const params = [r.address, r.amount];
-            if (r.narration) params.push(r.label, r.narration);
-            else if (r.label) params.push(r.label);
-            await rpc(rpcFor(r.txnType), params);
-          }
-        });
+        if (useRawTx) {
+          await withUnlock(async () => {
+            const inputs = selectedUtxos.map((u) => ({ txid: u.txid, vout: u.vout }));
+            const totalIn = selectedUtxos.reduce((s, u) => s + Number(u.amount || 0), 0);
+            const outputs = {};
+            let totalOut = 0;
+            for (const r of queue) {
+              outputs[r.address] = Number(r.amount) || 0;
+              totalOut += outputs[r.address];
+            }
+            const FEE_PER_TX = 0.0001; // simplistic flat fee
+            const change = totalIn - totalOut - FEE_PER_TX;
+            if (change < 0) throw new Error('Selected inputs are smaller than recipients + fee.');
+            if (change > 0.00000001) {
+              const cAddr = changeAddress || await rpc('getnewaddress', []);
+              outputs[cAddr] = Math.round(change * 1e8) / 1e8;
+            }
+            const raw    = await rpc('createrawtransaction', [inputs, outputs]);
+            const signed = await rpc('signrawtransaction', [raw]);
+            if (!signed || !signed.hex || signed.complete === false)
+              throw new Error('signrawtransaction returned incomplete result');
+            await rpc('sendrawtransaction', [signed.hex]);
+          });
+          // Selection consumed; clear for next send.
+          if (window.__aliasShim && window.__aliasShim.coinControl)
+            window.__aliasShim.coinControl.selected = [];
+        } else {
+          await withUnlock(async () => {
+            for (const r of queue) {
+              const params = [r.address, r.amount];
+              if (r.narration) params.push(r.label, r.narration);
+              else if (r.label) params.push(r.label);
+              await rpc(rpcFor(r.txnType), params);
+            }
+          });
+        }
         dispatch('bridge', 'sendCoinsResult', true);
       } catch (e) {
         logRpcError('sendCoins', e);
@@ -506,7 +561,19 @@
       // for now stash the changes on bridge.info.options so the values
       // round-trip within the session, and acknowledge the call cleanly.
       if (action && typeof action === 'object' && action.optionsChanged) {
+        const langChanged = Object.prototype.hasOwnProperty.call(action.optionsChanged, 'Language');
         bridge.info.options = Object.assign(bridge.info.options || {}, action.optionsChanged);
+        try {
+          if (window.aliasBridge && window.aliasBridge.setOptions) {
+            await window.aliasBridge.setOptions(action.optionsChanged);
+          }
+        } catch (_) {}
+        if (typeof bridge.getOptions === 'function') bridge.getOptions();
+        if (langChanged) {
+          // Matches the original Qt's QMessageBox::warning when the locale
+          // changes — strings are baked in at startup.
+          window.alert('Please restart wallet\n\nThe used language has changed.\nPlease restart the wallet!');
+        }
         return;
       }
       if (typeof action === 'string') return;
@@ -730,6 +797,27 @@
     return info.unlocked_until > 0 ? 1 : 2;
   }
 
+  // Port of SpectreGUI::updateStakingIcon. The original checked fIsStaking +
+  // nWeight; we use getinfo.stakeweight as a proxy. Tooltip falls through the
+  // original's nested ternary chain in priority order: locked > offline >
+  // syncing > no-coins > otherwise active.
+  function applyStakingStateToDOM(info, encStatus) {
+    const $icon = $('#stakingIcon');
+    if (!$icon.length || !info) return;
+    const stakeweight = Number(info.stakeweight) || 0;
+    if (stakeweight > 0) {
+      $icon.removeClass('not-staking').addClass('staking');
+      $icon.attr('data-title', 'Staking');
+      return;
+    }
+    $icon.addClass('not-staking').removeClass('staking');
+    let why = 'Not staking because you don\'t have mature coins';
+    if (encStatus === 2)                            why = 'Not staking because wallet is locked';
+    else if ((Number(info.connections) || 0) === 0) why = 'Not staking because wallet is offline';
+    else if ((Number(info.blocks) || 0) < 100)      why = 'Not staking because wallet is syncing';
+    $icon.attr('data-title', why);
+  }
+
   // Port of SpectreGUI::setNumConnections. Updates the connections icon
   // (uses one of assets/svg/connection-N.svg up to N=12), the overlay text
   // count, and the "Checking wallet state with network" syncing spinner.
@@ -799,6 +887,26 @@
     }
   }
 
+  // Load a translation map if a non-English locale is selected. Looks at
+  // bridge.info.options.Language (set by Options page) or navigator.language.
+  async function maybeLoadTranslations() {
+    if (!window.aliasBridge || !window.aliasBridge.loadTranslation) return;
+    const fromOpts = (bridge.info.options && bridge.info.options.Language) || '';
+    const fromNav  = (navigator.language || '').replace('-', '_');
+    const locale = fromOpts || fromNav;
+    if (!locale || locale === 'en' || locale.startsWith('en_')) return;
+    try {
+      const map = await window.aliasBridge.loadTranslation(locale);
+      if (map) {
+        window.__aliasShim.translations = map;
+        // Re-run translateStrings if the UI defined it (will dispatch updateElement
+        // for each .translate element it iterates).
+        if (typeof translateStrings === 'function') translateStrings();
+      }
+    } catch (_) {}
+  }
+  setTimeout(maybeLoadTranslations, 500);
+
   window.addEventListener('alias:bridge-ready', function () {
     const seenTxids = new Set();
     let lastEncStatus = -1;
@@ -837,6 +945,10 @@
           lastEncStatus = enc;
         }
         applyConnectionStateToDOM(info.connections);
+        applyStakingStateToDOM(info, enc);
+        // Daemon's status-bar warning (chain warnings, version warnings, etc.)
+        // is surfaced in #network-alert via networkAlert(text).
+        dispatch('bridge', 'networkAlert', info.errors || '');
         // Heuristic sync check — mirrors SpectreGUI::setNumBlocks "Up to
         // date" branch which hides all .outofsync elements. The daemon
         // doesn't expose initialblockdownload via getinfo, so use

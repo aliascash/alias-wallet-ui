@@ -8,23 +8,27 @@
 <body>
   <main class="dialog">
     <h1>Coin Control</h1>
-    <p>Available unspent outputs. Selection isn't yet wired into the send flow — for now this is a read-only view.</p>
+    <p class="muted">Tick UTXOs to include in the next send. Selected outputs will be used as the transaction inputs (via createrawtransaction).</p>
     <div class="totals">
       <span>Quantity: <b id="qty">0</b></span>
+      <span>Selected: <b id="selectedQty">0</b></span>
       <span>Amount: <b id="amt">0.00000000 ALIAS</b></span>
+      <span>Selected: <b id="selectedAmt">0.00000000 ALIAS</b></span>
     </div>
     <div class="table-wrap">
       <table class="utxos">
         <thead>
           <tr>
-            <th>Amount</th><th>Address</th><th>Date</th><th>Confirmations</th><th>Txid (n)</th>
+            <th><input type="checkbox" id="checkAll"></th>
+            <th>Amount</th><th>Address</th><th>Confirmations</th><th>Txid (n)</th>
           </tr>
         </thead>
         <tbody id="rows"><tr><td colspan="5" class="loading">Loading…</td></tr></tbody>
       </table>
     </div>
     <footer>
-      <button id="btn-close" class="btn btn-default-action">Close</button>
+      <button id="btn-clear"   class="btn">Clear selection</button>
+      <button id="btn-close"   class="btn btn-default-action">Apply &amp; Close</button>
     </footer>
   </main>
   <script src="coincontrol.js"></script>

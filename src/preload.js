@@ -24,6 +24,9 @@ contextBridge.exposeInMainWorld('aliasBridge', {
   backupWallet:      () => ipcRenderer.invoke('alias:backup-wallet'),
   openCoinControl:   () => ipcRenderer.invoke('alias:open-coin-control'),
   openDebug:         () => ipcRenderer.invoke('alias:open-debug'),
+  loadTranslation:   (locale) => ipcRenderer.invoke('alias:load-translation', locale),
+  getOptions:        () => ipcRenderer.invoke('alias:get-options'),
+  setOptions:        (changes) => ipcRenderer.invoke('alias:set-options', changes),
   // Splash receives status updates pushed from main via send().
   onSplashStatus:    (cb) => ipcRenderer.on('alias:splash-status', (_e, text) => cb(text)),
 });

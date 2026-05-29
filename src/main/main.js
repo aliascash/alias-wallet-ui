@@ -219,6 +219,63 @@ ipcMain.handle('alias:passphrase-result', (event, payload) => {
 });
 ipcMain.handle('alias:quit', () => app.quit());
 
+// Options — persisted in electron-store under `options`. UI-side options (e.g.
+// MinimizeToTray, DisplayUnit) live entirely here; daemon-side options
+// (paytxfee, reservebalance) also call their corresponding RPC on save.
+const DEFAULT_OPTIONS = {
+  StartAtStartup:    false,
+  DetachDatabases:   false,
+  Fee:               0.0001,
+  Staking:           true,
+  StakingDonation:   '0',
+  ReserveBalance:    0,
+  MinStakeInterval:  '0',
+  MinRingSize:       10,
+  MaxRingSize:       10,
+  MinimizeOnClose:   false,
+  MinimizeToTray:    false,
+  Notifications:     [],
+  ThinMode:          false,
+  ThinFullIndex:     false,
+  ThinIndexWindow:   4096,
+  DisplayUnit:       0,
+  DisplayAddresses:  false,
+  Language:          'en',
+  RowsPerPage:       25,
+  VisibleTransactions: [],
+};
+ipcMain.handle('alias:get-options', () => {
+  const stored = settings.get('options') || {};
+  return Object.assign({}, DEFAULT_OPTIONS, stored);
+});
+ipcMain.handle('alias:set-options', async (_event, changes) => {
+  if (!changes || typeof changes !== 'object') return false;
+  const current = settings.get('options') || {};
+  const next    = Object.assign({}, DEFAULT_OPTIONS, current, changes);
+  settings.set('options', next);
+  // Mirror daemon-side options that have RPC equivalents.
+  try {
+    if (Object.prototype.hasOwnProperty.call(changes, 'Fee'))
+      await rpc('settxfee', [Number(changes.Fee) || 0]);
+  } catch (_) {}
+  try {
+    if (Object.prototype.hasOwnProperty.call(changes, 'ReserveBalance'))
+      await rpc('reservebalance', [true, Number(changes.ReserveBalance) || 0]);
+  } catch (_) {}
+  return true;
+});
+
+// Translation loader — returns the {source: translation} map for a locale,
+// or null if no map exists. Locale codes match src/translations/<locale>.json
+// (derived from alias-modernized's alias_<locale>.ts).
+ipcMain.handle('alias:load-translation', (_event, locale) => {
+  if (!locale || locale === 'en') return null;
+  const file = path.join(__dirname, '..', 'translations', `${locale}.json`);
+  if (!fs.existsSync(file)) return null;
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
+  catch (_) { return null; }
+});
+
 // Debug — opens Chromium DevTools on the main window. The original Qt had a
 // debug console window with command-line RPC entry; DevTools serves the same
 // purpose for the JS-side bridge + lets devs inspect renderer state.
