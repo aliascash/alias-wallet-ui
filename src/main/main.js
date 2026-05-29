@@ -1,7 +1,7 @@
 // Electron main process — launches aliaswalletd, exposes JSON-RPC bridge
 // to the renderer, owns the BrowserWindow.
 
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -363,7 +363,14 @@ async function routeStartup() {
   }
 }
 
-app.whenReady().then(routeStartup);
+app.whenReady().then(() => {
+  // No menu bar — matches the original Alias 4.4.0 (Qt-based UI had none).
+  // The renderer's HTML sidebar IS the navigation; the default File/Edit/View
+  // menu just sits unused on every window. Edit-style keyboard shortcuts
+  // (Ctrl+C/V/X, etc.) still work because Chromium handles them directly.
+  Menu.setApplicationMenu(null);
+  return routeStartup();
+});
 app.on('window-all-closed', () => {
   if (daemonProc) daemonProc.kill();
   if (process.platform !== 'darwin') app.quit();
