@@ -1,0 +1,33 @@
+# Node / Electron
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# electron-builder output
+dist/
+out/
+
+# Bundled daemon binaries (large, built separately by alias-modernized)
+resources/**/aliaswalletd
+resources/**/aliaswalletd.exe
+resources/**/aliaswallet
+resources/**/aliaswallet.exe
+
+# Bundled Tor (fetched from Tor Project Expert Bundle, see README)
+resources/**/Tor/
+
+# electron-builder uses ${platform}/${arch} = win32/x64 / linux/x64 / darwin/x64
+resources/win32/
+resources/linux/
+resources/darwin/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local environment overrides
+.env
+.env.local

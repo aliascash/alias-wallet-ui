@@ -1,0 +1,1323 @@
+#tooltip, .center-div {
+    text-align: center
+}
+
+.label, .label:empty, .transaction-overview {
+    display: block
+}
+
+#transaction-info ul li .contact-info .contact-name, td {
+    text-overflow: ellipsis;
+    overflow: hidden
+}
+
+.uppercase {
+    text-transform: uppercase
+}
+
+/*------------------------------------------------------------------
+[Flexbox Base Container]
+*/
+.flex-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    align-content: center;
+    margin-right: -15px;
+}
+.flex-container > div:first-child {
+    flex-grow: 1;
+}
+.flex-container > div {
+    padding-right: 15px;
+}
+
+
+/*------------------------------------------------------------------
+[FA]
+*/
+.fa.black {
+    color: #282829
+}
+
+.fa.green {
+    color: #499749
+}
+
+.fa.grey {
+    color: #8a8c8e
+}
+
+.fa.red {
+    color: #f84444
+}
+
+.fa.yellow {
+    color: #fbaa26
+}
+
+.fa.lightgreen {
+    color: #85bb0b
+}
+
+.fa.lightred {
+    color: #ff4b00
+}
+
+.fa.orange {
+    color: #f28321
+}
+
+.btn-danger > i, .btn-primary i {
+    padding-right: 0.18em;
+}
+
+/*------------------------------------------------------------------
+[Icons]
+*/
+span.staking {
+    background-image:url("../svg/staking.svg");
+}
+
+span.not-staking {
+    background-image:url("../svg/staking_off.svg");
+}
+
+span.encryption {
+    background-image:url("../svg/lock.svg");
+}
+
+span.no-encryption {
+    background-image:url("../svg/lock_off.svg");
+}
+
+span.encryption-stake {
+    background-image:url("../svg/lock_stake.svg");
+}
+
+span.tor {
+    background-image:url("../svg/tor.svg");
+    margin-right: -5px;
+}
+
+span.no-tor {
+    background-image:url('../svg/tor_off.svg');
+}
+
+span.spinner {
+    background-image:url('../svg/spinner.svg');
+}
+
+span.connection-0 {
+    background-image:url('../svg/connection-0.svg');
+}
+
+span.syncing-0 {
+    background-image:url('../svg/syncing-0.svg');
+}
+
+.heading-selected {
+    margin: 0;
+    color: #313131
+}
+
+.heading-deselected {
+    margin: 0;
+    color: #999
+}
+
+@media (max-width: 480px) {
+    .fa-2x {
+        font-size:1.66666666em;
+    }
+}
+
+/*------------------------------------------------------------------
+[Page]
+*/
+
+.page-content-wrapper {
+    background: #F0F1F3
+}
+
+.panel {
+    border: 0 solid transparent
+}
+
+.page-sidebar .sidebar-menu .menu-items > li ul.sub-menu > li:hover > .icon-thumbnail {
+    color: #f28321
+}
+
+/* Fix sidebar padding on MacOS (without jquery-scrollbar ) */
+.page-sidebar .sidebar-menu > .menu-items > li > ul.sub-menu li > a > .arrow:before {
+    margin-right: 3px !important;
+}
+
+.page-sidebar .sidebar-menu > .menu-items > li ul.sub-menu > li {
+    padding: 0 5px 0 0px !important;
+}
+
+.page-sidebar .sidebar-menu > .menu-items > li ul.sub-menu > li > a {
+    padding-left: 40px !important;
+}
+
+.page-sidebar .sidebar-menu > *:not(.scroll-wrapper) .icon-thumbnail {
+    margin-right: 0px !important;
+}
+
+.panel.panel-default {
+    border: 1px solid rgba(0, 0, 0, .07);
+    background: #fff
+}
+
+.page-container > .page-content-wrapper > .content {
+    padding-top: 0px !important;
+}
+
+.page-container > .page-content-wrapper {
+    position: absolute !important;
+    min-height: initial !important;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 5px;
+}
+
+@media (max-width: 767px) {
+    .page-container > .page-content-wrapper {
+        position: absolute !important;
+        min-height: initial !important;
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+        overflow-y: auto;
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Header]
+ */
+.header {
+    position: static !important;
+    padding-right: 35px;
+}
+
+#status {
+    margin-top: 10px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+}
+
+#status > * {
+    line-height: 32px;
+    height: 32px;
+    width: 32px;
+    margin-left: 15px;
+    transition: all 0.5s;
+    color: orange;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    transition: height 0.5s, width 0.5s, font-size 0.5s, left 0.5s, margin-right 0.5s;
+}
+
+#status > .icon-overlay {
+    transform: translateX(-100%) translateY(1%);
+    margin-left: 0px;
+    margin-right: -32px;
+    pointer-events: none;
+    pointer: none;
+}
+
+@media  only screen and (min-width: 768px) {
+    #status > .icon-overlay {
+        transform: translateX(-100%) translateY(0.1ex);
+    }
+}
+
+#status > .syncing {
+    line-height: 42px;
+    width: 42px;
+    height: 42px;
+}
+#status > #syncingIconText.syncing {
+    margin-right: -42px;
+}
+
+@media (max-width: 767px) {
+    .header {
+        padding-right: 20px;
+        margin-bottom: 1px;
+    }
+    .header, .header .header-inner {
+        height: 51px !important;
+    }
+
+    #status {
+        margin-top: 6px;
+        height: 38px;
+    }
+
+    #status > * {
+        line-height: 28px;
+        height: 28px;
+        width: 28px;
+        font-size: 11px;
+        margin-left: 12px;
+    }
+
+    #status > .icon-overlay {
+        margin-right: -28px;
+    }
+
+    #status > .syncing {
+        line-height: 38px;
+        width: 38px;
+        height: 38px;
+    }
+    #status > #syncingIconText.syncing {
+        margin-right: -38px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding-right: 5px;
+    }
+}
+
+
+
+/*------------------------------------------------------------------
+[Nav]
+*/
+
+.nav-sub-menu {
+    background-color: #fff;
+    border: none;
+    -webkit-border-radius: 0 !important;
+    -moz-border-radius: 0 !important;
+    border-radius: 0 !important
+}
+
+nav.navbar {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: baseline;
+    flex-wrap: wrap;
+    align-content: center;
+}
+nav.navbar > div:first-child {
+    flex-grow: 1;
+}
+nav.navbar > div:not(:first-child) {
+    padding-left: 15px;
+}
+
+nav.navbar {
+    padding-top: 5px;
+    padding-bottom: 10px;
+    padding-left: 35px;
+    padding-right: 35px;
+}
+nav.navbar + div.row {
+    margin-top: 5px;
+    margin-bottom: 0px;
+    margin-left: 35px;
+    margin-right: 35px;
+}
+
+@media (max-width: 767px) {
+    .nav-tabs ~ .tab-content {
+        padding: 5px !important;
+    }
+
+    nav.navbar {
+        padding-top: 0px;
+        padding-bottom: 0px;
+        padding-left: 20px;
+        padding-right: 20px;
+        margin-bottom: 0px;
+    }
+    nav.navbar + div.row {
+        margin-left: 5px;
+        margin-right: 0px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-tabs > li > a {
+        padding-left: 5px !important;
+    }
+
+    nav.navbar {
+        padding-left: 10px;
+        padding-right: 5px;
+    }
+}
+
+@media (max-height: 680px) {
+    nav.navbar {
+        margin-bottom: 5px !important;
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Tooltips]
+*/
+
+#tooltip {
+    font-size: .8em;
+    color: #fff;
+    background: #382b3f;
+    position: absolute;
+    z-index: 99999999;
+    padding: 10px;
+    line-height: 15px;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: thin;
+    border-color: #8a8c8e;
+    pointer-events: none;
+    pointer: none;
+}
+
+.light-red, .syncing {
+    color: #f28321
+}
+
+#tooltip:after {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #382b3f;
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -10px;
+    margin-left: -10px
+}
+
+#tooltip.top:after {
+    border-top-color: transparent;
+    border-bottom: 10px solid #382b3f;
+    top: -20px;
+    bottom: auto
+}
+
+#tooltip.left:after {
+    left: 10px;
+    margin: 0
+}
+
+#tooltip.right:after {
+    right: 10px;
+    left: auto;
+    margin: 0
+}
+
+.cents {
+    font-size: 15px
+}
+
+.syncing {
+    whitespace: nowrap
+}
+
+.transaction-overview {
+    text-decoration: none;
+    color: #aaa;
+    padding: 20px;
+    border-bottom: 1px solid #F0F1F3;
+    font-size: 13px
+}
+
+.transaction-overview span {
+    color: #382b3f
+}
+
+.transaction-overview span.date {
+    color: #b9bdbe
+}
+
+.overview_date {
+    letter-spacing: 1px
+}
+
+.network-alerts-icon {
+    margin-right: 5px
+}
+
+
+/*------------------------------------------------------------------
+[<Forms & Inputs>]
+*/
+
+.warning {
+    font-size: .8em;
+    color: #f84444;
+    padding: 5px
+}
+
+button, input, optgroup, select, textarea {
+    background: transparant;
+    font-family: Montserrat, sans-serif;
+    font-size: 13px;
+    color: #000
+}
+
+input, optgroup, select, textarea {
+    padding: 3px 9px;
+    height: 34px;
+    border: 1px solid #F0F1F3;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px
+}
+
+button {
+    border: 1px solid #F0F1F3;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px
+}
+
+.newval {
+    background: #fff;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    width: 99%
+}
+
+.select-drop-down {
+    width: 145px;
+    border: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    font-size: 13px;
+    height: 35px
+}
+
+.unit.select-drop-down {
+    width: 110px;
+    border: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    font-size: 13px;
+    height: 35px;
+}
+
+select.unit[disabled] {
+    appearance: none !important;
+    border: none !important;
+}
+
+::-webkit-input-placeholder, :placeholder-shown {
+    color: #282829
+}
+
+.padding-right-forms {
+    margin-right: 25px
+}
+
+.select-drop-down {
+    appearance: none;
+    background: url('../icons/chevron.png') 95% no-repeat #F0F1F3;
+    border: 1px solid rgba(0, 0, 0, .07)
+}
+
+.select-drop-down-small {
+    width: 50px;
+    font-size: 13px;
+    border: none;
+    height: 35px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: url('../icons/chevron.png') 95% no-repeat #F0F1F3;
+    border: 1px solid rgba(0, 0, 0, .07)
+}
+
+.form-control-options-page {
+    background-color: #F0F1F3;
+    background-image: none;
+    border: 1px solid rgba(0, 0, 0, .07);
+    -webkit-appearance: none;
+    color: #2c2c2c;
+    outline: 0;
+    height: 35px;
+    line-height: normal;
+    font-size: 14px;
+    font-weight: 400;
+    min-height: 35px;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    -webkit-transition: background .2s linear 0s;
+    transition: background .2s linear 0s
+}
+
+.small.hint-text {
+    opacity: 1;
+}
+
+@media (min-width: 768px) {
+    .panel .btn-primary {
+        margin-right: 25px;
+    }
+}
+
+@media (max-width: 700px) {
+    .padding-right-forms {
+        margin-right: 0
+    }
+
+    .hide-this-icon {
+        display: none
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Table]
+*/
+
+td {
+    max-width: 0;
+    white-space: nowrap
+}
+
+table {
+    width: 100%
+}
+
+.table {
+    color: #282829
+}
+
+@media (max-width: 480px) {
+    .table thead tr th {
+        font-size: 12px;
+    }
+
+    .table.table-condensed thead tr th {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
+    .table tbody tr td {
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+}
+
+@media (max-height: 680px) {
+    .table > tbody > tr > td, .table > thead > tr > th {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+}
+
+@media (min-width: 1001px) {
+    .table tbody tr td {
+        font-size: 12px;
+    }
+}
+@media (min-width: 1401px) {
+    .table tbody tr td {
+        font-size: 13px;
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Footable]
+*/
+
+.footable-row-detail-group {
+    font-weight: 700
+}
+
+.footable-row-detail-name {
+    font-weight: 700;
+}
+
+.footable > tfoot > tr > td{
+    padding-bottom: 0px !important;
+}
+
+.footable-row-detail-value {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+@media (max-width: 480px) {
+    .footable > tbody > tr > td, .footable > thead > tr > th {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Overview]
+*/
+.wallet {
+    min-height: 307px;
+    padding-top: 8px;
+}
+
+#balances td {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+#recenttxns-container {
+    height: 424px;
+}
+
+#recenttxns thead tr th, #recenttxns tbody tr td {
+    text-align: center;
+}
+
+.overview_date {
+    white-space: normal !important;
+}
+
+#overview .table tbody tr td, #overview .table tbody tr td * {
+    font-size: 13px;
+    white-space: normal;
+}
+#overview .table tbody tr td span {
+    white-space: nowrap;
+    vertical-align: baseline;
+}
+
+@media (max-height: 680px) {
+    .wallet {
+        min-height: 360px;
+    }
+}
+
+@media (max-width: 991px) {
+    .wallet {
+        min-height: 0px;
+    }
+}
+
+@media (max-height: 680px), (max-width: 767px) {
+    .panel {
+        margin-bottom: 5px !important;
+    }
+    .panel .panel-body {
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
+    #balances {
+        margin-bottom: 0px;
+    }
+}
+
+@media (max-width: 480px) {
+    .panel .panel-heading, #balances td {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    #overview .table tbody tr td, #overview .table tbody tr td * {
+        font-size: 11px;
+    }
+    #overview .table tbody tr td .unit {
+        display: table;
+        width: 100%;
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Receive]
+*/
+#receive .center-div {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#receive .table > tbody > tr > td {
+    vertical-align: middle;
+}
+
+@media (max-width: 767px) {
+    #receive .center-div > a.btn {
+        width: 145px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+}
+
+@media (min-width: 531px) {
+    #receive tbody > tr > td:first-child, #receive thead > tr > th:first-child {
+        display: none!important;
+    }
+}
+
+@media (max-width: 530px) {
+    #receive tbody > tr > td:first-child, #receive thead > tr > th:first-child {
+        display: table-cell;
+        width: 32px;
+        padding-left: 7px !important;
+    }
+
+    #receive tbody > tr > td:nth-child(2), #receive thead > tr > th:nth-child(2) {
+        padding-left: 0px !important;
+    }
+}
+
+/*------------------------------------------------------------------
+[Addressbook]
+*/
+.address {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+#addressbook .table > tbody > tr > td {
+    vertical-align: middle;
+}
+
+#addressbook .center-div {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 767px) {
+    #addressbook .center-div > a.btn {
+        width: 145px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+}
+
+@media (min-width: 531px) {
+    #addressbook tbody > tr > td:first-child, #addressbook thead > tr > th:first-child {
+        display: none!important;
+    }
+}
+
+@media (max-width: 530px) {
+    #addressbook tbody > tr > td:first-child, #addressbook thead > tr > th:first-child {
+        width: 32px;
+        display: table-cell;
+        padding-left: 7px !important;
+    }
+
+    #addressbook tbody > tr > td:nth-child(2), #addressbook thead > tr > th:nth-child(2) {
+        padding-left: 0px !important;
+    }
+}
+
+#address-lookup-table tbody > tr > td:first-child, #address-lookup-table thead > tr > th:first-child {
+    display: none;
+}
+
+
+/*------------------------------------------------------------------
+[Blockdata]
+*/
+#blk-hash, #txn-hash {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+#block-info-modal td:first-child, #block-info-modal th:first-child, #blkexp-txn-modal td:first-child, #blkexp-txn-modal th:first-child {
+    width: 30%;
+}
+
+#block-info-modal td, #blkexp-txn-modal td{
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+
+/*------------------------------------------------------------------
+[Modals]
+*/
+
+#qrcode-modal {
+    display: none
+}
+
+#import-key-modal {
+    margin: auto;
+    padding: 20px;
+    width: 800px;
+    background: #fff;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, .7);
+    -webkit-box-shadow: 0 0 4px rgba(0, 0, 0, .7);
+    -moz-box-shadow: 0 0 4px rgba(0, 0, 0, .7);
+    display: none;
+    position: absolute
+}
+
+#import-key-modal label {
+    display: inline-block;
+    padding-right: 20px;
+    margin: 15px 20px 20px;
+    text-align: right;
+    width: 200px
+}
+
+#import-key-modal input {
+    width: 650px;
+    height: 40px;
+    padding: 0 10px;
+    margin-bottom: 10px
+}
+
+#import-key-modal textarea {
+    width: 500px;
+    height: 50px;
+    padding: 0 10px;
+    margin-bottom: 10px
+}
+
+#qrcode {
+    margin: auto;
+    padding-bottom: 20px
+}
+
+#qrcode canvas, #qrcode img {
+    display: block;
+    margin: auto
+}
+
+#message-preview img {
+    max-width: 90%
+}
+
+#transaction-info {
+    padding-bottom: 25px;
+    -webkit-user-select: text;
+    user-select: text
+}
+
+.verified-mark {
+    color: #fff;
+    background-color: green;
+    border-radius: 15px;
+    padding: 3px
+}
+
+/* normal */
+.verified-mark:hover {
+    border-radius: 10px;
+    padding-left: 10px;
+    padding-right: 10px
+}
+
+.contributor-mark {
+    color: #fff;
+    background-color: #f84444;
+    border-radius: 15px;
+    padding: 5px
+}
+
+.contributor-mark:hover {
+    border-radius: 10px;
+    padding-left: 10px;
+    padding-right: 10px
+}
+
+.spectreteam-mark {
+    color: #fff;
+    background-color: #04043d;
+    border-radius: 15px;
+    padding: 3px
+}
+
+.spectreteam-mark:hover {
+    border-radius: 10px;
+    padding-left: 10px;
+    padding-right: 10px
+}
+
+textarea {
+    resize: none;
+    display: block;
+    height: 60px;
+    border: 1px solid #ededed;
+    width: 100%
+}
+
+.input-list input[type=textedarea] {
+    display: block;
+    margin: 0;
+    width: 100%;
+    font-family: sans-serif;
+    font-size: 18px;
+    appearance: none;
+    box-shadow: none;
+    border-radius: none
+}
+
+.input-list input[type=textaddrea]:focus {
+    outline: 0
+}
+
+.heading-deselected, .heading-selected {
+    font-size: 1em;
+    font-family: Montserrat, sans-serif;
+    text-decoration: none;
+    cursor: pointer
+}
+
+#remove-on-send {
+    padding: 20px
+}
+
+@media (max-width: 767px) {
+    .modal .modal-header {
+        padding: 15px 10px 0px !important;
+    }
+    .modal-dialog {
+        margin-left: 45px;
+        margin-right: 25px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-dialog {
+        margin: 0px;
+    }
+}
+
+
+/*------------------------------------------------------------------
+[Scrollbars]
+*/
+
+.iScrollVerticalScrollbar {
+    position: absolute;
+    z-index: 9999;
+    bottom: 0;
+    top: 0;
+    right: 0;
+    overflow: hidden;
+    background: #a7b0b1;
+    width: 10px
+}
+
+.iScrollIndicator {
+    width: 100%;
+    background: #697172
+}
+
+.default-scroll {
+    display: block;
+    height: auto;
+    width: auto
+}
+
+/* Progress bar */
+#syncProgressBar {
+    height: 11px;
+    display: block;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border: none;
+    margin-bottom: 2px
+}
+
+progress::-webkit-progress-bar {
+    background: #131218;
+    border-radius: 50px;
+    padding: 2px;
+    box-shadow: 0 1px 0 0 rgba(255, 255, 255, .2)
+}
+
+progress::-webkit-progress-value {
+    border-radius: 50px;
+    box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, .4);
+    background: -webkit-linear-gradient(45deg, transparent, transparent 33%, rgba(0, 0, 0, .1) 33%, rgba(0, 0, 0, .1) 66%, transparent 66%), -webkit-linear-gradient(top, rgba(255, 255, 255, .25), rgba(0, 0, 0, .2)), -webkit-linear-gradient(left, #e5203d, #e41c39);
+    background-size: 25px 14px, 100% 100%, 100% 100%;
+    -webkit-animation: animateprogress 5s linear 0 infinite;
+    animation: animateprogress 5s linear 0 infinite
+}
+
+@-webkit-keyframes animateprogress {
+    0% {
+        background-position: 0 0, 0 0, 0 0
+    }
+    100% {
+        background-position: -100px 0, 0 0, 0 0
+    }
+}
+
+
+/*------------------------------------------------------------------
+[HD key wizzard]
+*/
+
+.wizardback:before {
+    float: left
+}
+
+.wizardfwd {
+    display: block;
+    position: fixed;
+    float: right;
+    bottom: 0;
+    cursor: pointer;
+    z-index: 999999999999;
+    top: 430px;
+    right: 20px
+}
+
+.footable.breakpoint > tbody > tr > td > span.footable-toggle, .footable > thead > tr > th > span.footable-sort-indicator {
+    display: inline-block;
+    font-family: footable;
+    speak: none;
+    font-style: normal;
+    font-weight: 400;
+    font-variant: normal;
+    text-transform: none;
+    -webkit-font-smoothing: antialiased
+}
+
+.wizardfwd:after {
+    float: left
+}
+
+.green-circle {
+    color: #19e2b4
+}
+
+.red-circle {
+    color: #f84444
+}
+
+
+.none {
+    display: none !important
+}
+
+.radio label.form-controlring_size:before {
+    display: none
+}
+
+
+/*------------------------------------------------------------------
+[Transactions]
+*/
+
+/* Make tbody scrollable */
+#transactions-table > thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed; /* even columns width , fix width of table too*/
+}
+
+#transactions-table > tbody {
+    display: block;
+    height: 50vh;
+    overflow: auto;
+}
+
+#transactions-table > tbody > tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed; /* even columns width , fix width of table too*/
+}
+
+#transactions-table > thead > tr > th.trans-status {
+    width:28px !important;
+    padding-left:5px !important;
+}
+#transactions-table > tbody > tr > td.trans-status {
+    width: 28px !important;
+    padding-left: 6px !important;
+    overflow: visible;
+}
+#transactions-table > tbody > tr > td.trans-status > i {
+    margin-top: -4px;
+    margin-bottom: -4px;
+    font-size:1.66666666em;
+    vertical-align: middle;
+}
+
+#transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
+    width: 127px;
+}
+
+#transactions-table > thead > tr > th.amount{
+    text-align: right;
+}
+#transactions-table > tbody > tr > td.amount {
+    text-align: right;
+}
+
+#transactions-table > thead > tr > th.trans-type-icon, #transactions-table > tbody > tr > td.trans-type-icon  {
+    width: 38px;
+}
+
+#transactions-table > tbody > tr > td.trans-type-icon img {
+    margin-top: -4px;
+    margin-bottom: -4px;
+}
+
+#transactions-table {
+    margin-bottom: 0px !important;
+}
+
+@media (max-width: 1000px) {
+    #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
+        width: 110px;
+    }
+}
+
+@media (max-width: 680px) {
+    #transactions-table > tbody > tr > td {
+        white-space: normal !important;
+        overflow-wrap: break-word;
+    }
+    #transactions-table > tbody > tr > td, #transactions-table > thead > tr > th {
+        padding-top: 6px !important;
+        padding-bottom: 6px !important;
+    }
+    #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
+        width: 72px;
+    }
+    #transactions-table > tbody > tr > td.trans-status > i, #transactions-table > tbody > tr > td.trans-type-icon > img {
+        margin-top: 2px;
+    }
+}
+
+@media (max-width: 530px) {
+    .trans-nar {
+        display: none
+    }
+}
+
+@media (max-width: 480px) {
+    #transactions-table > thead > tr > th {
+        font-size: 11px;
+    }
+    #transactions-table > thead > tr > th.trans-status, #transactions-table > tbody > tr > td.trans-status {
+        width:22px !important;
+    }
+    #transactions-table > thead > tr > th.trans-date, #transactions-table > tbody > tr > td.trans-date {
+        width: 60px;
+    }
+    #transactions-table > thead > tr > th.trans-type-icon, #transactions-table > tbody > tr > td.trans-type-icon  {
+        width: 28px;
+    }
+}
+
+
+/* Make page-content scrollable with fix header */
+body.fixed-header {
+    overflow-y: hidden;
+}
+
+#network-alert {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    color: #f84444;
+    font-weight: bold;
+}
+
+#transaction-info dl {
+    width: 100%;
+    overflow: hidden;
+    padding: 0;
+    margin: 0
+}
+
+#transaction-info dt {
+    float: left;
+    width: 22%;
+    padding: 0;
+    margin: 0
+}
+
+#transaction-info dd {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    float: left;
+    width: 78%;
+    padding: 0;
+    margin: 0
+}
+
+#transaction-info a {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+
+/*------------------------------------------------------------------
+[Chain Data]
+*/
+
+/* Make tbody scrollable */
+#chaindata-table > thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed; /* even columns width , fix width of table too*/
+}
+
+#chaindata-table > tbody {
+    display: block;
+    height: 50vh;
+    overflow: auto;
+}
+
+#chaindata-table > tbody > tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed; /* even columns width , fix width of table too*/
+}
+
+#chaindata-table tbody > tr > td {
+    vertical-align: middle;
+}
+
+@media (min-width: 531px) {
+    #chaindata-table tbody > tr > td:first-child, #chaindata-table thead > tr > th:first-child {
+        display: none!important;
+    }
+}
+
+@media (max-width: 530px) {
+    #chaindata-table tbody > tr > td:first-child, #chaindata-table thead > tr > th:first-child {
+        width: 32px;
+        display: table-cell;
+        padding-left: 7px !important;
+    }
+
+    #chaindata-table tbody > tr > td:nth-child(2), #chaindata-table thead > tr > th:nth-child(2) {
+        padding-left: 0px !important;
+    }
+}
+

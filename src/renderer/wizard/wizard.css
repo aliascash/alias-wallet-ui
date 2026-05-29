@@ -1,0 +1,128 @@
+/* Mimic Qt SetupWalletWizard "ModernStyle". Window is 516x486 incl title;
+   content area is 516x456. Match the original's proportions exactly:
+   - Left sidebar ~110px, dark purple, vertically-centered logo
+   - Body padding 16px L/R, 14px T/B
+   - Heading "Set Up Your Wallet" — bold, ~16px, dark
+   - Body text ~13px, normal weight, line-height ~1.45
+   - Radio buttons: native HTML defaults, small ~13px label
+   - Footer button row: 4 buttons (Back/Next/Cancel/Help), ~70px wide, ~22px tall */
+
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: "Segoe UI", "Tahoma", "Helvetica Neue", sans-serif;
+  font-size: 13px;
+  color: #1e1e1e;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.wizard-shell {
+  display: flex;
+  height: 100vh;
+}
+
+.wizard-side {
+  width: 110px;
+  background: #3b3855;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.wizard-side img { width: 78px; opacity: 0.95; }
+
+.wizard-main {
+  flex: 1;
+  display: flex; flex-direction: column;
+  padding: 14px 16px 8px;
+  overflow: hidden;
+}
+
+.wizard-page { flex: 1; overflow-y: auto; }
+.wizard-page h1 {
+  font-size: 14px; font-weight: 700;
+  margin: 0 0 8px;
+  color: #1e1e1e;
+}
+.wizard-page p {
+  font-size: 13px; line-height: 1.45;
+  color: #1e1e1e;
+  margin: 0 0 10px;
+}
+.wizard-page code {
+  background: none; color: inherit; padding: 0;
+  font-family: inherit; font-size: inherit;
+}
+
+.wizard-option {
+  display: block;
+  padding: 5px 0;
+  cursor: pointer;
+  font-size: 13px;
+}
+.wizard-option input {
+  margin-right: 6px;
+  vertical-align: -2px;
+}
+
+.form-group { margin: 8px 0; }
+.form-group label { display: block; font-size: 12px; color: #444; margin-bottom: 3px; }
+.form-control {
+  width: 100%; max-width: 320px;
+  padding: 3px 6px;
+  border: 1px solid #a0a0a0; border-radius: 0; font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+}
+.form-control:focus { outline: none; border-color: #0078d4; }
+
+.mnemonic-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+  margin: 8px 0;
+}
+.mnemonic-grid .word, .mnemonic-grid input {
+  padding: 3px 6px;
+  border: 1px solid #d0d0d0;
+  border-radius: 0;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 12px;
+  background: #fff;
+}
+.mnemonic-grid .word { display: flex; align-items: center; }
+.mnemonic-grid .word .idx { color: #888; margin-right: 4px; min-width: 18px; text-align: right; }
+
+.verify-status { margin-top: 6px; font-size: 12px; min-height: 14px; }
+.verify-status.ok  { color: #1f7a3a; }
+.verify-status.bad { color: #a8312e; }
+
+.muted { color: #777; font-size: 12px; margin-top: 4px; }
+
+.wizard-footer {
+  display: flex; gap: 6px;
+  padding-top: 8px;
+  margin-top: 4px;
+  border-top: 1px solid #d8d8d8;
+  align-items: center;
+  justify-content: flex-end;  /* Qt QWizard clusters buttons on the right */
+}
+
+/* Native-Qt-button look: light grey, thin border, small. */
+.btn {
+  min-width: 72px;
+  padding: 3px 12px;
+  font-family: inherit; font-size: 13px;
+  background: #f5f5f5;
+  border: 1px solid #a0a0a0;
+  border-radius: 0;
+  cursor: pointer;
+  color: #1e1e1e;
+}
+.btn:hover    { background: #ececec; }
+.btn:active   { background: #d8d8d8; }
+.btn[disabled] { color: #999; background: #f0f0f0; cursor: not-allowed; }
+
+/* Qt default button has a blue 1px inset border highlight. */
+.btn.btn-default-action {
+  border: 2px solid #0078d4;
+  padding: 2px 11px;
+}
+
+.btn-spacer { flex: 1; }

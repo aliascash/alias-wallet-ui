@@ -1,0 +1,58 @@
+{
+  "name": "alias-wallet-desktop",
+  "version": "4.4.1",
+  "description": "Alias wallet desktop UI — Electron front-end for the aliaswalletd daemon. Mirrors the original Alias UI (HTML/CSS/JS from aliascash/alias-wallet-ui) without Qt.",
+  "main": "src/main/main.js",
+  "author": "Alias Developers",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:linux": "electron-builder --linux",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "electron-store": "^8.2.0"
+  },
+  "devDependencies": {
+    "electron": "^30.5.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "cash.alias.wallet",
+    "productName": "Alias Wallet",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "!**/*.md"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/${platform}/${arch}",
+        "to": "daemon",
+        "filter": [
+          "aliaswalletd",
+          "aliaswalletd.exe",
+          "Tor/**/*"
+        ]
+      }
+    ],
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Finance"
+    },
+    "win": {
+      "target": ["nsis", "portable"]
+    },
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.finance"
+    }
+  }
+}
