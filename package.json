@@ -1,7 +1,7 @@
 {
   "name": "alias-wallet-desktop",
-  "version": "4.4.1",
-  "description": "Alias wallet desktop UI — Electron front-end for the aliaswalletd daemon. Mirrors the original Alias UI (HTML/CSS/JS from aliascash/alias-wallet-ui) without Qt.",
+  "version": "5.1.0",
+  "description": "ALIAS wallet desktop UI — Electron front-end for the aliaswalletd daemon. Mirrors the original ALIAS UI (HTML/CSS/JS from aliascash/alias-wallet-ui) without Qt.",
   "main": "src/main/main.js",
   "author": "Alias Developers",
   "license": "MIT",
@@ -23,7 +23,7 @@
   },
   "build": {
     "appId": "cash.alias.wallet",
-    "productName": "Alias Wallet",
+    "productName": "ALIAS Wallet",
     "directories": {
       "output": "dist",
       "buildResources": "build"

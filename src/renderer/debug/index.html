@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ALIAS - Debug window</title>
+  <link rel="stylesheet" href="debug.css">
+</head>
+<body>
+  <div class="tabs">
+    <button class="tab active" data-tab="information">Information</button>
+    <button class="tab" data-tab="console">Console</button>
+    <button class="tab" data-tab="network">Network Traffic</button>
+  </div>
+
+  <div class="tab-content" id="tab-information">
+    <table class="info-grid">
+      <tr><th class="section" colspan="2">ALIAS Core</th></tr>
+      <tr><th>Client name</th><td id="info-client-name">N/A</td></tr>
+      <tr><th>Client version</th><td id="info-client-version">N/A</td></tr>
+      <tr><th>Using OpenSSL version</th><td id="info-openssl-version">N/A</td></tr>
+      <tr><th>Using BerkeleyDB version</th><td id="info-bdb-version">N/A</td></tr>
+      <tr><th>Build date</th><td id="info-build-date">N/A</td></tr>
+      <tr><th>Startup time</th><td id="info-startup-time">N/A</td></tr>
+      <tr><th class="section" colspan="2">Network</th></tr>
+      <tr><th>Name</th><td id="info-network-name">N/A</td></tr>
+      <tr><th>Number of connections</th><td id="info-connections">N/A</td></tr>
+      <tr><th class="section" colspan="2">Block chain</th></tr>
+      <tr><th>Current number of blocks</th><td id="info-blocks">N/A</td></tr>
+      <tr><th>Estimated total blocks</th><td id="info-blocks-est">N/A</td></tr>
+      <tr><th>Last block time</th><td id="info-last-block-time">N/A</td></tr>
+      <tr><th class="section" colspan="2">Debug log file</th></tr>
+      <tr><td colspan="2"><button id="btn-open-log">Open</button><span class="hint"> Open the ALIAS debug log file from the current data directory.</span></td></tr>
+      <tr><th class="section" colspan="2">Command-line options</th></tr>
+      <tr><td colspan="2"><button id="btn-show-help">Show</button><span class="hint"> Show the ALIAS help message.</span></td></tr>
+    </table>
+  </div>
+
+  <div class="tab-content" id="tab-console" style="display:none">
+    <div class="console-scroll" id="console-scroll"></div>
+    <div class="console-input-row">
+      <span class="prompt">&gt;</span>
+      <input type="text" id="console-input" placeholder="Enter a command (or 'help' for a list)" autocomplete="off">
+      <button id="console-clear">Clear console</button>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-network" style="display:none">
+    <table class="net-grid">
+      <tr><th colspan="3">Totals</th></tr>
+      <tr><th>In:</th><td id="net-in">N/A</td><th>Out:</th></tr>
+      <tr><td></td><td id="net-out">N/A</td><td></td></tr>
+    </table>
+    <div class="net-graph-row">
+      <label>Range:
+        <select id="graph-range">
+          <option value="5" selected>5 minutes</option>
+          <option value="10">10 minutes</option>
+          <option value="30">30 minutes</option>
+          <option value="60">1 hour</option>
+        </select>
+      </label>
+      <button id="graph-clear">Clear</button>
+      <span class="graph-legend"><span class="dot-in"></span> In <span class="dot-out"></span> Out</span>
+    </div>
+    <canvas id="traffic-graph" width="700" height="160"></canvas>
+    <div class="peer-hint">Select a peer to view detailed information.</div>
+    <table class="peer-grid" id="peer-table">
+      <thead>
+        <tr><th>Address/Hostname</th><th>User Agent</th><th>Ping Time</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script src="debug.js"></script>
+</body>
+</html>

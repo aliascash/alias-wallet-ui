@@ -23,6 +23,15 @@
   }
 
   function utxoKey(u) { return (u.txid || '') + ':' + (u.vout || 0); }
+
+  // Tree mode mirrors original CoinControlDialog::updateView grouping —
+  // UTXOs grouped by source address; aggregate amount per group header.
+  // List mode is one UTXO per row (flat).
+  let viewMode = 'list';
+  document.querySelectorAll('input[name="viewmode"]').forEach((r) => {
+    r.addEventListener('change', () => { viewMode = r.value; render(); });
+  });
+
   function render() {
     if (utxos.length === 0) {
       rowsEl.innerHTML = '<tr><td colspan="5" class="loading">No unspent outputs.</td></tr>';
@@ -32,22 +41,57 @@
     }
     rowsEl.innerHTML = '';
     let total = 0, selTotal = 0, selCount = 0;
-    for (const u of utxos) {
-      const amt = Number(u.amount) || 0;
-      total += amt;
-      const k = utxoKey(u);
-      const checked = selectedKeys.has(k);
-      if (checked) { selTotal += amt; selCount++; }
-      const tr = document.createElement('tr');
-      tr.dataset.k = k;
-      tr.innerHTML = `
-        <td><input type="checkbox" ${checked ? 'checked' : ''} data-k="${k}"></td>
-        <td>${amt.toFixed(8)}</td>
-        <td>${u.address || ''}</td>
-        <td>${u.confirmations || 0}</td>
-        <td>${(u.txid || '').slice(0, 16)}… (${u.vout})</td>`;
-      rowsEl.appendChild(tr);
+
+    if (viewMode === 'tree') {
+      const byAddr = new Map();
+      for (const u of utxos) {
+        const addr = u.address || '(unknown)';
+        if (!byAddr.has(addr)) byAddr.set(addr, []);
+        byAddr.get(addr).push(u);
+        total += Number(u.amount) || 0;
+      }
+      for (const [addr, items] of byAddr) {
+        const groupAmt = items.reduce((s, u) => s + (Number(u.amount) || 0), 0);
+        const header = document.createElement('tr');
+        header.className = 'group-header';
+        header.innerHTML = `<td></td><td><b>${groupAmt.toFixed(8)}</b></td><td colspan="2"><b>${addr}</b></td><td>${items.length} output(s)</td>`;
+        rowsEl.appendChild(header);
+        for (const u of items) {
+          const amt = Number(u.amount) || 0;
+          const k = utxoKey(u);
+          const checked = selectedKeys.has(k);
+          if (checked) { selTotal += amt; selCount++; }
+          const tr = document.createElement('tr');
+          tr.dataset.k = k;
+          tr.className = 'group-child';
+          tr.innerHTML = `
+            <td><input type="checkbox" ${checked ? 'checked' : ''} data-k="${k}"></td>
+            <td>${amt.toFixed(8)}</td>
+            <td></td>
+            <td>${u.confirmations || 0}</td>
+            <td>${(u.txid || '').slice(0, 16)}… (${u.vout})</td>`;
+          rowsEl.appendChild(tr);
+        }
+      }
+    } else {
+      for (const u of utxos) {
+        const amt = Number(u.amount) || 0;
+        total += amt;
+        const k = utxoKey(u);
+        const checked = selectedKeys.has(k);
+        if (checked) { selTotal += amt; selCount++; }
+        const tr = document.createElement('tr');
+        tr.dataset.k = k;
+        tr.innerHTML = `
+          <td><input type="checkbox" ${checked ? 'checked' : ''} data-k="${k}"></td>
+          <td>${amt.toFixed(8)}</td>
+          <td>${u.address || ''}</td>
+          <td>${u.confirmations || 0}</td>
+          <td>${(u.txid || '').slice(0, 16)}… (${u.vout})</td>`;
+        rowsEl.appendChild(tr);
+      }
     }
+
     qtyEl.textContent = String(utxos.length);
     amtEl.textContent = total.toFixed(8) + ' ALIAS';
     selQty.textContent = String(selCount);

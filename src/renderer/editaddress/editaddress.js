@@ -7,7 +7,12 @@
 
 (function () {
   'use strict';
-  const mode = (window.location.hash || '#new-sending').slice(1).toLowerCase();
+  // Accept both the kebab-case form ('new-sending') and the original Qt
+  // class-style camelCase form ('NewSendingAddress'). Normalize to kebab.
+  const rawMode = (window.location.hash || '#new-sending').slice(1);
+  const mode = rawMode
+    .replace(/^([A-Z][a-z]+)([A-Z][a-z]+)Address$/, (_, a, b) => `${a}-${b}`)
+    .toLowerCase();
 
   const rowAddress = document.getElementById('row-address');
   const rowStealth = document.getElementById('row-stealth');

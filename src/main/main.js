@@ -1,7 +1,7 @@
 // Electron main process — launches aliaswalletd, exposes JSON-RPC bridge
 // to the renderer, owns the BrowserWindow.
 
-const { app, BrowserWindow, Menu, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog, shell, Tray, Notification, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -24,13 +24,19 @@ if (!app.requestSingleInstanceLock()) {
   app.quit();
   process.exit(0);
 }
-app.on('second-instance', () => {
+app.on('second-instance', (_e, argv) => {
   const win = mainWindow || wizardWindow;
   if (win) {
     if (win.isMinimized()) win.restore();
     win.focus();
   }
+  // On Win/Linux, the alias: URI arrives as a CLI arg on the second instance.
+  const uri = (argv || []).find((a) => typeof a === 'string' && a.startsWith('alias:'));
+  if (uri && typeof dispatchUriToRenderer === 'function') dispatchUriToRenderer(uri);
 });
+
+// First-instance launch may also carry the URI in process.argv.
+const initialUriArg = process.argv.find((a) => typeof a === 'string' && a.startsWith('alias:'));
 
 // ---------- persistent settings ----------
 //
@@ -109,15 +115,32 @@ function startDaemon() {
   seedTorFiles(daemonPath, dataDir);
   // cwd must be the daemon's dir — net.cpp CreateProcessA("Tor/tor.exe", ...)
   // resolves the Tor binary relative to the *current* working directory.
+  //
+  // windowsHide:true suppresses the Windows console window that would
+  // otherwise pop up when a GUI process spawns a console subprocess
+  // (aliaswalletd is a console app, electron.exe is a GUI app).
+  //
+  // stdio 'inherit' in dev so the developer sees daemon output in the
+  // terminal where they ran `npm start`. In packaged builds Electron
+  // has no console, so we 'ignore' the pipes to avoid the OS opening
+  // one for buffering.
   daemonProc = spawn(daemonPath, [`-datadir=${dataDir}`, '-server'], {
     cwd: path.dirname(daemonPath),
-    stdio: 'inherit',
+    stdio: isDev ? 'inherit' : 'ignore',
+    windowsHide: true,
   });
   daemonProc.on('exit', (code) => {
     console.log(`aliaswalletd exited with code ${code}`);
     daemonProc = null;
   });
 }
+
+// Methods the renderer polls speculatively that the daemon rejects for
+// known reasons (listanonoutputs not implemented; getaccount on stealth
+// addresses returns 500). The renderer's qwebchannel shim already
+// tolerates a null/empty result. Returning null here keeps Electron's
+// ipcMain from logging "Error occurred in handler" on every poll.
+const SILENT_RPC_METHODS = new Set(['listanonoutputs', 'getaccount']);
 
 async function rpc(method, params = []) {
   const res = await axios.post(`http://${RPC_HOST}:${RPC_PORT}/`, {
@@ -133,7 +156,14 @@ async function rpc(method, params = []) {
   return res.data.result;
 }
 
-ipcMain.handle('alias:rpc', async (_event, method, params) => rpc(method, params));
+ipcMain.handle('alias:rpc', async (_event, method, params) => {
+  try {
+    return await rpc(method, params);
+  } catch (e) {
+    if (SILENT_RPC_METHODS.has(method)) return null;
+    throw e;
+  }
+});
 ipcMain.handle('alias:daemon-status', () => ({
   running: daemonProc !== null,
   pid: daemonProc ? daemonProc.pid : null,
@@ -194,8 +224,9 @@ function openPassphraseDialog(mode) {
       modal: !!parent,
       alwaysOnTop: !parent,
       resizable: false, minimizable: false, maximizable: false,
-      title: 'Alias',
+      title: 'ALIAS',
       icon: APP_ICON,
+      autoHideMenuBar: true,
       webPreferences: {
         preload: path.join(__dirname, '..', 'preload.js'),
         contextIsolation: true,
@@ -234,7 +265,7 @@ const DEFAULT_OPTIONS = {
   MaxRingSize:       10,
   MinimizeOnClose:   false,
   MinimizeToTray:    false,
-  Notifications:     [],
+  Notifications:     ['*'],  // mirrors original OptionsModel default (notify on all tx types)
   ThinMode:          false,
   ThinFullIndex:     false,
   ThinIndexWindow:   4096,
@@ -276,11 +307,31 @@ ipcMain.handle('alias:load-translation', (_event, locale) => {
   catch (_) { return null; }
 });
 
-// Debug — opens Chromium DevTools on the main window. The original Qt had a
-// debug console window with command-line RPC entry; DevTools serves the same
-// purpose for the JS-side bridge + lets devs inspect renderer state.
+// Debug window — mirrors the original Alias QDialog "Alias - Debug window"
+// at 740x480 with Information / Console / Network Traffic tabs.
+let debugWindow = null;
 ipcMain.handle('alias:open-debug', () => {
-  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.openDevTools({ mode: 'detach' });
+  if (debugWindow && !debugWindow.isDestroyed()) { debugWindow.focus(); return; }
+  debugWindow = new BrowserWindow({
+    width: 740, height: 480, useContentSize: true,
+    parent: mainWindow || undefined,
+    modal: false,
+    title: 'ALIAS - Debug window',
+    autoHideMenuBar: true,
+    webPreferences: {
+      preload: path.join(__dirname, '..', 'preload.js'),
+      contextIsolation: true, nodeIntegration: false, sandbox: false,
+    },
+  });
+  debugWindow.setMenu(null);
+  debugWindow.loadFile(path.join(__dirname, '..', 'renderer', 'debug', 'index.html'));
+  attachDevHooks(debugWindow);
+  debugWindow.on('closed', () => { debugWindow = null; });
+});
+
+ipcMain.handle('alias:open-debug-log', async () => {
+  const logPath = path.join(getDataDir(), 'debug.log');
+  if (fs.existsSync(logPath)) await shell.openPath(logPath);
 });
 
 // Coin Control — UTXO list. Read-only v1; selection not yet wired into sendCoins.
@@ -293,6 +344,7 @@ ipcMain.handle('alias:open-coin-control', () => {
     modal: false,
     title: 'Coin Control',
     icon: APP_ICON,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload.js'),
       contextIsolation: true,
@@ -313,8 +365,9 @@ ipcMain.handle('alias:open-about', () => {
     parent: mainWindow || undefined,
     modal: false,
     resizable: false, minimizable: false, maximizable: false,
-    title: 'About Alias',
+    title: 'About ALIAS',
     icon: APP_ICON,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload.js'),
       contextIsolation: true,
@@ -346,6 +399,7 @@ ipcMain.handle('alias:open-edit-address', (_event, opts) => {
       resizable: false, minimizable: false, maximizable: false,
       title: 'Edit Address',
       icon: APP_ICON,
+      autoHideMenuBar: true,
       webPreferences: {
         preload: path.join(__dirname, '..', 'preload.js'),
         contextIsolation: true,
@@ -477,7 +531,7 @@ function createSplashWindow() {
     movable: false,
     alwaysOnTop: true,
     transparent: false,
-    title: 'Alias',
+    title: 'ALIAS',
     icon: APP_ICON,
     backgroundColor: '#282829',
     webPreferences: {
@@ -511,11 +565,12 @@ function createWizardWindow() {
     width: 516,
     height: 456,
     useContentSize: true,
-    title: 'Alias Wallet Setup',
+    title: 'ALIAS Wallet Setup',
     icon: APP_ICON,
     resizable: false,
     minimizable: false,
     maximizable: false,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload.js'),
       contextIsolation: true,
@@ -531,15 +586,30 @@ function createWizardWindow() {
 function createMainWindow() {
   // Match the original Alias v4.4.0 client window: ~1280×720 content area
   // (1296×759 outer with Windows chrome — 16:9).
-  const saved = settings.get('mainBounds') || { width: 1280, height: 720 };
+  let saved = settings.get('mainBounds') || { width: 1280, height: 720 };
+  // Validate saved bounds against current displays — a window restored from
+  // a different monitor layout can end up off-screen, looking like the app
+  // failed to launch. Drop x/y if the rect doesn't overlap any display.
+  const { screen } = require('electron');
+  const onScreen = screen.getAllDisplays().some((d) => {
+    const r = d.workArea;
+    return Number.isFinite(saved.x) && Number.isFinite(saved.y)
+        && saved.x + 60 < r.x + r.width
+        && saved.x + saved.width  - 60 > r.x
+        && saved.y + 20 < r.y + r.height
+        && saved.y + 20 > r.y;
+  });
+  if (!onScreen) saved = { width: saved.width || 1280, height: saved.height || 720 };
   mainWindow = new BrowserWindow({
     width:  saved.width,
     height: saved.height,
     x:      Number.isFinite(saved.x) ? saved.x : undefined,
     y:      Number.isFinite(saved.y) ? saved.y : undefined,
     useContentSize: true,
-    title: 'Alias - Client',
+    title: 'ALIAS - Client',
     icon: APP_ICON,
+    show: false,  // shown explicitly after did-finish-load to avoid white flash
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload.js'),
       contextIsolation: true,
@@ -547,11 +617,33 @@ function createMainWindow() {
     },
   });
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
-  // Persist bounds on close so the next launch reopens at the same size/spot.
-  mainWindow.on('close', () => {
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+    mainWindow.focus();
+  });
+
+  // Mirror SpectreGUI::changeEvent — minimize-to-tray when option is enabled.
+  // QT version hid the window on WindowStateChange + isMinimized + option flag.
+  mainWindow.on('minimize', (e) => {
+    const opts = settings.get('options') || {};
+    if (opts.MinimizeToTray && process.platform !== 'darwin') {
+      e.preventDefault();
+      mainWindow.hide();
+    }
+  });
+
+  // Mirror SpectreGUI::closeEvent — if neither minimize-to-tray nor
+  // minimize-on-close is set, the X button quits. Otherwise X just hides
+  // (the tray icon is the way back).
+  mainWindow.on('close', (e) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       const b = mainWindow.getContentBounds();
       settings.set('mainBounds', b);
+    }
+    const opts = settings.get('options') || {};
+    if (process.platform !== 'darwin' && (opts.MinimizeToTray || opts.MinimizeOnClose) && !app.isQuiting) {
+      e.preventDefault();
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.hide();
     }
   });
   mainWindow.on('closed', () => { mainWindow = null; });
@@ -626,6 +718,11 @@ async function routeStartup() {
 
   // If wallet is encrypted + locked, prompt the user for the passphrase
   // BEFORE opening the main window. Matches the original v4.4.0 launch flow.
+  //
+  // Splash must close FIRST — both the splash and the passphrase dialog use
+  // alwaysOnTop, and on Windows the dialog ends up stacked under the splash
+  // so the user can't see or interact with it. Original Qt had the same
+  // issue and dismissed the splash before showing the unlock prompt.
   try {
     splashStatus('Update balance...');
     const info = await rpc('getinfo', []);
@@ -633,6 +730,7 @@ async function routeStartup() {
     const isLocked    = isEncrypted && info.unlocked_until === 0;
     if (isLocked) {
       console.log('[startup] wallet encrypted+locked — prompting for passphrase.');
+      closeSplash();
       const ok = await promptUnlockAtLogin();
       if (!ok) { console.log('[startup] unlock cancelled — quitting.'); app.quit(); return; }
     }
@@ -640,25 +738,176 @@ async function routeStartup() {
 
   splashStatus('...Start UI...');
   createMainWindow();
-  // Close splash once main window has finished loading.
-  mainWindow.webContents.once('did-finish-load', () => closeSplash());
+  // Close splash once main window has finished loading. Fallback: force-show
+  // after 12s in case did-finish-load never fires (renderer hang) — splash
+  // dismissed + main window shown so the user sees SOMETHING.
+  const splashCloseTimeout = setTimeout(() => {
+    console.warn('[startup] did-finish-load timeout — forcing main window show');
+    closeSplash();
+    if (mainWindow && !mainWindow.isDestroyed()) { mainWindow.show(); mainWindow.focus(); }
+  }, 12000);
+  mainWindow.webContents.once('did-finish-load', () => {
+    clearTimeout(splashCloseTimeout);
+    closeSplash();
+    if (mainWindow && !mainWindow.isDestroyed()) { mainWindow.show(); mainWindow.focus(); }
+    if (initialUriArg) dispatchUriToRenderer(initialUriArg);
+  });
+  mainWindow.webContents.once('did-fail-load', (_e, code, desc) => {
+    console.error('[startup] did-fail-load', code, desc);
+    clearTimeout(splashCloseTimeout);
+    closeSplash();
+    if (mainWindow && !mainWindow.isDestroyed()) { mainWindow.show(); mainWindow.focus(); }
+  });
+}
+
+// System tray icon — matches original SpectreGUI::createTrayIcon. Click to
+// toggle main-window show/hide; context menu mirrors original ordering
+// (toggle, Options, RPC Console, Quit). Stored at module scope so it isn't
+// GC'd and so we can hide it on quit.
+let trayIcon = null;
+function createTray() {
+  if (trayIcon) return;
+  try {
+    const img = nativeImage.createFromPath(APP_ICON);
+    trayIcon = new Tray(img.isEmpty() ? nativeImage.createEmpty() : img);
+  } catch (_) { trayIcon = new Tray(nativeImage.createEmpty()); }
+  trayIcon.setToolTip('ALIAS');
+  const buildMenu = () => Menu.buildFromTemplate([
+    { label: mainWindow && mainWindow.isVisible() ? 'Hide ALIAS' : 'Show ALIAS',
+      click: () => { if (!mainWindow) return; if (mainWindow.isVisible()) mainWindow.hide(); else { mainWindow.show(); mainWindow.focus(); } } },
+    { type: 'separator' },
+    { label: '&Options...', click: () => { if (mainWindow) { mainWindow.show(); mainWindow.focus(); mainWindow.webContents.executeJavaScript(`$('#navitems a[href="#options"]').click();`).catch(() => {}); } } },
+    { label: '&Debug window', click: () => ipcMain.emit('alias:open-debug') /* falls through handle */ },
+    { type: 'separator' },
+    { label: 'E&xit', click: () => app.quit() },
+  ]);
+  trayIcon.setContextMenu(buildMenu());
+  trayIcon.on('click', () => {
+    if (!mainWindow) return;
+    if (mainWindow.isVisible()) mainWindow.hide(); else { mainWindow.show(); mainWindow.focus(); }
+    trayIcon.setContextMenu(buildMenu());
+  });
+}
+
+// Notify user of incoming transactions. The renderer detects new tx via
+// the poll loop and forwards via this IPC, which fires a native OS
+// notification through Electron's built-in Notification API (replaces the
+// original Notificator).
+ipcMain.handle('alias:notify', (_event, title, body) => {
+  if (!Notification.isSupported()) return;
+  try {
+    new Notification({ title: String(title || 'ALIAS'), body: String(body || ''), silent: false }).show();
+  } catch (_) {}
+});
+
+// alias: URI handler — mirror SpectreGUI::handleURI. Fired on second-instance
+// launches (Win/Linux pass URI as argv) and macOS open-url. The renderer
+// receives the URI via 'alias:uri-open' and pre-fills the Send recipient.
+function dispatchUriToRenderer(uri) {
+  if (!uri || !uri.startsWith('alias:')) return;
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  try {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+    mainWindow.webContents.send('alias:uri-open', uri);
+  } catch (_) {}
+}
+try { app.setAsDefaultProtocolClient('alias'); } catch (_) {}
+app.on('open-url', (event, uri) => { event.preventDefault(); dispatchUriToRenderer(uri); });
+
+// Build the application menu matching original SpectreGUI::createMenuBar.
+// On non-Mac the bar is hidden (matching `appMenuBar->hide()` in original)
+// but the actions exist so keyboard accelerators still trigger.
+// Bring main window forward + click a renderer element. Used for menu items
+// that should fire the same JS handler the in-page button would.
+function triggerInRenderer(sel) {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  mainWindow.show(); mainWindow.focus();
+  mainWindow.webContents.executeJavaScript(`$(${JSON.stringify(sel)}).click(); void 0;`).catch(() => {});
+}
+
+function buildAppMenu() {
+  return Menu.buildFromTemplate([
+    {
+      label: '&File',
+      submenu: [
+        // Backup uses the same handler as the in-page button: trigger the
+        // sidebar Backup-Wallet entry which calls bridge.userAction(["backupWallet"]).
+        { label: '&Backup Wallet...', click: () => triggerInRenderer('a[onclick*="backupWallet"]') },
+        { type: 'separator' },
+        { label: 'E&xit', accelerator: 'CmdOrCtrl+Q', role: 'quit' },
+      ],
+    },
+    {
+      label: '&Settings',
+      submenu: [
+        { label: '&Encrypt Wallet...',     click: () => triggerInRenderer('a[onclick*="encryptWallet"]') },
+        { label: '&Change Passphrase...',  click: () => triggerInRenderer('a[onclick*="changePassphrase"]') },
+        { label: '&(Un)lock Wallet...',    click: () => triggerInRenderer('#toggleLock a') },
+        { type: 'separator' },
+        { label: '&Options...', accelerator: 'CmdOrCtrl+,', click: () => triggerInRenderer('#navitems a[href="#options"]') },
+      ],
+    },
+    {
+      label: '&Help',
+      submenu: [
+        { label: '&Debug window', click: () => triggerInRenderer('a[onclick*="debugClicked"]') },
+        { type: 'separator' },
+        { label: '&About ALIAS',  click: () => triggerInRenderer('a[onclick*="aboutClicked"]') },
+      ],
+    },
+  ]);
 }
 
 app.whenReady().then(() => {
-  // No menu bar — matches the original Alias 4.4.0 (Qt-based UI had none).
-  // The renderer's HTML sidebar IS the navigation; the default File/Edit/View
-  // menu just sits unused on every window. Edit-style keyboard shortcuts
-  // (Ctrl+C/V/X, etc.) still work because Chromium handles them directly.
-  Menu.setApplicationMenu(null);
+  // Original SpectreGUI builds the menu bar with File/Settings/Help.
+  // On macOS the bar is visible at top-of-screen; on Win/Linux it is created
+  // then hidden (`appMenuBar->hide()`) so accelerators (Ctrl+Q, Ctrl+,, etc.)
+  // still trigger via Chromium's accelerator system.
+  Menu.setApplicationMenu(buildAppMenu());
+  if (process.platform !== 'darwin') {
+    // Equivalent of appMenuBar->hide() — set autoHideMenuBar on every
+    // window we create below; here we just hide it on the main one when
+    // it's created.
+  }
+  createTray();
   return routeStartup();
 });
-app.on('window-all-closed', () => {
-  if (daemonProc) daemonProc.kill();
+// Graceful daemon shutdown: prefer the JSON-RPC 'stop' command (lets the
+// daemon flush wallet.dat + block index), wait up to 8s for the process to
+// exit, then SIGKILL as fallback. Synchronous wait on the exit promise
+// keeps Electron from quitting before the daemon finishes writing.
+let shuttingDown = false;
+async function gracefulStopDaemon() {
+  if (!daemonProc || shuttingDown) return;
+  shuttingDown = true;
+  try { await rpc('stop', []); } catch (_) { /* daemon may already be exiting */ }
+  // Wait for the process to actually exit so wallet.dat lands on disk.
+  await new Promise((resolve) => {
+    const t = setTimeout(() => {
+      try { if (daemonProc) daemonProc.kill(); } catch (_) {}
+      resolve();
+    }, 8000);
+    if (!daemonProc) { clearTimeout(t); resolve(); return; }
+    daemonProc.once('exit', () => { clearTimeout(t); resolve(); });
+  });
+  daemonProc = null;
+}
+
+app.on('window-all-closed', async () => {
+  await gracefulStopDaemon();
   if (process.platform !== 'darwin') app.quit();
 });
-app.on('before-quit', () => {
+app.on('before-quit', (e) => {
+  app.isQuiting = true;  // unblock the close-event minimize-to-tray hold
   if (mainWindow && !mainWindow.isDestroyed()) {
     try { settings.set('mainBounds', mainWindow.getContentBounds()); } catch (_) {}
   }
-  if (daemonProc) daemonProc.kill();
+  if (trayIcon) { try { trayIcon.destroy(); } catch (_) {} trayIcon = null; }
+  // before-quit may fire before window-all-closed. If the daemon is still
+  // alive, hold the quit while we ask it to stop gracefully.
+  if (daemonProc && !shuttingDown) {
+    e.preventDefault();
+    gracefulStopDaemon().then(() => app.quit());
+  }
 });

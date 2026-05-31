@@ -50,7 +50,7 @@
       stakingRow.hidden = false;
       rowPass2.hidden = true;
       rowPass3.hidden = true;
-      warningLabel.innerHTML = '<b>Alias Wallet Login</b>';
+      warningLabel.innerHTML = '<b>ALIAS Wallet Login</b>';
       document.title = 'Unlock wallet';
       break;
     case 'unlockstaking':

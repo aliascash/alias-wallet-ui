@@ -24,6 +24,12 @@ contextBridge.exposeInMainWorld('aliasBridge', {
   backupWallet:      () => ipcRenderer.invoke('alias:backup-wallet'),
   openCoinControl:   () => ipcRenderer.invoke('alias:open-coin-control'),
   openDebug:         () => ipcRenderer.invoke('alias:open-debug'),
+  openDebugLog:      () => ipcRenderer.invoke('alias:open-debug-log'),
+  notify:            (title, body) => ipcRenderer.invoke('alias:notify', title, body),
+  // Main process pushes alias: URIs (from CLI / open-url / drag-drop into
+  // main proc) via this channel. Renderer hands them to the shim which
+  // dispatches emitReceipient.
+  onUriOpen:         (cb) => ipcRenderer.on('alias:uri-open', (_e, uri) => cb(uri)),
   loadTranslation:   (locale) => ipcRenderer.invoke('alias:load-translation', locale),
   getOptions:        () => ipcRenderer.invoke('alias:get-options'),
   setOptions:        (changes) => ipcRenderer.invoke('alias:set-options', changes),

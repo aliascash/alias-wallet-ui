@@ -127,7 +127,7 @@
     // with the same warning text the C++ dialog showed.
     window.alert(
       'Wallet encrypted\n\n' +
-      'Alias will close now to finish the encryption process. ' +
+      'ALIAS will close now to finish the encryption process. ' +
       'Remember that encrypting your wallet cannot fully protect ' +
       'your coins from being stolen by malware infecting your computer.\n\n' +
       'IMPORTANT: Any previous backups you have made of your wallet file ' +
@@ -182,7 +182,20 @@
     copy: function (text) {
       try { navigator.clipboard.writeText(String(text || '')); } catch (e) { /* noop */ }
     },
-    paste: function () { return ''; },  // sync paste isn't available; UI rarely depends on return
+    // Original C++: returns clipboard text AND emits emitPaste(text). UI's
+    // paste(targetSelector) sets pasteTo then calls bridge.paste(), then the
+    // emitPaste handler writes the clipboard text into pasteTo. Mirror by
+    // reading async and dispatching the signal — UI doesn't use the return.
+    paste: function () {
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          navigator.clipboard.readText().then((text) => {
+            dispatch('bridge', 'emitPaste', String(text || ''));
+          }).catch(() => {});
+        }
+      } catch (_) {}
+      return '';
+    },
 
     // --- external links ---
     urlClicked: function (url) {
@@ -251,6 +264,21 @@
       try {
         const addr = await rpc(cmd, label ? [label] : []);
         dispatch('bridge', 'newAddressResult', true, '', addr, !!send);
+        // Original Alias Qt's WalletModel auto-refreshed the address tables
+        // via a Qt model signal. Mirror that by pushing the new entry into
+        // the Receive + Address Book tables right away — the 8s poll loop
+        // would otherwise leave the new row invisible for several seconds.
+        if (!send) {
+          const isStealth = (addressType === 1);
+          dispatch('bridge', 'emitAddresses', [{
+            address:     addr,
+            label:       label || 'Unlabeled',
+            label_value: label || '',
+            pubkey:      isStealth ? 'Stealth Address' : 'n/a',
+            type:        'R',
+            at:          isStealth ? 2 : 0,
+          }]);
+        }
         return addr;
       } catch (e) {
         logRpcError(cmd, e);
@@ -260,7 +288,18 @@
         return '';
       }
     },
-    deleteAddress: async function (/* address */) { /* daemon has no delete; noop */ },
+    deleteAddress: async function (address) {
+      // Original Alias's WalletModel called DelAddressBookName directly on
+      // the wallet. The daemon doesn't expose that as RPC, so we mirror the
+      // user-visible outcome by clearing the label via setaccount('') —
+      // which is the closest equivalent for own addresses (Bitcoin's RPC
+      // rejects setaccount on foreign addresses, which the original C++
+      // would have refused to remove anyway since removeRows() refuses
+      // Receiving-type rows).
+      if (!address) return;
+      try { await rpc('setaccount', [address, '']); }
+      catch (e) { logRpcError('setaccount(clear)', e); }
+    },
 
     // --- chain / wallet info ---
     populateTransactionTable: async function () {
@@ -275,12 +314,23 @@
       catch (e) { logRpcError('getinfo', e); return null; }
     },
 
-    // --- Options. Load persisted settings from main + dispatch getOptionResult.
+    // --- Options. Load persisted settings from main + dispatch getOptionResult,
+    // then fan out OptionsModel signals so handlers wired in UI (unit_setType,
+    // updateReserved, updateRowsPerPage, visibleTransactions) reflect the
+    // persisted values immediately. Mirrors original OptionsModel::Init() emits.
     getOptions: async function () {
       try {
         const opts = await window.aliasBridge.getOptions();
         bridge.info.options = opts;
         dispatch('bridge', 'getOptionResult', opts);
+        if (opts.DisplayUnit !== undefined)
+          dispatch('optionsModel', 'displayUnitChanged', Number(opts.DisplayUnit) || 0);
+        if (opts.ReserveBalance !== undefined)
+          dispatch('optionsModel', 'reserveBalanceChanged', Math.round(Number(opts.ReserveBalance) * 1e8));
+        if (opts.RowsPerPage !== undefined)
+          dispatch('optionsModel', 'rowsPerPageChanged', Number(opts.RowsPerPage) || 25);
+        if (Array.isArray(opts.VisibleTransactions))
+          dispatch('optionsModel', 'visibleTransactionsChanged', opts.VisibleTransactions);
       } catch (_) {}
     },
 
@@ -361,15 +411,77 @@
     },
     blockDetails: async function (blockHash) {
       try {
-        const r = await rpc('getblock', [String(blockHash)]);
-        dispatch('bridge', 'blockDetailsResult', r);
+        const b = await rpc('getblock', [String(blockHash)]);
+        // Remap daemon's getblock shape to the UI's expected block_* keys.
+        const out = {
+          block_hash:        b.hash || blockHash,
+          block_transactions: Array.isArray(b.tx) ? b.tx.length : 0,
+          block_height:      b.height,
+          block_type:        b.flags || (b.proofhash ? 'PoS' : 'PoW'),
+          block_reward:      b.reward != null ? b.reward : '',
+          block_timestamp:   b.time ? new Date(b.time * 1000).toISOString() : '',
+          block_merkle_root: b.merkleroot || '',
+          block_prev_block:  b.previousblockhash || '',
+          block_next_block:  b.nextblockhash || '',
+          block_difficulty:  b.difficulty != null ? b.difficulty : '',
+          block_bits:        b.bits || '',
+          block_size:        b.size != null ? b.size : '',
+          block_version:     b.version != null ? b.version : '',
+          block_nonce:       b.nonce != null ? b.nonce : '',
+        };
+        dispatch('bridge', 'blockDetailsResult', out);
       } catch (e) { logRpcError('getblock', e); }
     },
-    txnDetails: async function (txid) {
+    // Original signature: bridge.txnDetails(blockHash, txid) — second arg
+    // when invoked from the per-block tx list. We accept either form.
+    txnDetails: async function (blockHashOrTxid, maybeTxid) {
+      const txid = maybeTxid || blockHashOrTxid;
       try {
-        const r = await rpc('getrawtransaction', [String(txid), 1]);
-        dispatch('bridge', 'txnDetailsResult', r);
-      } catch (e) { logRpcError('getrawtransaction', e); }
+        const rawHex = await rpc('getrawtransaction', [String(txid), 0]);
+        const r = await rpc('decoderawtransaction', [rawHex]);
+        // gettransaction gives confirmations/blockhash/time (wallet-aware).
+        // For non-wallet txs this returns 500; tolerate and continue.
+        let wallet = {};
+        try { wallet = await rpc('gettransaction', [String(txid)]); } catch (_) {}
+        // Resolve input source addresses via decoderawtransaction on each
+        // prev-tx. Skip on error — UI shows the field empty.
+        const inputs = [];
+        for (const vin of (r.vin || [])) {
+          if (!vin.txid) continue;
+          try {
+            const prevHex = await rpc('getrawtransaction', [String(vin.txid), 0]);
+            const prev = await rpc('decoderawtransaction', [prevHex]);
+            const prevOut = (prev.vout || [])[vin.vout || 0];
+            inputs.push({
+              input_source_address: ((prevOut && prevOut.scriptPubKey && prevOut.scriptPubKey.addresses) || [''])[0],
+              input_value:          prevOut ? prevOut.value : '',
+            });
+          } catch (_) {
+            inputs.push({ input_source_address: vin.txid + ':' + (vin.vout || 0), input_value: '' });
+          }
+        }
+        const outputs = (r.vout || []).map((o) => ({
+          output_source_address: ((o.scriptPubKey && o.scriptPubKey.addresses) || [''])[0],
+          output_value:          o.value,
+        }));
+        const out = {
+          transaction_hash:          r.txid || txid,
+          transaction_size:          r.size || '',
+          transaction_rcv_time:      wallet.timereceived ? new Date(wallet.timereceived * 1000).toISOString() : '',
+          transaction_mined_time:    wallet.blocktime ? new Date(wallet.blocktime * 1000).toISOString() : '',
+          transaction_block_hash:    wallet.blockhash || '',
+          transaction_reward:        wallet.amount != null ? wallet.amount : 0,
+          transaction_confirmations: wallet.confirmations != null ? wallet.confirmations : '',
+          transaction_value:         outputs.reduce((s, o) => s + Number(o.output_value || 0), 0).toFixed(8),
+          transaction_inputs:        inputs,
+          transaction_outputs:       outputs,
+          error_msg: '',
+        };
+        dispatch('bridge', 'txnDetailsResult', out);
+      } catch (e) {
+        logRpcError('getrawtransaction', e);
+        dispatch('bridge', 'txnDetailsResult', { error_msg: (e && e.message) || String(e) });
+      }
     },
 
     // --- validation / signing ---
@@ -411,12 +523,64 @@
       }
     },
     transactionDetails: async function (txid) {
+      // Mirror TransactionDesc::toHTML — emits an HTML block with
+      // Transaction ID / Block Hash / Status / Date / Source / Net amount /
+      // per-destination credit/debit lines + chainz.cryptoid explorer
+      // links. The UI handler appends this to #transaction-info via
+      // .html().
       try {
-        const r = await rpc('gettransaction', [txid]);
-        dispatch('bridge', 'transactionDetailsResult', JSON.stringify(r, null, 2));
+        const tx = await rpc('gettransaction', [txid]);
+        if (!tx) {
+          dispatch('bridge', 'transactionDetailsResult', '');
+          return;
+        }
+        const explorer = 'https://chainz.cryptoid.info/alias/';
+        const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+        const dateStr = tx.time ? new Date(tx.time * 1000).toLocaleString() : '';
+        const fmt = (n) => (n == null ? '' : Number(n).toFixed(8) + ' ALIAS');
+        const explorerLink = (path, label) => `<a href="javascript:void(0)" onclick='bridge.urlClicked(${JSON.stringify(explorer + path)})'>${esc(label)}</a>`;
+
+        let h = '<div class="tx-desc" style="font-family:Montserrat,sans-serif">';
+        h += `<b>Transaction ID:</b> ${explorerLink('tx.dws?' + tx.txid, tx.txid)}<br>`;
+        if (tx.blockhash) {
+          h += `<b>Block Hash:</b> ${explorerLink('block.dws?' + tx.blockhash, tx.blockhash)}<br>`;
+        }
+        const confs = tx.confirmations || 0;
+        let status;
+        if (confs < 0)       status = 'conflicted';
+        else if (confs === 0) status = '0/unconfirmed';
+        else if (confs < 10)  status = `${confs}/unconfirmed`;
+        else                  status = `${confs} confirmations`;
+        h += `<b>Status:</b> ${esc(status)}<br>`;
+        if (dateStr) h += `<b>Date:</b> ${esc(dateStr)}<br>`;
+        if (tx.generated) h += `<b>Source:</b> Generated<br>`;
+        if (tx.fee !== undefined && tx.fee !== 0) {
+          h += `<b>Transaction fee:</b> ${esc(fmt(tx.fee))}<br>`;
+        }
+        if (tx.amount !== undefined) {
+          h += `<b>Net amount:</b> ${esc(fmt(tx.amount))}<br>`;
+        }
+        // Per-destination details
+        if (Array.isArray(tx.details)) {
+          for (const d of tx.details) {
+            const dir = d.category === 'send' ? 'Debit' : 'Credit';
+            const addr = d.address || '';
+            h += `<br><b>${esc(dir)}:</b> ${esc(fmt(d.amount))}`;
+            if (addr) h += `<br><b>To/From:</b> ${esc(addr)}`;
+            if (d.account) h += `<br><b>Label:</b> ${esc(d.account)}`;
+            if (d.narration) h += `<br><b>Narration:</b> ${esc(d.narration)}`;
+            h += '<br>';
+          }
+        }
+        // Optional comment/message stored in the wallet entry
+        if (tx.comment)   h += `<br><b>Comment:</b><br>${esc(tx.comment)}<br>`;
+        if (tx.to)        h += `<br><b>Comment-To:</b><br>${esc(tx.to)}<br>`;
+        h += '</div>';
+
+        dispatch('bridge', 'transactionDetailsResult', h);
       } catch (e) {
         logRpcError('gettransaction', e);
-        dispatch('bridge', 'transactionDetailsResult', '');
+        dispatch('bridge', 'transactionDetailsResult', `<div class="tx-desc-error">Error loading transaction: ${(e && e.message) || e}</div>`);
       }
     },
 
@@ -595,11 +759,18 @@
         dispatch('bridge', 'getNewMnemonicResult', false, e.message || String(e));
       }
     },
-    importFromMnemonic: async function (mnemonic, passphrase, label, scanFromTime) {
+    // UI signature (spectre.js): (mnemonic, passphrase, label, bip44, scanFromTime).
+    // Daemon RPC: `mnemonic import <words> [passphrase] [bip44] [scanchain] [label]`.
+    importFromMnemonic: async function (mnemonic, passphrase, label, bip44, scanFromTime) {
       try {
         const params = ['import', mnemonic || '', passphrase || ''];
+        // bip44 + scanchain are positional booleans; emit them only if either
+        // is requested so older daemons that ignore them still work.
+        if (bip44 || scanFromTime) {
+          params.push(bip44 ? true : false);
+          params.push(scanFromTime ? true : false);
+        }
         if (label) params.push(label);
-        if (scanFromTime) params.push(scanFromTime);
         const r = await rpc('mnemonic', params);
         dispatch('bridge', 'importFromMnemonicResult', true, r);
       } catch (e) {
@@ -829,7 +1000,7 @@
     if (!$icon.length) return;
     const n = Math.max(0, Math.min(12, Number(connections) || 0));
     $icon.attr('src', 'assets/svg/connection-' + n + '.svg');
-    $icon.attr('data-title', n + ' active connection(s) to Alias network');
+    $icon.attr('data-title', n + ' active connection(s) to ALIAS network');
     if (connections > 0) {
       $icon.removeClass('fa-spin');
       $txt.text(String(connections)).removeClass('none');
@@ -906,6 +1077,59 @@
     } catch (_) {}
   }
   setTimeout(maybeLoadTranslations, 500);
+
+  // alias: URI handling — mirrors SpectreGUI::handleURI. Parses
+  // alias:<address>?amount=X&label=Y&narration=Z and dispatches
+  // emitReceipient so the UI navigates to Send and pre-fills the first
+  // recipient row.
+  function parseAliasUri(uri) {
+    if (typeof uri !== 'string' || !uri.startsWith('alias:')) return null;
+    const rest = uri.slice(6).replace(/^\/\//, '');
+    const qIdx = rest.indexOf('?');
+    const address = qIdx === -1 ? rest : rest.slice(0, qIdx);
+    const query   = qIdx === -1 ? '' : rest.slice(qIdx + 1);
+    const params = {};
+    for (const pair of query.split('&')) {
+      if (!pair) continue;
+      const [k, v] = pair.split('=');
+      params[decodeURIComponent(k)] = v == null ? '' : decodeURIComponent(v.replace(/\+/g, ' '));
+    }
+    if (!address) return null;
+    return {
+      address,
+      label:     params.label     || '',
+      narration: params.narration || params.message || '',
+      amount:    parseFloat(params.amount || '0') || 0,
+    };
+  }
+  function handleAliasUri(uri) {
+    const r = parseAliasUri(uri);
+    if (!r) return;
+    // Original Alias passed amount as int64 satoshis (CAmount). The UI's
+    // send.js divides by 1E8 to display. Convert from ALIAS units in the
+    // URI accordingly.
+    const amountSats = Math.round(r.amount * 1e8);
+    dispatch('bridge', 'emitReceipient', r.address, r.label, r.narration, amountSats);
+    dispatch('bridge', 'triggerElement', '#navitems a[href=#send]', 'click');
+  }
+  if (window.aliasBridge && window.aliasBridge.onUriOpen) {
+    window.aliasBridge.onUriOpen(handleAliasUri);
+  }
+  // Drag-drop onto the renderer DOM — accept text/uri-list of alias: URIs.
+  window.addEventListener('dragover', (e) => { e.preventDefault(); });
+  window.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const dt = e.dataTransfer;
+    if (!dt) return;
+    const text = dt.getData('text/uri-list') || dt.getData('text/plain') || '';
+    for (const line of text.split(/\r?\n/)) {
+      if (line.startsWith('alias:')) handleAliasUri(line.trim());
+    }
+  });
+  // Expose for tests.
+  window.__aliasShim = window.__aliasShim || {};
+  window.__aliasShim.handleAliasUri = handleAliasUri;
+  window.__aliasShim.parseAliasUri  = parseAliasUri;
 
   window.addEventListener('alias:bridge-ready', function () {
     const seenTxids = new Set();
@@ -1020,7 +1244,24 @@
         // the overview's recent-transactions list ticks live.
         if (seenTxids.size > 0) {
           for (const tx of translated) {
-            if (tx.id && !seenTxids.has(tx.id)) dispatch('bridge', 'transactionTableChanged', tx);
+            if (tx.id && !seenTxids.has(tx.id)) {
+              dispatch('bridge', 'transactionTableChanged', tx);
+              // Mirror SpectreGUI::incomingTransaction — fire an OS
+              // notification on newly-seen incoming tx (positive amount),
+              // but only if the Notifications option includes this tx type
+              // (or is "*" for everything). Matches original C++ filter.
+              try {
+                if (window.aliasBridge && window.aliasBridge.notify && Number(tx.amount) > 0) {
+                  const notifications = (bridge.info.options && bridge.info.options.Notifications) || [];
+                  const allowAll = notifications.length === 0 || notifications[0] === '*';
+                  const txType   = String(tx.type || tx.t || '').toLowerCase();
+                  if (allowAll || notifications.includes(txType)) {
+                    const body = `+${Number(tx.amount).toFixed(8)} ALIAS` + (tx.label ? ` (${tx.label})` : '');
+                    window.aliasBridge.notify('ALIAS — incoming transaction', body);
+                  }
+                }
+              } catch (_) {}
+            }
           }
         }
         for (const tx of translated) if (tx.id) seenTxids.add(tx.id);

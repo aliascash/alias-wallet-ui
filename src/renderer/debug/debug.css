@@ -1,0 +1,51 @@
+html, body { margin: 0; padding: 0; height: 100%; font-family: "Segoe UI", Tahoma, sans-serif; font-size: 13px; background: #fff; color: #222; }
+body { display: flex; flex-direction: column; }
+
+.tabs { display: flex; border-bottom: 1px solid #ccc; background: #f3f3f3; }
+.tab {
+  background: none; border: none; padding: 8px 16px;
+  cursor: pointer; outline: none; font-size: 13px; color: #444;
+  border-bottom: 2px solid transparent;
+}
+.tab.active { color: #000; border-bottom-color: #382b3f; background: #fff; }
+.tab:hover:not(.active) { background: #e8e8e8; }
+
+.tab-content { flex: 1; padding: 12px; overflow: auto; }
+
+.info-grid { border-collapse: collapse; width: 100%; }
+.info-grid th.section { background: none; color: #382b3f; font-weight: bold; padding-top: 10px; text-align: left; }
+.info-grid th { text-align: left; font-weight: normal; color: #666; padding: 3px 12px 3px 0; vertical-align: top; }
+.info-grid td { padding: 3px 0; font-family: Consolas, monospace; }
+.info-grid button { padding: 4px 12px; }
+.info-grid .hint { color: #888; font-size: 12px; margin-left: 8px; }
+
+#tab-console { display: flex; flex-direction: column; padding: 0; }
+.console-scroll {
+  flex: 1; overflow-y: auto; padding: 8px 12px;
+  font-family: Consolas, monospace; font-size: 12px;
+  background: #fafafa; white-space: pre-wrap; word-break: break-all;
+}
+.console-line { padding: 1px 0; }
+.console-cmd { color: #000; }
+.console-cmd:before { content: '> '; color: #888; }
+.console-out { color: #333; }
+.console-err { color: #c00; }
+.console-input-row {
+  display: flex; align-items: center; padding: 6px 12px;
+  border-top: 1px solid #ccc; background: #fff;
+}
+.prompt { color: #888; padding-right: 6px; font-family: Consolas, monospace; }
+#console-input { flex: 1; padding: 4px; font-family: Consolas, monospace; font-size: 12px; border: 1px solid #ccc; }
+#console-clear { margin-left: 8px; padding: 4px 10px; }
+
+.net-grid { border-collapse: collapse; margin-bottom: 12px; }
+.net-grid th, .net-grid td { padding: 4px 12px; text-align: left; }
+.net-graph-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; font-size: 12px; color: #444; }
+.graph-legend { margin-left: auto; }
+.graph-legend .dot-in  { display: inline-block; width: 10px; height: 10px; background: #0c0; margin-right: 4px; }
+.graph-legend .dot-out { display: inline-block; width: 10px; height: 10px; background: #c00; margin: 0 4px 0 12px; }
+#traffic-graph { display: block; width: 100%; height: 160px; background: #000; border: 1px solid #c8c8c8; margin-bottom: 12px; }
+.peer-hint { color: #666; padding: 6px 0; }
+.peer-grid { border-collapse: collapse; width: 100%; font-size: 12px; }
+.peer-grid th, .peer-grid td { padding: 4px 8px; border-bottom: 1px solid #eee; text-align: left; }
+.peer-grid thead { background: #f3f3f3; }
