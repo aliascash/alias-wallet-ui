@@ -24,6 +24,16 @@ if (!app.requestSingleInstanceLock()) {
   app.quit();
   process.exit(0);
 }
+// Global error guards — prevent the app from silently dying on an
+// unhandled rejection or uncaught exception. Most often these come from
+// renderer RPC calls that fail when the wallet is locked.
+process.on('uncaughtException', (e) => {
+  console.error('[main] uncaughtException:', e && e.stack || e);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[main] unhandledRejection:', reason && reason.stack || reason);
+});
+
 app.on('second-instance', (_e, argv) => {
   const win = mainWindow || wizardWindow;
   if (win) {
@@ -194,11 +204,20 @@ ipcMain.handle('alias:import-wallet-dat', async (_event, srcPath) => {
 });
 
 ipcMain.handle('alias:wizard-complete', () => {
+  // Persist a flag so isFirstLaunch knows the wizard has been completed,
+  // independent of whether the daemon auto-created wallet.dat.
+  settings.set('wizardCompleted', true);
   if (wizardWindow) { wizardWindow.close(); wizardWindow = null; }
   createMainWindow();
+  mainWindow.webContents.once('did-finish-load', () => { startupComplete = true; });
 });
 ipcMain.handle('alias:wizard-cancel', () => {
+  // Match original Alias behavior: cancelling the wizard exits the app
+  // (spectre.cpp:254 `if (!wizard.exec()) return 0;`). Because we don't
+  // mark wizardCompleted, the next launch will re-fire the wizard.
+  settings.set('wizardCompleted', false);
   if (wizardWindow) wizardWindow.close();
+  app.isQuiting = true;
   app.quit();
 });
 
@@ -215,9 +234,10 @@ function openPassphraseDialog(mode) {
     passphrasePending = resolve;
     const parent = mainWindow || wizardWindow;
     const win = new BrowserWindow({
-      // Match original askpassphrasedialog.ui geometry: 598×209, min width 550.
-      width: 598, height: 209, useContentSize: true,
-      minWidth: 550,
+      // Original askpassphrasedialog.ui geometry was 598×209; bumped to
+      // 280 so the new padded layout shows the OK/Cancel buttons fully.
+      width: 620, height: 280, useContentSize: true,
+      minWidth: 550, minHeight: 240,
       // Modal requires a parent on Linux; if none yet (startup unlock), the
       // dialog is a standalone always-on-top window.
       parent: parent || undefined,
@@ -558,12 +578,13 @@ function closeSplash() {
 }
 
 function createWizardWindow() {
-  // Match the original Qt SetupWalletWizard exactly: content area 516×456
-  // (total window incl Windows title bar = 516×486). useContentSize=true so
-  // width/height refer to content, not the outer frame.
+  // Match the original Qt QWizard ModernStyle proportions: a header band
+  // at top (logo + title + subtitle), body below, button footer. Default
+  // Qt size is roughly 575×460; we go a bit taller (490) so the 24-word
+  // verify grid fits without scrolling.
   wizardWindow = new BrowserWindow({
-    width: 516,
-    height: 456,
+    width: 575,
+    height: 490,
     useContentSize: true,
     title: 'ALIAS Wallet Setup',
     icon: APP_ICON,
@@ -606,7 +627,9 @@ function createMainWindow() {
     x:      Number.isFinite(saved.x) ? saved.x : undefined,
     y:      Number.isFinite(saved.y) ? saved.y : undefined,
     useContentSize: true,
-    title: 'ALIAS - Client',
+    // Title format mirrors original SpectreGUI ctor:
+    //   setWindowTitle(tr("Alias") + " - " + tr("Client") + " - " + CLIENT_PLAIN_VERSION)
+    title: `ALIAS - Client - v${app.getVersion()}.0`,
     icon: APP_ICON,
     show: false,  // shown explicitly after did-finish-load to avoid white flash
     autoHideMenuBar: true,
@@ -617,6 +640,9 @@ function createMainWindow() {
     },
   });
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+  // Keep our window title — Electron otherwise replaces it with the page's
+  // <title> on load. Matches original SpectreGUI::setWindowTitle().
+  mainWindow.on('page-title-updated', (e) => { e.preventDefault(); });
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
     mainWindow.focus();
@@ -668,8 +694,22 @@ async function waitForRpcReady(timeoutMs) {
 function isFirstLaunch() {
   if (skipSetup)  return false;
   if (forceSetup) return true;
+  // Three-state check:
+  //   - wizardCompleted=true  → never re-fire (user finished setup)
+  //   - wizardCompleted=false → re-fire (user cancelled mid-wizard)
+  //   - flag absent + wallet.dat exists → existing install pre-flag;
+  //                                       grandfather as completed.
+  //   - flag absent + no wallet.dat    → genuine first launch.
+  const flag = settings.get('wizardCompleted');
+  if (flag === true)  return false;
+  if (flag === false) return true;
   const walletPath = path.join(getDataDir(), 'wallet.dat');
-  return !fs.existsSync(walletPath);
+  if (fs.existsSync(walletPath)) {
+    // Existing wallet from a build that predated this flag — auto-mark.
+    settings.set('wizardCompleted', true);
+    return false;
+  }
+  return true;
 }
 
 // Long-lived session unlock — 24h. Matches the user expectation that they
@@ -694,48 +734,50 @@ async function promptUnlockAtLogin() {
 
 async function routeStartup() {
   const firstLaunch = isFirstLaunch();
-  // Show splash immediately so the user has visible feedback while the daemon
-  // boots. Matches the original Alias QSplashScreen.
-  createSplashWindow();
-  splashStatus('Loading...');
+
+  // Flow:
+  //   Encrypted wallet  : unlock dialog FIRST (no splash before it) →
+  //                       splash → main window.
+  //   Unencrypted       : splash → main window.
+  //   First launch      : setup wizard (no splash).
+  //
+  // Daemon starts in the background while we wait — no UI is shown until
+  // we know which path to take (this means the user sees nothing for the
+  // few seconds the daemon takes to come up; matches the requested flow).
+
   startDaemon();
-  splashStatus('Starting Tor and daemon...');
   const ready = await waitForRpcReady(20000);
   if (!ready) {
     console.error('Daemon RPC never came up — opening main window anyway.');
-    closeSplash();
+    createSplashWindow();
+    splashStatus('Daemon failed to start');
     createMainWindow();
     return;
   }
 
   if (firstLaunch) {
     console.log('[setup] no wallet.dat — opening Setup Wizard.');
-    splashStatus('Setup required.');
-    closeSplash();
     createWizardWindow();
+    startupComplete = true;
     return;
   }
 
-  // If wallet is encrypted + locked, prompt the user for the passphrase
-  // BEFORE opening the main window. Matches the original v4.4.0 launch flow.
-  //
-  // Splash must close FIRST — both the splash and the passphrase dialog use
-  // alwaysOnTop, and on Windows the dialog ends up stacked under the splash
-  // so the user can't see or interact with it. Original Qt had the same
-  // issue and dismissed the splash before showing the unlock prompt.
+  let isLocked = false;
   try {
-    splashStatus('Update balance...');
     const info = await rpc('getinfo', []);
     const isEncrypted = info && info.unlocked_until !== undefined;
-    const isLocked    = isEncrypted && info.unlocked_until === 0;
-    if (isLocked) {
-      console.log('[startup] wallet encrypted+locked — prompting for passphrase.');
-      closeSplash();
-      const ok = await promptUnlockAtLogin();
-      if (!ok) { console.log('[startup] unlock cancelled — quitting.'); app.quit(); return; }
-    }
+    isLocked = isEncrypted && info.unlocked_until === 0;
   } catch (e) { console.warn('[startup] getinfo failed during unlock check:', e.message); }
 
+  if (isLocked) {
+    console.log('[startup] wallet encrypted+locked — prompting for passphrase first.');
+    const ok = await promptUnlockAtLogin();
+    if (!ok) { console.log('[startup] unlock cancelled — quitting.'); app.quit(); return; }
+  }
+
+  // After unlock (or for unencrypted wallets): splash → main window.
+  createSplashWindow();
+  splashStatus(isLocked ? 'Loading wallet...' : 'Loading...');
   splashStatus('...Start UI...');
   createMainWindow();
   // Close splash once main window has finished loading. Fallback: force-show
@@ -751,12 +793,14 @@ async function routeStartup() {
     closeSplash();
     if (mainWindow && !mainWindow.isDestroyed()) { mainWindow.show(); mainWindow.focus(); }
     if (initialUriArg) dispatchUriToRenderer(initialUriArg);
+    startupComplete = true;
   });
   mainWindow.webContents.once('did-fail-load', (_e, code, desc) => {
     console.error('[startup] did-fail-load', code, desc);
     clearTimeout(splashCloseTimeout);
     closeSplash();
     if (mainWindow && !mainWindow.isDestroyed()) { mainWindow.show(); mainWindow.focus(); }
+    startupComplete = true;
   });
 }
 
@@ -798,6 +842,22 @@ ipcMain.handle('alias:notify', (_event, title, body) => {
   try {
     new Notification({ title: String(title || 'ALIAS'), body: String(body || ''), silent: false }).show();
   } catch (_) {}
+});
+
+// Native modal info dialog with the app's own titlebar. The renderer's
+// window.alert() shows the package name instead of our productName, which
+// looks broken — call this from the renderer instead for any user-facing
+// alert/info messages.
+ipcMain.handle('alias:show-alert', async (_event, title, message) => {
+  const parent = (mainWindow && !mainWindow.isDestroyed()) ? mainWindow : undefined;
+  await dialog.showMessageBox(parent, {
+    type: 'info',
+    title:   String(title   || 'ALIAS'),
+    message: String(title   || 'ALIAS'),
+    detail:  String(message || ''),
+    buttons: ['OK'],
+    noLink: true,
+  });
 });
 
 // alias: URI handler — mirror SpectreGUI::handleURI. Fired on second-instance
@@ -894,7 +954,16 @@ async function gracefulStopDaemon() {
   daemonProc = null;
 }
 
+// During routeStartup the passphrase dialog can be the ONLY open
+// BrowserWindow for a moment (between dialog.close() and createMainWindow).
+// Without this flag, that gap fires `window-all-closed` → gracefulStopDaemon
+// → app.quit, killing the freshly-shown main window ~1s later.
+let startupComplete = false;
 app.on('window-all-closed', async () => {
+  if (!startupComplete) {
+    console.log('[startup] window-all-closed during routing — ignoring');
+    return;
+  }
   await gracefulStopDaemon();
   if (process.platform !== 'darwin') app.quit();
 });

@@ -10,6 +10,7 @@
     <button class="tab active" data-tab="information">Information</button>
     <button class="tab" data-tab="console">Console</button>
     <button class="tab" data-tab="network">Network Traffic</button>
+    <button class="tab" data-tab="peers">Peers</button>
   </div>
 
   <div class="tab-content" id="tab-information">
@@ -63,6 +64,9 @@
       <span class="graph-legend"><span class="dot-in"></span> In <span class="dot-out"></span> Out</span>
     </div>
     <canvas id="traffic-graph" width="700" height="160"></canvas>
+  </div>
+
+  <div class="tab-content" id="tab-peers" style="display:none">
     <div class="peer-hint">Select a peer to view detailed information.</div>
     <table class="peer-grid" id="peer-table">
       <thead>

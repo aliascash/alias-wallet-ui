@@ -23,7 +23,7 @@
   },
   "build": {
     "appId": "cash.alias.wallet",
-    "productName": "ALIAS Wallet",
+    "productName": "ALIAS",
     "directories": {
       "output": "dist",
       "buildResources": "build"

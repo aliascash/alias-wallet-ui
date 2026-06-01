@@ -26,6 +26,10 @@ contextBridge.exposeInMainWorld('aliasBridge', {
   openDebug:         () => ipcRenderer.invoke('alias:open-debug'),
   openDebugLog:      () => ipcRenderer.invoke('alias:open-debug-log'),
   notify:            (title, body) => ipcRenderer.invoke('alias:notify', title, body),
+  // Native message box. Use this instead of window.alert() so the dialog
+  // titlebar shows our app name (ALIAS) rather than the package's
+  // executable filename.
+  showAlert:         (title, message) => ipcRenderer.invoke('alias:show-alert', title, message),
   // Main process pushes alias: URIs (from CLI / open-url / drag-drop into
   // main proc) via this channel. Renderer hands them to the shim which
   // dispatches emitReceipient.

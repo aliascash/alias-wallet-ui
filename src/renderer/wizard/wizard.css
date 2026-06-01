@@ -1,56 +1,78 @@
-/* Mimic Qt SetupWalletWizard "ModernStyle". Window is 516x486 incl title;
-   content area is 516x456. Match the original's proportions exactly:
-   - Left sidebar ~110px, dark purple, vertically-centered logo
-   - Body padding 16px L/R, 14px T/B
-   - Heading "Set Up Your Wallet" — bold, ~16px, dark
-   - Body text ~13px, normal weight, line-height ~1.45
-   - Radio buttons: native HTML defaults, small ~13px label
-   - Footer button row: 4 buttons (Back/Next/Cancel/Help), ~70px wide, ~22px tall */
+/* Qt QWizard ModernStyle:
+   - Intro page only: WatermarkPixmap shown as left sidebar (purple
+     background with stacked logo) — see original Screenshot_10.
+   - All other pages: no sidebar; instead a header band with title +
+     subtitle on the left and the 48x48 alias-app logo on the right
+     (Screenshots 11-15).
+   The body toggles class `mode-watermark` or `mode-header` via wizard.js
+   per page. */
 
 html, body { height: 100%; margin: 0; }
 body {
   font-family: "Segoe UI", "Tahoma", "Helvetica Neue", sans-serif;
   font-size: 13px;
   color: #1e1e1e;
-  background: #ffffff;
+  background: #f0f0f0;
   overflow: hidden;
 }
 
 .wizard-shell {
-  display: flex;
+  display: flex; flex-direction: row;
   height: 100vh;
+  background: #f0f0f0;
 }
 
-.wizard-side {
-  width: 110px;
+/* --- Intro layout (sidebar + content) --- */
+.wizard-sidebar {
+  width: 140px;
   background: #3b3855;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.wizard-side img { width: 78px; opacity: 0.95; }
+.wizard-sidebar img { width: 78px; opacity: 0.95; user-select: none; -webkit-user-drag: none; }
+
+.wizard-right {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+}
+
+/* Sidebar is shown ONLY for intro */
+body.mode-watermark .wizard-sidebar { display: flex; }
+body.mode-header    .wizard-sidebar { display: none; }
+/* Header band is shown ONLY for non-intro */
+body.mode-watermark .wizard-header  { display: none; }
+body.mode-header    .wizard-header  { display: flex; }
+
+/* --- Header band (non-intro layout) --- */
+.wizard-header {
+  align-items: center;
+  padding: 10px 16px 8px;
+  background: #ffffff;
+  border-bottom: 1px solid #c8c8c8;
+}
+.wizard-header .header-text { flex: 1; min-width: 0; }
+.wizard-header .header-title    { font-size: 13px; font-weight: 700; color: #1e1e1e; }
+.wizard-header .header-subtitle { font-size: 12px; color: #555; margin-top: 2px; line-height: 1.35; padding-left: 14px; }
+.wizard-header .header-logo {
+  width: 48px; height: 48px; flex-shrink: 0; margin-left: 16px;
+  user-select: none; -webkit-user-drag: none;
+}
 
 .wizard-main {
   flex: 1;
   display: flex; flex-direction: column;
-  padding: 14px 16px 8px;
+  padding: 14px 20px 8px;
+  background: #f0f0f0;
   overflow: hidden;
 }
 
-.wizard-page { flex: 1; overflow-y: auto; }
-.wizard-page h1 {
-  font-size: 14px; font-weight: 700;
-  margin: 0 0 8px;
-  color: #1e1e1e;
-}
-.wizard-page p {
-  font-size: 13px; line-height: 1.45;
-  color: #1e1e1e;
-  margin: 0 0 10px;
-}
-.wizard-page code {
-  background: none; color: inherit; padding: 0;
-  font-family: inherit; font-size: inherit;
-}
+.wizard-page { flex: 1; overflow-y: auto; padding-right: 4px; }
+
+/* Intro page's in-body title (used only in watermark layout). Hidden when
+   in header-mode because the header band shows the title already. */
+.page-title { font-size: 14px; font-weight: 700; margin: 0 0 10px; }
+.page-body  { font-size: 13px; line-height: 1.45; margin: 0 0 12px; color: #1e1e1e; }
+body.mode-header .page-title { display: none; }
 
 .wizard-option {
   display: block;
@@ -63,55 +85,105 @@ body {
   vertical-align: -2px;
 }
 
-.form-group { margin: 8px 0; }
-.form-group label { display: block; font-size: 12px; color: #444; margin-bottom: 3px; }
+/* Form rows — original uses QFormLayout, label aligned right, input
+   stretching. We replicate with a 2-column grid (label / input). */
+.form-row {
+  display: grid; grid-template-columns: 130px 1fr;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+}
+[hidden] { display: none !important; }
+.form-row label { font-size: 13px; color: #1e1e1e; text-align: left; }
 .form-control {
-  width: 100%; max-width: 320px;
-  padding: 3px 6px;
-  border: 1px solid #a0a0a0; border-radius: 0; font-size: 13px;
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #a0a0a0; border-radius: 2px; font-size: 13px;
   font-family: inherit;
   background: #fff;
+  box-sizing: border-box;
 }
 .form-control:focus { outline: none; border-color: #0078d4; }
+.form-control.wide { max-width: none; }
 
-.mnemonic-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+/* Display-only 4-column seed list (Step 2/3) — original screenshot 12. */
+.mnemonic-grid-display {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px 14px;
   margin: 8px 0;
+  font-size: 13px;
 }
-.mnemonic-grid .word, .mnemonic-grid input {
-  padding: 3px 6px;
-  border: 1px solid #d0d0d0;
-  border-radius: 0;
-  font-family: "Consolas", "Menlo", monospace;
-  font-size: 12px;
+.mnemonic-grid-display .word { display: flex; align-items: baseline; }
+.mnemonic-grid-display .word .idx { color: #1e1e1e; min-width: 28px; text-align: right; margin-right: 6px; }
+.mnemonic-grid-display .word .text { color: #1e1e1e; }
+
+/* Verify / recover input grid — 4 columns of 6 rows (original
+   screenshots 13/14 show 4 cols). */
+.mnemonic-grid {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px 10px;
+  margin: 6px 0;
+  align-items: center;
+}
+.mnemonic-grid input {
+  min-width: 0; box-sizing: border-box; width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #a0a0a0; border-radius: 2px;
+  font-family: inherit; font-size: 13px;
   background: #fff;
+  transition: background 120ms, border-color 120ms;
 }
-.mnemonic-grid .word { display: flex; align-items: center; }
-.mnemonic-grid .word .idx { color: #888; margin-right: 4px; min-width: 18px; text-align: right; }
+.mnemonic-grid .ngroup {
+  display: grid; grid-template-columns: 28px 1fr; align-items: center; gap: 4px;
+}
+.mnemonic-grid .ngroup .idx { font-size: 13px; color: #1e1e1e; text-align: right; }
+
+.mnemonic-grid input.match,
+input.match    { background: rgba(0, 200, 0, 0.18) !important; border-color: #1f7a3a !important; }
+.mnemonic-grid input.mismatch,
+input.mismatch { background: rgba(220, 0, 0, 0.16) !important; border-color: #a8312e !important; }
+
+.mnemonic-label {
+  display: block; font-size: 13px; color: #1e1e1e; margin: 10px 0 4px;
+}
+.import-path { font-family: Consolas, monospace; font-size: 12px; color: #555; min-height: 16px; }
+
+.wizard-note-intro {
+  font-size: 12px; color: #1e1e1e; margin: 14px 0 4px;
+}
+.wizard-note-list {
+  font-size: 12px; color: #1e1e1e; margin: 0 0 8px 24px;
+}
+.wizard-note-list li { margin: 2px 0; }
+.wizard-note-bottom {
+  font-size: 12px; color: #1e1e1e; margin: 12px 0 6px;
+}
 
 .verify-status { margin-top: 6px; font-size: 12px; min-height: 14px; }
 .verify-status.ok  { color: #1f7a3a; }
 .verify-status.bad { color: #a8312e; }
 
-.muted { color: #777; font-size: 12px; margin-top: 4px; }
+.field-error {
+  color: #a8312e; font-size: 12px; margin: 4px 0 0; min-height: 14px;
+}
+.form-control.invalid { border-color: #a8312e; background: rgba(220, 0, 0, 0.06); }
+
+.muted { color: #777; font-size: 12px; }
 
 .wizard-footer {
   display: flex; gap: 6px;
-  padding-top: 8px;
-  margin-top: 4px;
-  border-top: 1px solid #d8d8d8;
+  padding: 10px 18px;
+  border-top: 1px solid #c8c8c8;
+  background: #f0f0f0;
   align-items: center;
-  justify-content: flex-end;  /* Qt QWizard clusters buttons on the right */
+  justify-content: flex-end;
 }
-
-/* Native-Qt-button look: light grey, thin border, small. */
 .btn {
-  min-width: 72px;
-  padding: 3px 12px;
+  min-width: 80px;
+  padding: 4px 14px;
   font-family: inherit; font-size: 13px;
   background: #f5f5f5;
   border: 1px solid #a0a0a0;
-  border-radius: 0;
+  border-radius: 2px;
   cursor: pointer;
   color: #1e1e1e;
 }
@@ -119,10 +191,10 @@ body {
 .btn:active   { background: #d8d8d8; }
 .btn[disabled] { color: #999; background: #f0f0f0; cursor: not-allowed; }
 
-/* Qt default button has a blue 1px inset border highlight. */
 .btn.btn-default-action {
   border: 2px solid #0078d4;
-  padding: 2px 11px;
+  padding: 3px 13px;
 }
-
-.btn-spacer { flex: 1; }
+.btn.btn-default-action[disabled] {
+  border-color: #c0c0c0;
+}

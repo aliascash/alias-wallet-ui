@@ -19,6 +19,17 @@
     <link href="assets/plugins/emojione/assets/css/emojione.min.css" rel="stylesheet">
     <link href="assets/css/spectre.css" rel="stylesheet">
 
+    <!-- Equalize widths of the Options/Display controls so the Language
+         dropdown, RowsPerPage input, and Notifications / VisibleTransactions
+         multi-selects all line up vertically (matches original Alias). -->
+    <style>
+      #tab1display #optLanguage,
+      #tab1display #optRowsPerPage,
+      #tab1display #optNotifications,
+      #tab1display #optVisibleTransactions { width: 280px !important; max-width: 280px; }
+      #tab1display #optNotifications,
+      #tab1display #optVisibleTransactions { min-height: 130px; }
+    </style>
     <!-- Hide debug-only UI sections (Sub-Wallets sidebar item, debug option groups).
          Original Alias v4.4.0 spectregui.cpp:278 injects this same rule at runtime
          when not in debug mode; we always run in release mode for end users. -->
@@ -190,9 +201,9 @@
                                      src="assets/svg/connection-0.svg">
                                 <span id="connectionsIconText" class="icon-overlay none">13</span>
 
-                                <img id=syncingIcon class="fa-spin none" data-title="Checking wallet state with network"
+                                <img id=syncingIcon data-title="Checking wallet state with network"
                                      src="assets/svg/spinner.svg">
-                                <span id="syncingIconText" class="icon-overlay none">99%</span>
+                                <span id="syncingIconText" class="icon-overlay">0%</span>
                             </div>
                         </div>
                     </div>

@@ -8,104 +8,133 @@
 <body>
   <div class="wizard-shell">
 
-    <aside class="wizard-side">
+    <!-- TWO layouts share this shell:
+         - .layout-watermark : intro page only — purple sidebar with stacked
+           logo on the left, content on the right. Mirrors original Qt
+           IntroPage::setPixmap(WatermarkPixmap, ...).
+         - .layout-header    : all other pages — header band with title +
+           subtitle (left) and 48x48 alias-app logo (right), then content.
+         JS toggles `.wizard-shell` between these two modes per page. -->
+
+    <!-- Sidebar (intro layout) -->
+    <aside class="wizard-sidebar">
       <img src="../assets/svg/Alias-Stacked-Reverse.svg" alt="ALIAS">
     </aside>
 
-    <main class="wizard-main">
+    <!-- Right column wrapper (intro layout) / full column (header layout) -->
+    <div class="wizard-right">
 
-      <section class="wizard-page" data-page="intro">
-        <h1>Set Up Your Wallet</h1>
-        <p>The application has detected that you don't have a wallet.dat file, which holds your private keys. Please choose how you want to create or restore your private keys.</p>
-        <label class="wizard-option">
-          <input type="radio" name="setup-path" value="new" checked>
-          Create new mnemonic recovery seed words
-        </label>
-        <label class="wizard-option">
-          <input type="radio" name="setup-path" value="recover">
-          Recover from your existing mnemonic seed words
-        </label>
-        <label class="wizard-option">
-          <input type="radio" name="setup-path" value="import">
-          Import wallet.dat file
-        </label>
-      </section>
-
-      <section class="wizard-page" data-page="new-settings" hidden>
-        <h1>Mnemonic Settings</h1>
-        <p>The mnemonic seed is 24 words. The optional password acts as a 25th word — keep it secret to protect your seed.</p>
-        <div class="form-group">
-          <label>Language</label>
-          <select id="mnemonic-language" class="form-control">
-            <option value="english" selected>English</option>
-            <option value="french">French</option>
-            <option value="japanese">Japanese</option>
-            <option value="spanish">Spanish</option>
-            <option value="chinese_s">Chinese (Simplified)</option>
-            <option value="chinese_t">Chinese (Traditional)</option>
-          </select>
+      <!-- Header band (header layout) -->
+      <header class="wizard-header">
+        <div class="header-text">
+          <div id="wizard-title"    class="header-title">Set Up Your Wallet</div>
+          <div id="wizard-subtitle" class="header-subtitle"></div>
         </div>
-        <div class="form-group">
-          <label>Password (optional)</label>
-          <input type="password" id="mnemonic-password" class="form-control">
-        </div>
-        <div class="form-group">
-          <label>Confirm password</label>
-          <input type="password" id="mnemonic-password-confirm" class="form-control">
-        </div>
-      </section>
+        <img class="header-logo" src="../assets/svg/alias-app.svg" alt="ALIAS">
+      </header>
 
-      <section class="wizard-page" data-page="new-result" hidden>
-        <h1>Your Recovery Seed</h1>
-        <p><strong>Write these 24 words down and keep them safe.</strong> If you lose them, you lose your coins.</p>
-        <div id="mnemonic-words" class="mnemonic-grid"></div>
-      </section>
+      <main class="wizard-main">
 
-      <section class="wizard-page" data-page="new-verify" hidden>
-        <h1>Verify Your Seed</h1>
-        <p>Type back the 24 words to confirm you have saved them.</p>
-        <div id="mnemonic-verify-grid" class="mnemonic-grid"></div>
-        <p id="verify-status" class="verify-status"></p>
-      </section>
+        <!-- Page_Intro -->
+        <section class="wizard-page" data-page="intro">
+          <h1 class="page-title">Set Up Your Wallet</h1>
+          <p class="page-body">The application has detected that you don't have a wallet.dat file, which holds your private keys. Please choose how you want to create or restore your private keys.</p>
+          <label class="wizard-option">
+            <input type="radio" name="setup-path" value="new" checked>
+            Create new mnemonic recovery seed words
+          </label>
+          <label class="wizard-option">
+            <input type="radio" name="setup-path" value="recover">
+            Recover from your existing mnemonic seed words
+          </label>
+          <label class="wizard-option">
+            <input type="radio" name="setup-path" value="import">
+            Import wallet.dat file
+          </label>
+        </section>
 
-      <section class="wizard-page" data-page="recover" hidden>
-        <h1>Recover From Mnemonic</h1>
-        <p>Enter your 24 mnemonic words and optional password.</p>
-        <div id="recover-grid" class="mnemonic-grid"></div>
-        <div class="form-group">
-          <label>Password (optional)</label>
-          <input type="password" id="recover-password" class="form-control">
-        </div>
-      </section>
+        <!-- Page_NewMnemonic_Settings -->
+        <section class="wizard-page" data-page="new-settings" hidden>
+          <div class="form-row">
+            <label for="mnemonic-language">Language:</label>
+            <select id="mnemonic-language" class="form-control">
+              <option value="english" selected>English</option>
+              <option value="french">French</option>
+              <option value="japanese">Japanese</option>
+              <option value="spanish">Spanish</option>
+              <option value="chinese_s">Chinese (Simplified)</option>
+              <option value="chinese_t">Chinese (Traditional)</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="mnemonic-password">Seed Password:</label>
+            <input type="password" id="mnemonic-password" class="form-control" autocomplete="off">
+          </div>
+          <div class="form-row">
+            <label for="mnemonic-password-confirm">Verify Password:</label>
+            <input type="password" id="mnemonic-password-confirm" class="form-control" autocomplete="off">
+          </div>
+          <p class="wizard-note-intro">Creating mnemonic seed words is a three step procedure:</p>
+          <ol class="wizard-note-list">
+            <li>Define language and optional password for your seed.</li>
+            <li>Write down created seed words.</li>
+            <li>Verify seed words and seed password.</li>
+          </ol>
+        </section>
 
-      <section class="wizard-page" data-page="import" hidden>
-        <h1>Import wallet.dat</h1>
-        <p>Choose a backup wallet.dat file. It will replace the empty wallet that was just created.</p>
-        <button id="import-pick" class="btn">Choose file…</button>
-        <p id="import-selected" class="muted"></p>
-      </section>
+        <!-- Page_NewMnemonic_Result -->
+        <section class="wizard-page" data-page="new-result" hidden>
+          <label class="mnemonic-label">Mnemonic Recovery Seed Words:</label>
+          <div id="mnemonic-words" class="mnemonic-grid-display"></div>
+          <p class="wizard-note-bottom">You need the Mnemonic Recovery Seed Words to restore this wallet. Write them down and keep them somewhere safe.<br>You will be asked to confirm the Recovery Seed Words in the next screen to ensure you have written it down correctly.</p>
+        </section>
 
-      <section class="wizard-page" data-page="encrypt" hidden>
-        <h1>Encrypt Your Wallet</h1>
-        <p>Choose a strong passphrase. You will need it to send coins or unlock the wallet. <strong>If you forget it, you lose access to your coins.</strong></p>
-        <div class="form-group">
-          <label>Passphrase</label>
-          <input type="password" id="encrypt-password" class="form-control">
-        </div>
-        <div class="form-group">
-          <label>Confirm passphrase</label>
-          <input type="password" id="encrypt-password-confirm" class="form-control">
-        </div>
-        <label class="wizard-option">
-          <input type="checkbox" id="encrypt-skip">
-          Skip encryption (not recommended)
-        </label>
-      </section>
+        <!-- Page_NewMnemonic_Verification -->
+        <section class="wizard-page" data-page="new-verify" hidden>
+          <div class="form-row" id="verify-password-row" hidden>
+            <label for="verify-password">Seed Password:</label>
+            <input type="password" id="verify-password" class="form-control wide" autocomplete="off">
+          </div>
+          <label class="mnemonic-label">Enter Mnemonic Seed Words:</label>
+          <div id="mnemonic-verify-grid" class="mnemonic-grid"></div>
+          <p id="verify-status" class="verify-status"></p>
+        </section>
 
-      <section class="wizard-page" data-page="done" hidden>
-        <h1>Wallet Created</h1>
-        <p id="done-status">Finalizing…</p>
-      </section>
+        <!-- Page_RecoverFromMnemonic -->
+        <section class="wizard-page" data-page="recover" hidden>
+          <div class="form-row">
+            <label for="recover-password">Seed Password:</label>
+            <input type="password" id="recover-password" class="form-control wide" autocomplete="off">
+          </div>
+          <div class="form-row">
+            <label for="recover-password-confirm">Verify Password:</label>
+            <input type="password" id="recover-password-confirm" class="form-control wide" autocomplete="off">
+          </div>
+          <label class="mnemonic-label">Enter Mnemonic Seed Words:</label>
+          <div id="recover-grid" class="mnemonic-grid"></div>
+        </section>
+
+        <!-- Page_ImportWalletDat -->
+        <section class="wizard-page" data-page="import" hidden>
+          <p id="import-selected" class="import-path"></p>
+          <button id="import-pick" class="btn">Select wallet.dat</button>
+        </section>
+
+        <!-- Page_EncryptWallet — no "skip encryption" in original -->
+        <section class="wizard-page" data-page="encrypt" hidden>
+          <p class="page-body">The password protects your private keys and will be asked by the wallet on startup and for critical operations.</p>
+          <div class="form-row">
+            <label for="encrypt-password">Wallet Password:</label>
+            <input type="password" id="encrypt-password" class="form-control wide" autocomplete="off">
+          </div>
+          <div class="form-row">
+            <label for="encrypt-password-confirm">Verify Password:</label>
+            <input type="password" id="encrypt-password-confirm" class="form-control wide" autocomplete="off">
+          </div>
+          <p id="encrypt-error" class="field-error" hidden></p>
+        </section>
+
+      </main>
 
       <footer class="wizard-footer">
         <button id="btn-back"   class="btn" disabled>&lt; Back</button>
@@ -114,7 +143,7 @@
         <button id="btn-help"   class="btn">Help</button>
       </footer>
 
-    </main>
+    </div>
   </div>
 
   <script src="wizard.js"></script>

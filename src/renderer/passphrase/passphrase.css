@@ -9,45 +9,49 @@ body {
   font-family: "Segoe UI", "Tahoma", sans-serif;
   font-size: 13px;
   color: #1e1e1e;
-  background: #f0f0f0;
+  background: #ffffff;
   overflow: hidden;
 }
 
 .dialog {
   display: flex; flex-direction: column;
-  padding: 9px 9px 9px;
+  padding: 16px 20px 12px;
   height: 100vh; box-sizing: border-box;
-  gap: 6px;
+  gap: 12px;
 }
 
 /* warningLabel — Qt RichText, word-wrap, default left-aligned. */
 .warning {
-  margin: 0; padding: 0;
-  line-height: 1.35;
+  margin: 0 0 4px; padding: 0 0 10px;
+  border-bottom: 1px solid #ececec;
+  line-height: 1.4;
+  color: #382b3f;
+  font-size: 14px;
 }
 .warning b { font-weight: 700; }
 
-/* QFormLayout rows: label-aligned-right + input growing.
-   formAlignment was AlignHCenter|AlignTop, so the rows are centered. */
+/* Centered form rows */
 .row {
   display: flex; align-items: center;
-  margin: 1px 0;
+  margin: 4px 0;
   justify-content: center;
 }
 .row label {
   text-align: right;
-  padding-right: 6px;
-  min-width: 150px;
+  padding-right: 10px;
+  min-width: 130px;
+  color: #444;
 }
 .row input {
-  flex: 0 1 360px;
-  min-height: 21px;
-  padding: 1px 4px;
-  border: 1px solid #a0a0a0; border-radius: 0;
+  flex: 0 1 320px;
+  min-height: 26px;
+  padding: 4px 8px;
+  border: 1px solid #c8c8c8; border-radius: 3px;
   font-family: inherit; font-size: 13px;
   background: #fff;
+  transition: border-color 120ms;
 }
-.row input:focus { outline: none; border-color: #0078d4; }
+.row input:focus { outline: none; border-color: #382b3f; box-shadow: 0 0 0 2px rgba(56,43,63,0.12); }
 
 /* [hidden] specificity fix — see wizard.css for the same pattern. */
 [hidden] { display: none !important; }
@@ -67,24 +71,29 @@ body {
 
 footer {
   margin-top: auto;
-  padding-top: 6px;
-  display: flex; gap: 6px; justify-content: flex-end;
+  padding-top: 10px;
+  border-top: 1px solid #ececec;
+  display: flex; gap: 8px; justify-content: flex-end;
 }
 .btn {
-  min-width: 72px;
-  padding: 3px 12px;
+  min-width: 80px;
+  padding: 6px 16px;
   font-family: inherit; font-size: 13px;
   background: #f5f5f5;
-  border: 1px solid #a0a0a0; border-radius: 0;
+  border: 1px solid #c8c8c8; border-radius: 3px;
   cursor: pointer; color: #1e1e1e;
+  transition: background 120ms, border-color 120ms;
 }
-.btn:hover    { background: #ececec; }
+.btn:hover    { background: #ececec; border-color: #a8a8a8; }
 .btn:active   { background: #d8d8d8; }
 .btn[disabled] { color: #999; background: #f0f0f0; cursor: not-allowed; }
 .btn.btn-default-action {
-  border: 2px solid #0078d4;
-  padding: 2px 11px;
+  background: #382b3f;
+  color: #fff;
+  border-color: #382b3f;
 }
+.btn.btn-default-action:hover  { background: #4a3a52; border-color: #4a3a52; }
+.btn.btn-default-action:active { background: #2a1f30; }
 .btn.btn-default-action[disabled] {
-  border-color: #c0c0c0;
+  background: #c0c0c0; color: #fff; border-color: #c0c0c0;
 }

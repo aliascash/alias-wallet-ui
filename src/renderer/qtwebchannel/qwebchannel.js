@@ -1,3 +1,14 @@
+// Global renderer error guards — keep an unexpected RPC failure (often
+// "wallet is locked") from crashing the page. Logged so we can still trace
+// them in DevTools.
+window.addEventListener('error', (e) => {
+  console.error('[renderer] error', e && (e.error && e.error.stack || e.message));
+});
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('[renderer] unhandledrejection', e && (e.reason && e.reason.stack || e.reason));
+  e.preventDefault();
+});
+
 // Drop-in replacement for Qt's qwebchannel.js. Lets the original
 // alias-wallet-ui HTML/JS run unchanged in Electron by mimicking the
 // QWebChannel API surface and forwarding calls to the daemon via the
@@ -124,9 +135,12 @@
       console.warn('[shim] encryptwallet returned/threw (expected at restart):', e.message);
     }
     // Match the original: QApplication::quit() after a successful encrypt,
-    // with the same warning text the C++ dialog showed.
-    window.alert(
-      'Wallet encrypted\n\n' +
+    // with the same warning text the C++ dialog showed. Use the native
+    // alert IPC so the titlebar shows "ALIAS" rather than the package name.
+    const showAlert = window.aliasBridge && window.aliasBridge.showAlert;
+    const showFn = showAlert ? showAlert : (t, m) => { window.alert(t + '\n\n' + m); };
+    await showFn(
+      'Wallet encrypted',
       'ALIAS will close now to finish the encryption process. ' +
       'Remember that encrypting your wallet cannot fully protect ' +
       'your coins from being stolen by malware infecting your computer.\n\n' +
@@ -321,8 +335,72 @@
     getOptions: async function () {
       try {
         const opts = await window.aliasBridge.getOptions();
+        // The Options page populates each <select> from result["opt<Name>"]
+        // — see spectre.js optionsPage.getOptionResult. Without these lists
+        // the Language / Notifications / VisibleTransactions selects would
+        // render empty. Mirrors what original OptionsModel sent back as the
+        // "opt<Name>" companion arrays.
+        const enriched = Object.assign({}, opts, {
+          optLanguage: {
+            en:      'English',
+            de:      'Deutsch',
+            es:      'Español',
+            fr:      'Français',
+            it:      'Italiano',
+            ja:      '日本語',
+            ko:      '한국어',
+            nl:      'Nederlands',
+            pl:      'Polski',
+            pt:      'Português',
+            pt_BR:   'Português (Brasil)',
+            ru:      'Русский',
+            tr:      'Türkçe',
+            zh_CN:   '中文 (简体)',
+            zh_TW:   '中文 (繁體)',
+          },
+          // Verbatim from TransactionRecord::getTypeLabel() in
+          // transactionrecord.cpp:23-63, deduped per spectrebridge.cpp:333.
+          // The "transactions" key becomes an <optgroup label="Transactions">
+          // wrapping all the type labels (see spectre.js:1271).
+          optNotifications: { transactions: [
+            'Other',
+            'Public staked',
+            'Private staked',
+            'Public donated',
+            'Private donated',
+            'Public contributed',
+            'Private contributed',
+            'Public sent to',
+            'Public received with',
+            'Public received from',
+            'Public sent to self',
+            'Private sent to self',
+            'Private received with',
+            'Private sent to',
+            'Public to Private',
+            'Private to Public',
+          ]},
+          optVisibleTransactions: { transactions: [
+            'Other',
+            'Public staked',
+            'Private staked',
+            'Public donated',
+            'Private donated',
+            'Public contributed',
+            'Private contributed',
+            'Public sent to',
+            'Public received with',
+            'Public received from',
+            'Public sent to self',
+            'Private sent to self',
+            'Private received with',
+            'Private sent to',
+            'Public to Private',
+            'Private to Public',
+          ]},
+        });
         bridge.info.options = opts;
-        dispatch('bridge', 'getOptionResult', opts);
+        dispatch('bridge', 'getOptionResult', enriched);
         if (opts.DisplayUnit !== undefined)
           dispatch('optionsModel', 'displayUnitChanged', Number(opts.DisplayUnit) || 0);
         if (opts.ReserveBalance !== undefined)
@@ -736,7 +814,11 @@
         if (langChanged) {
           // Matches the original Qt's QMessageBox::warning when the locale
           // changes — strings are baked in at startup.
-          window.alert('Please restart wallet\n\nThe used language has changed.\nPlease restart the wallet!');
+          if (window.aliasBridge && window.aliasBridge.showAlert) {
+            window.aliasBridge.showAlert('Please restart wallet', 'The used language has changed.\nPlease restart the wallet!');
+          } else {
+            window.alert('Please restart wallet\n\nThe used language has changed.\nPlease restart the wallet!');
+          }
         }
         return;
       }
@@ -995,8 +1077,6 @@
   function applyConnectionStateToDOM(connections) {
     const $icon = $('#connectionsIcon');
     const $txt  = $('#connectionsIconText');
-    const $sync = $('#syncingIcon');
-    const $syncTxt = $('#syncingIconText');
     if (!$icon.length) return;
     const n = Math.max(0, Math.min(12, Number(connections) || 0));
     $icon.attr('src', 'assets/svg/connection-' + n + '.svg');
@@ -1004,11 +1084,121 @@
     if (connections > 0) {
       $icon.removeClass('fa-spin');
       $txt.text(String(connections)).removeClass('none');
-      $sync.addClass('none');
-      $syncTxt.addClass('none');
     } else {
       $icon.addClass('fa-spin');
       $txt.addClass('none');
+    }
+  }
+  // Port of SpectreGUI::setNumBlocks (spectregui.cpp:565-679):
+  //   "Up to date" / synced.svg ONLY when ALL three hold:
+  //     1. count >= nTotalBlocks         (our blocks >= peer-reported tip)
+  //     2. secs < 30*60                  (last block age < 30 minutes)
+  //     3. nNodeState != NS_GET_FILTERED_BLOCKS  (we ignore — full node)
+  //   Otherwise: spinner + percentage label.
+  // GetNumBlocksOfPeers() in original (main.cpp:2031-2034):
+  //   return max(cPeerBlockCounts.median(), Checkpoints::GetTotalBlocksEstimate())
+  // where cPeerBlockCounts is a rolling median (size 5) of peers' nChainHeight
+  // (exposed via getpeerinfo as "chainheight"), and the checkpoint estimate is
+  // the highest hardcoded checkpoint height from checkpoints.cpp.
+  const CHECKPOINT_ESTIMATE = 1245000; // checkpoints.cpp mainnet last entry
+  let lastPeerHeight = 0;
+  let lastTipBlockTime = 0;  // unix seconds of our current chain tip
+  let lastTipKnownHash = '';
+
+  function medianOf(arr) {
+    if (!arr.length) return 0;
+    const s = arr.slice().sort((a, b) => a - b);
+    const m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : Math.floor((s[m - 1] + s[m]) / 2);
+  }
+
+  async function refreshTipBlockTime(blocks) {
+    // Avoid extra RPCs if height hasn't moved.
+    try {
+      const tipHash = await rpc('getbestblockhash', []);
+      if (tipHash && tipHash !== lastTipKnownHash) {
+        lastTipKnownHash = tipHash;
+        const blk = await rpc('getblock', [String(tipHash)]);
+        if (blk && Number(blk.time)) lastTipBlockTime = Number(blk.time);
+      }
+    } catch (_) { /* tolerate */ }
+  }
+
+  async function applySyncStateToDOM(info) {
+    const $sync = $('#syncingIcon');
+    const $syncTxt = $('#syncingIconText');
+    if (!$sync.length) return;
+    const blocks = Number(info && info.blocks) || 0;
+    const peers  = Number(info && info.connections) || 0;
+
+    // Discover peer tip (= nTotalBlocks in original). Match
+    // main.cpp:2031-2034: median of peer chain heights, floored at the
+    // hardcoded checkpoint estimate.
+    let peerMedian = 0;
+    if (peers > 0) {
+      try {
+        const peerList = await rpc('getpeerinfo', []);
+        if (Array.isArray(peerList) && peerList.length > 0) {
+          // rpcnet.cpp:93 emits "chainheight" — fall back to legacy field
+          // names for forks that renamed it.
+          const heights = peerList
+            .map(p => Number(p.chainheight) || Number(p.startingheight) || Number(p.synced_headers) || 0)
+            .filter(h => h > 0);
+          peerMedian = medianOf(heights);
+        }
+      } catch (_) {}
+    }
+    const nTotalBlocks = Math.max(peerMedian, CHECKPOINT_ESTIMATE);
+    if (nTotalBlocks > lastPeerHeight) lastPeerHeight = nTotalBlocks;
+    // Refresh our tip block time (= clientModel->getLastBlockDate()).
+    await refreshTipBlockTime(blocks);
+
+    const haveTip   = lastPeerHeight > 0;
+    const caughtUp  = haveTip && peers > 0 && blocks >= lastPeerHeight;
+    const nowSecs   = Math.floor((typeof performance !== 'undefined' && performance.timing
+                                  ? performance.timing.navigationStart + performance.now()
+                                  : 0) / 1000) || Math.floor(Date.now() / 1000);
+    const secsSinceTip = lastTipBlockTime > 0 ? Math.max(0, nowSecs - lastTipBlockTime) : Infinity;
+    const recent    = secsSinceTip < 30 * 60;
+
+    const synced = caughtUp && recent;
+
+    if (synced) {
+      $sync.attr('src', 'assets/svg/synced.svg').removeClass('fa-spin syncing');
+      $syncTxt.removeClass('syncing').addClass('none').text('');
+      $sync.attr('data-title', 'Up to date');
+    } else if (haveTip && peers > 0) {
+      // Verbatim from SpectreGUI::setNumBlocks (spectregui.cpp:691-710):
+      //   build a data-URI SVG with a 30%-opacity background ring + an
+      //   orange progress arc. stroke-dasharray length = pct * 2πr / 100
+      //   with r=29 (=> 182.2124). Clamp pct to [2.5, 95] so the arc is
+      //   visible at extremes.
+      // Verbatim from spectregui.cpp:606 — nPercentageDone = count / (nTotalBlocks * 0.01f)
+      const pctRaw  = Math.max(0, Math.min(100, blocks / (lastPeerHeight * 0.01)));
+      const svgPct  = pctRaw < 2.5 ? 2.5 : pctRaw > 95 ? 95 : pctRaw;
+      const dashLen = (svgPct * 182.2124 / 100).toFixed(4);
+      // Build the ring SVG. Use stroke attrs directly (no <style> block) so
+      // Chromium reliably renders it via an <img> data URI. encodeURIComponent
+      // handles all the escaping (including '#' → '%23').
+      const svgRaw =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
+        +   '<circle cx="32" cy="32" r="29" fill="none" stroke="#F38220" stroke-opacity="0.3" stroke-width="5"/>'
+        +   '<circle cx="32" cy="32" r="29" fill="none" stroke="#F38220" stroke-width="5" '
+        +     'stroke-dasharray="' + dashLen + ' 182.2124" transform="rotate(-90 32 32)" />'
+        + '</svg>';
+      const svg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgRaw);
+      $sync.attr('src', svg).removeClass('fa-spin').addClass('syncing');
+      // Label: <10 → one decimal place ("0.5%"), else floor integer.
+      const pctText = (pctRaw < 10 ? (Math.floor(pctRaw * 10) / 10).toFixed(1)
+                                   : String(Math.min(99, Math.floor(pctRaw)))) + '%';
+      $syncTxt.text(pctText).removeClass('none').addClass('syncing');
+      $sync.attr('data-title', 'Synchronizing with network');
+    } else {
+      // No connections OR haven't learned tip yet — plain spinner, no %.
+      $sync.attr('src', 'assets/svg/spinner.svg').addClass('fa-spin').removeClass('syncing');
+      $syncTxt.removeClass('syncing').addClass('none').text('');
+      $sync.attr('data-title',
+        peers === 0 ? 'No connections — waiting for peers' : 'Discovering chain tip from peers');
     }
   }
 
@@ -1169,6 +1359,7 @@
           lastEncStatus = enc;
         }
         applyConnectionStateToDOM(info.connections);
+        await applySyncStateToDOM(info);
         applyStakingStateToDOM(info, enc);
         // Daemon's status-bar warning (chain warnings, version warnings, etc.)
         // is surfaced in #network-alert via networkAlert(text).
@@ -1178,10 +1369,16 @@
         // doesn't expose initialblockdownload via getinfo, so use
         // "have peers + non-trivial height" as a proxy. Refine if a
         // dedicated sync signal becomes available.
-        if (info.connections > 0 && info.blocks > 100) {
+        // Match SpectreGUI::setNumBlocks (spectregui.cpp:678-679): hide
+        // .outofsync ribbons ONLY in the "Up to date" branch, which
+        // requires both caught-up to peer tip AND last block < 30 min old.
+        const haveTip = lastPeerHeight > 0;
+        const nowSec  = Math.floor(Date.now() / 1000);
+        const secsSinceTip = lastTipBlockTime > 0 ? (nowSec - lastTipBlockTime) : Infinity;
+        if (haveTip && info.connections > 0 && info.blocks >= lastPeerHeight && secsSinceTip < 30 * 60) {
           $('.outofsync').hide();
-          const $sync = $('#syncingIcon');
-          $sync.removeClass('fa-spin syncing').attr('src', 'assets/svg/synced.svg');
+        } else {
+          $('.outofsync').show();
         }
       }
 
@@ -1194,19 +1391,33 @@
       //     address-book entries (type=S).
       //   listprivateaddresses         → stealth addresses. Unusual response
       //     shape: { Account, "Stealth Address": "<addr> - <label>" }.
+      //
+      // If listreceivedbyaddress returns empty (fresh wallet — wizard set up
+      // master+account but didn't generate default addresses) seed the two
+      // defaults so the Receive tab matches the original.
       try {
-        const [byAddr, privAddrs] = await Promise.all([
-          rpc('listreceivedbyaddress', [0, true]).catch(() => []),
-          rpc('listprivateaddresses', []).catch(() => null),
-        ]);
+        let byAddr = await rpc('listreceivedbyaddress', [0, true]).catch(() => []);
+        if (Array.isArray(byAddr) && byAddr.length === 0) {
+          try { await rpc('getnewaddress',        ['Default Public Address']);  } catch (_) {}
+          byAddr = await rpc('listreceivedbyaddress', [0, true]).catch(() => []);
+        }
+        let privAddrs = await rpc('listprivateaddresses', []).catch(() => null);
+        if (!privAddrs || !privAddrs['Stealth Address']) {
+          try { await rpc('getnewstealthaddress', ['Default Private Address']); } catch (_) {}
+          privAddrs = await rpc('listprivateaddresses', []).catch(() => null);
+        }
         const items = [];
 
-        // Public side
-        const OWN_HINT = /^(Default|Initial) /;  // labels we set or daemon presets
+        // Public side. The daemon hardcodes "Alias Foundation" in
+        // walletdb.cpp for the dev contribution address — rebrand it to
+        // "ALIAS Foundation" at display time.
+        const OWN_HINT = /^(Default|Initial) /;
+        const LABEL_REWRITES = { 'Alias Foundation': 'ALIAS Foundation' };
         for (const r of (Array.isArray(byAddr) ? byAddr : [])) {
           if (!r.address) continue;
-          const lbl = r.account || '';
-          const isOwn = !lbl || OWN_HINT.test(lbl);
+          const rawLbl = r.account || '';
+          const lbl    = LABEL_REWRITES[rawLbl] || rawLbl;
+          const isOwn  = !lbl || OWN_HINT.test(lbl);
           items.push({
             address:     r.address,
             label:       lbl || 'Unlabeled',

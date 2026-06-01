@@ -5,7 +5,7 @@
 
   // Tab switching
   const tabs = document.querySelectorAll('.tab');
-  const panes = { information: $('tab-information'), console: $('tab-console'), network: $('tab-network') };
+  const panes = { information: $('tab-information'), console: $('tab-console'), network: $('tab-network'), peers: $('tab-peers') };
   tabs.forEach((btn) => btn.addEventListener('click', () => {
     tabs.forEach((b) => b.classList.toggle('active', b === btn));
     Object.entries(panes).forEach(([k, el]) => el.style.display = (k === btn.dataset.tab ? '' : 'none'));

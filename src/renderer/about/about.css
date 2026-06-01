@@ -21,9 +21,8 @@ body {
 .logo-pane {
   width: 96px;
   background: #382b3f;
-  display: flex; align-items: flex-start; justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  padding-top: 0;
 }
 .logo-pane img {
   width: 90px; height: 90px;
