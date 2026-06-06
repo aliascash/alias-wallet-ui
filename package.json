@@ -51,6 +51,21 @@
     "win": {
       "target": ["nsis", "portable"]
     },
+    "nsis": {
+      "perMachine": false,
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ALIAS",
+      "uninstallDisplayName": "ALIAS Wallet ${version}",
+      "license": "build/license.txt",
+      "include": "build/installer.nsh",
+      "installerLanguages": ["en_US", "de_DE", "es_ES", "fr_FR", "it_IT", "tr_TR", "ru_RU"],
+      "displayLanguageSelector": true,
+      "multiLanguageInstaller": true
+    },
     "mac": {
       "target": ["dmg"],
       "category": "public.app-category.finance"

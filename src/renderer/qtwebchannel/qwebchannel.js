@@ -1050,24 +1050,65 @@ window.addEventListener('unhandledrejection', (e) => {
     return info.unlocked_until > 0 ? 1 : 2;
   }
 
-  // Port of SpectreGUI::updateStakingIcon. The original checked fIsStaking +
-  // nWeight; we use getinfo.stakeweight as a proxy. Tooltip falls through the
-  // original's nested ternary chain in priority order: locked > offline >
-  // syncing > no-coins > otherwise active.
-  function applyStakingStateToDOM(info, encStatus) {
+  // Port of SpectreGUI::updateStakingIcon (spectregui.cpp:1090-1140).
+  //
+  // ACTIVE state (fIsStaking && nWeight): rich tooltip with weight, network
+  // weight, and the estimated time to the next reward.
+  //
+  // INACTIVE state: 7-level priority chain (we skip thin-mode since we run
+  // full-node only):
+  //   1. !enabled            -> "Not staking, staking is disabled"
+  //   2. wallet locked       -> "Not staking because wallet is locked"
+  //   3. no peers            -> "Not staking because wallet is offline"
+  //   4. initial block dl    -> "Not staking because wallet is syncing"
+  //   5. !fIsStaking         -> "Initializing staking..."
+  //   6. !nWeight            -> "Not staking because you don't have mature coins"
+  //   7. otherwise           -> "Not staking"
+  //
+  // stakingInfo: result of `getstakinginfo` (may be null on early/transient).
+  // syncedToTip: true when the chain is at the peer tip (proxy for !IBD).
+  function formatEta(secs) {
+    if (secs < 60)            return secs + ' second(s)';
+    if (secs < 60 * 60)       return Math.floor(secs / 60) + ' minute(s), ' + (secs % 60) + ' second(s)';
+    if (secs < 24 * 60 * 60)  return Math.floor(secs / 3600) + ' hour(s), ' + Math.floor((secs % 3600) / 60) + ' minute(s)';
+    return Math.floor(secs / 86400) + ' day(s), ' + Math.floor((secs % 86400) / 3600) + ' hour(s)';
+  }
+  function applyStakingStateToDOM(info, encStatus, stakingInfo, syncedToTip) {
     const $icon = $('#stakingIcon');
     if (!$icon.length || !info) return;
-    const stakeweight = Number(info.stakeweight) || 0;
-    if (stakeweight > 0) {
+
+    const enabled    = stakingInfo ? !!stakingInfo.enabled : true;
+    const staking    = stakingInfo ? !!stakingInfo.staking : false;
+    const weight     = stakingInfo ? (Number(stakingInfo.weight) || 0)
+                                   : (Number(info.stakeweight) || 0);
+    const netWeight  = stakingInfo ? (Number(stakingInfo.netstakeweight) || 0) : 0;
+    const expEtaRaw  = stakingInfo ? (Number(stakingInfo.expectedtime) || 0) : 0;
+
+    if (staking && weight > 0) {
       $icon.removeClass('not-staking').addClass('staking');
-      $icon.attr('data-title', 'Staking');
+      // Original divides weight & netWeight by COIN before display.
+      const w  = Math.floor(weight     / 1e8);
+      const nw = Math.floor(netWeight  / 1e8);
+      // Original formula: nEstimateTime = GetTargetSpacing * netWeight / weight.
+      // Daemon already returns `expectedtime` in seconds, so use that directly.
+      const eta = expEtaRaw > 0 ? formatEta(expEtaRaw) : 'unknown';
+      $icon.attr('data-title',
+        'Staking.<br/>' +
+        'Your weight is ' + w + '<br/>' +
+        'Network weight is ' + nw + '<br/>' +
+        'Average time between rewards is ' + eta);
       return;
     }
+
     $icon.addClass('not-staking').removeClass('staking');
-    let why = 'Not staking because you don\'t have mature coins';
-    if (encStatus === 2)                            why = 'Not staking because wallet is locked';
-    else if ((Number(info.connections) || 0) === 0) why = 'Not staking because wallet is offline';
-    else if ((Number(info.blocks) || 0) < 100)      why = 'Not staking because wallet is syncing';
+    let why;
+    if      (!enabled)                                 why = 'Not staking, staking is disabled';
+    else if (encStatus === 2)                          why = 'Not staking because wallet is locked';
+    else if ((Number(info.connections) || 0) === 0)    why = 'Not staking because wallet is offline';
+    else if (!syncedToTip)                             why = 'Not staking because wallet is syncing';
+    else if (!staking)                                 why = 'Initializing staking...';
+    else if (weight === 0)                             why = 'Not staking because you don\'t have mature coins';
+    else                                               why = 'Not staking';
     $icon.attr('data-title', why);
   }
 
@@ -1124,16 +1165,26 @@ window.addEventListener('unhandledrejection', (e) => {
     } catch (_) { /* tolerate */ }
   }
 
+  // Returns the syncedToTip flag so callers (staking icon) can use the same
+  // judgement without re-deriving it.
+  function ageText(secs) {
+    if (secs <= 0)            return '';
+    if (secs < 60)            return secs + ' second(s) ago';
+    if (secs < 60 * 60)       return Math.floor(secs / 60) + ' minute(s) ago';
+    if (secs < 24 * 60 * 60)  return Math.floor(secs / 3600) + ' hour(s) ago';
+    return Math.floor(secs / 86400) + ' day(s) ago';
+  }
   async function applySyncStateToDOM(info) {
     const $sync = $('#syncingIcon');
     const $syncTxt = $('#syncingIconText');
-    if (!$sync.length) return;
+    if (!$sync.length) return false;
     const blocks = Number(info && info.blocks) || 0;
     const peers  = Number(info && info.connections) || 0;
 
     // Discover peer tip (= nTotalBlocks in original). Match
     // main.cpp:2031-2034: median of peer chain heights, floored at the
-    // hardcoded checkpoint estimate.
+    // hardcoded checkpoint estimate. peerMedian recomputes each tick so
+    // the % falls if peers really do report a lower tip.
     let peerMedian = 0;
     if (peers > 0) {
       try {
@@ -1149,37 +1200,57 @@ window.addEventListener('unhandledrejection', (e) => {
       } catch (_) {}
     }
     const nTotalBlocks = Math.max(peerMedian, CHECKPOINT_ESTIMATE);
+    // lastPeerHeight is a high-water mark used only as a fallback when
+    // peers temporarily drop to 0; the live nTotalBlocks drives the %.
     if (nTotalBlocks > lastPeerHeight) lastPeerHeight = nTotalBlocks;
     // Refresh our tip block time (= clientModel->getLastBlockDate()).
     await refreshTipBlockTime(blocks);
 
-    const haveTip   = lastPeerHeight > 0;
-    const caughtUp  = haveTip && peers > 0 && blocks >= lastPeerHeight;
-    const nowSecs   = Math.floor((typeof performance !== 'undefined' && performance.timing
-                                  ? performance.timing.navigationStart + performance.now()
-                                  : 0) / 1000) || Math.floor(Date.now() / 1000);
+    const denom    = nTotalBlocks > 0 ? nTotalBlocks : lastPeerHeight;
+    const haveTip  = denom > 0;
+    // "Up to date" predicate (spectregui.cpp:667-668): caught up AND last
+    // block age < 30 min. The original does NOT require peers > 0 here —
+    // an offline wallet with a recent tip still shows "Up to date".
+    const caughtUp = haveTip && blocks >= denom;
+    const nowSecs  = Math.floor(Date.now() / 1000);
     const secsSinceTip = lastTipBlockTime > 0 ? Math.max(0, nowSecs - lastTipBlockTime) : Infinity;
-    const recent    = secsSinceTip < 30 * 60;
+    const recent   = secsSinceTip < 30 * 60;
 
     const synced = caughtUp && recent;
+
+    // Build the rich multi-line tooltip exactly as the original does
+    // (spectregui.cpp:603-733). Header is "Up to date" or "Catching up..."
+    // followed by the descriptive body.
+    let tooltip;
+    if (synced) {
+      tooltip = 'Up to date<br>Downloaded ' + blocks + ' block(s) of transaction history.';
+    } else {
+      const remaining   = Math.max(0, denom - blocks);
+      const pctForLabel = denom > 0 ? (blocks / (denom * 0.01)) : 0;
+      tooltip = 'Catching up...<br>'
+              + 'Synchronizing with network...<br>'
+              + '~' + remaining + ' block(s) remaining<br>'
+              + 'Downloaded ' + blocks + ' of ' + denom
+              + ' blocks of transaction history (' + pctForLabel.toFixed(3) + '% done).';
+    }
+    if (secsSinceTip > 0 && Number.isFinite(secsSinceTip)) {
+      tooltip += '<br>Last received block was generated ' + ageText(secsSinceTip) + '.';
+    }
 
     if (synced) {
       $sync.attr('src', 'assets/svg/synced.svg').removeClass('fa-spin syncing');
       $syncTxt.removeClass('syncing').addClass('none').text('');
-      $sync.attr('data-title', 'Up to date');
-    } else if (haveTip && peers > 0) {
+      $sync.attr('data-title', tooltip);
+    } else if (haveTip) {
       // Verbatim from SpectreGUI::setNumBlocks (spectregui.cpp:691-710):
       //   build a data-URI SVG with a 30%-opacity background ring + an
       //   orange progress arc. stroke-dasharray length = pct * 2πr / 100
       //   with r=29 (=> 182.2124). Clamp pct to [2.5, 95] so the arc is
       //   visible at extremes.
       // Verbatim from spectregui.cpp:606 — nPercentageDone = count / (nTotalBlocks * 0.01f)
-      const pctRaw  = Math.max(0, Math.min(100, blocks / (lastPeerHeight * 0.01)));
+      const pctRaw  = Math.max(0, Math.min(100, blocks / (denom * 0.01)));
       const svgPct  = pctRaw < 2.5 ? 2.5 : pctRaw > 95 ? 95 : pctRaw;
       const dashLen = (svgPct * 182.2124 / 100).toFixed(4);
-      // Build the ring SVG. Use stroke attrs directly (no <style> block) so
-      // Chromium reliably renders it via an <img> data URI. encodeURIComponent
-      // handles all the escaping (including '#' → '%23').
       const svgRaw =
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
         +   '<circle cx="32" cy="32" r="29" fill="none" stroke="#F38220" stroke-opacity="0.3" stroke-width="5"/>'
@@ -1192,14 +1263,14 @@ window.addEventListener('unhandledrejection', (e) => {
       const pctText = (pctRaw < 10 ? (Math.floor(pctRaw * 10) / 10).toFixed(1)
                                    : String(Math.min(99, Math.floor(pctRaw)))) + '%';
       $syncTxt.text(pctText).removeClass('none').addClass('syncing');
-      $sync.attr('data-title', 'Synchronizing with network');
+      $sync.attr('data-title', tooltip);
     } else {
-      // No connections OR haven't learned tip yet — plain spinner, no %.
+      // Bootstrap state — we haven't yet learned ANY tip estimate.
       $sync.attr('src', 'assets/svg/spinner.svg').addClass('fa-spin').removeClass('syncing');
       $syncTxt.removeClass('syncing').addClass('none').text('');
-      $sync.attr('data-title',
-        peers === 0 ? 'No connections — waiting for peers' : 'Discovering chain tip from peers');
+      $sync.attr('data-title', 'Synchronizing with network...');
     }
+    return synced;
   }
 
   // Port of SpectreGUI::setEncryptionStatus — directly manipulates DOM
@@ -1321,7 +1392,23 @@ window.addEventListener('unhandledrejection', (e) => {
   window.__aliasShim.handleAliasUri = handleAliasUri;
   window.__aliasShim.parseAliasUri  = parseAliasUri;
 
-  window.addEventListener('alias:bridge-ready', function () {
+  // Start polling on bridge-ready (proper path) OR a 1.5 s fallback —
+  // whichever fires first. The UI's connectSignals() calls many .connect()
+  // methods on page objects; if any one throws, jsReady() never runs and
+  // bridge-ready never fires. The fallback ensures the status icons,
+  // balance, address book, and tx list still update even when the
+  // upstream UI's init chain is broken.
+  let pollStarted = false;
+  function ensurePollStarted(reason) {
+    if (pollStarted) return;
+    pollStarted = true;
+    console.log('[shim] starting poll loop (' + reason + ')');
+    onBridgeReady();
+  }
+  window.addEventListener('alias:bridge-ready', function () { ensurePollStarted('bridge-ready'); });
+  setTimeout(function () { ensurePollStarted('fallback-timeout'); }, 1500);
+
+  function onBridgeReady() {
     const seenTxids = new Set();
     let lastEncStatus = -1;
 
@@ -1333,9 +1420,25 @@ window.addEventListener('unhandledrejection', (e) => {
     dispatch('optionsModel', 'reserveBalanceChanged', 0);
 
     async function poll() {
-      let info = null, txs = null;
-      try { [info, txs] = await Promise.all([rpc('getinfo', []), rpc('listtransactions', ['*', 50, 0])]); }
-      catch (e) { return; /* daemon may be syncing / restarting */ }
+      // getinfo MUST be done independently of the heavier calls below.
+      // Earlier this was a Promise.all([getinfo, listtransactions]) — if
+      // listtransactions threw (e.g. during a daemon rescan, or while the
+      // wallet is loading), Promise.all rejected and we returned without
+      // updating any of the status icons. The top-right then froze with the
+      // initial HTML state: encryption icon hidden (class "none"), sync icon
+      // text "0%", tooltip "Checking wallet state with network".
+      let info = null;
+      try { info = await rpc('getinfo', []); }
+      catch (_) {
+        // Daemon RPC is down (e.g. mid-restart right after encryptwallet
+        // returns to the wizard). Don't wait the full 8 s for the next
+        // setInterval tick — schedule a fast retry so the status icons
+        // pick up the current state as soon as the daemon comes back up.
+        setTimeout(poll, 1500);
+        return;
+      }
+      let txs = null;
+      try { txs = await rpc('listtransactions', ['*', 50, 0]); } catch (_) {}
 
       if (info) {
         if (info.version) bridge.info.build = info.version;
@@ -1359,27 +1462,20 @@ window.addEventListener('unhandledrejection', (e) => {
           lastEncStatus = enc;
         }
         applyConnectionStateToDOM(info.connections);
-        await applySyncStateToDOM(info);
-        applyStakingStateToDOM(info, enc);
+        const syncedToTip = await applySyncStateToDOM(info);
+        // getstakinginfo gives us the full priority chain + rich "Staking"
+        // tooltip data. Tolerate failure — staking icon falls back to the
+        // getinfo.stakeweight proxy if stakingInfo is null.
+        let stakingInfo = null;
+        try { stakingInfo = await rpc('getstakinginfo', []); } catch (_) {}
+        applyStakingStateToDOM(info, enc, stakingInfo, syncedToTip);
         // Daemon's status-bar warning (chain warnings, version warnings, etc.)
         // is surfaced in #network-alert via networkAlert(text).
         dispatch('bridge', 'networkAlert', info.errors || '');
-        // Heuristic sync check — mirrors SpectreGUI::setNumBlocks "Up to
-        // date" branch which hides all .outofsync elements. The daemon
-        // doesn't expose initialblockdownload via getinfo, so use
-        // "have peers + non-trivial height" as a proxy. Refine if a
-        // dedicated sync signal becomes available.
-        // Match SpectreGUI::setNumBlocks (spectregui.cpp:678-679): hide
-        // .outofsync ribbons ONLY in the "Up to date" branch, which
-        // requires both caught-up to peer tip AND last block < 30 min old.
-        const haveTip = lastPeerHeight > 0;
-        const nowSec  = Math.floor(Date.now() / 1000);
-        const secsSinceTip = lastTipBlockTime > 0 ? (nowSec - lastTipBlockTime) : Infinity;
-        if (haveTip && info.connections > 0 && info.blocks >= lastPeerHeight && secsSinceTip < 30 * 60) {
-          $('.outofsync').hide();
-        } else {
-          $('.outofsync').show();
-        }
+        // SpectreGUI::setNumBlocks (spectregui.cpp:678-684) hides the
+        // .outofsync ribbons inside the "Up to date" branch. We share that
+        // judgement via the syncedToTip flag the sync function returned.
+        if (syncedToTip) $('.outofsync').hide(); else $('.outofsync').show();
       }
 
       // Populate the Receive + Address Book tabs by dispatching emitAddresses.
@@ -1481,5 +1577,5 @@ window.addEventListener('unhandledrejection', (e) => {
 
     poll();
     setInterval(poll, POLL_MS);
-  });
+  }
 })();

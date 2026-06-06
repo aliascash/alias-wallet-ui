@@ -81,10 +81,15 @@ function getDaemonPath() {
   return path.join(process.resourcesPath, 'daemon', exe);
 }
 
+// MUST match the daemon's GetDefaultDataDir() in util.cpp:1051-1081 exactly.
+// If these diverge, the daemon syncs into a different folder than the one
+// the original v4.4.0 wallet (and any pre-extracted blockchain bootstrap)
+// uses, forcing a full Initial Block Download from genesis over Tor — which
+// takes days instead of minutes.
 function getDataDir() {
-  if (process.platform === 'win32') return path.join(os.homedir(), 'AppData', 'Roaming', 'Alias');
-  if (process.platform === 'darwin') return path.join(os.homedir(), 'Library', 'Application Support', 'Alias');
-  return path.join(os.homedir(), '.alias');
+  if (process.platform === 'win32') return path.join(os.homedir(), 'AppData', 'Roaming', 'Aliaswallet');
+  if (process.platform === 'darwin') return path.join(os.homedir(), 'Library', 'Application Support', 'Aliaswallet');
+  return path.join(os.homedir(), '.aliaswallet');
 }
 
 function writeAliasConf() {
@@ -115,12 +120,44 @@ function seedTorFiles(daemonPath, dataDir) {
   }
 }
 
+// One-time migration: earlier builds of this Electron shell pointed the
+// daemon at `%APPDATA%\Alias` instead of the daemon's actual default,
+// `%APPDATA%\Aliaswallet`. Any wallet that synced under the old path lives
+// in the wrong folder. On startup, if the legacy folder exists with the
+// real wallet and the canonical folder either doesn't exist or holds only
+// stale data, move the legacy folder into place. Older canonical data, if
+// any, is renamed to a timestamped backup — nothing is deleted.
+function migrateLegacyDataDir() {
+  const canonical = getDataDir();
+  let legacy;
+  if (process.platform === 'win32')      legacy = path.join(os.homedir(), 'AppData', 'Roaming', 'Alias');
+  else if (process.platform === 'darwin')legacy = path.join(os.homedir(), 'Library', 'Application Support', 'Alias');
+  else                                   legacy = path.join(os.homedir(), '.alias');
+  if (legacy === canonical) return;
+  const legacyWallet    = path.join(legacy, 'wallet.dat');
+  const canonicalWallet = path.join(canonical, 'wallet.dat');
+  if (!fs.existsSync(legacyWallet)) return;  // nothing to migrate
+  const legacyMtime    = fs.statSync(legacyWallet).mtimeMs;
+  const canonicalMtime = fs.existsSync(canonicalWallet) ? fs.statSync(canonicalWallet).mtimeMs : 0;
+  if (canonicalMtime >= legacyMtime) return;  // canonical is already newer; user already migrated
+  // Back up older canonical (if any), then rename legacy into place.
+  if (fs.existsSync(canonical)) {
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const backup = canonical + '.bak-' + stamp;
+    fs.renameSync(canonical, backup);
+    console.log('[migrate] backed up older canonical data dir to', backup);
+  }
+  fs.renameSync(legacy, canonical);
+  console.log('[migrate] moved active data dir', legacy, '->', canonical);
+}
+
 function startDaemon() {
   const daemonPath = getDaemonPath();
   if (!fs.existsSync(daemonPath)) {
     console.error(`Daemon binary not found at: ${daemonPath}`);
     return;
   }
+  migrateLegacyDataDir();
   const dataDir = writeAliasConf();
   seedTorFiles(daemonPath, dataDir);
   // cwd must be the daemon's dir — net.cpp CreateProcessA("Tor/tor.exe", ...)
@@ -143,6 +180,64 @@ function startDaemon() {
     console.log(`aliaswalletd exited with code ${code}`);
     daemonProc = null;
   });
+  // Start tailing debug.log so the splash can show the daemon's startup
+  // phase ("Loading block index...", "Loading wallet...", etc.) the same
+  // way the original Qt UI did via uiInterface.InitMessage. The daemon
+  // runs out-of-process so we can't tap that boost signal directly; the
+  // log is the cleanest surrogate.
+  tailDaemonLogToSplash(path.join(dataDir, 'debug.log'));
+}
+
+// One-shot poller: every 400 ms read whatever has been appended to
+// debug.log since last tick, scan for the InitMessage-equivalent lines,
+// forward each to the splash. Stops when the splash window closes.
+let logTailTimer = null;
+function tailDaemonLogToSplash(logPath) {
+  if (logTailTimer) { clearInterval(logTailTimer); logTailTimer = null; }
+  let lastSize = 0;
+  // If a previous run left a large log behind, start at the current end
+  // so we only surface messages from THIS launch.
+  try { lastSize = fs.statSync(logPath).size; } catch (_) { lastSize = 0; }
+  logTailTimer = setInterval(() => {
+    if (!splashWindow || splashWindow.isDestroyed()) {
+      clearInterval(logTailTimer); logTailTimer = null; return;
+    }
+    let curSize;
+    try { curSize = fs.statSync(logPath).size; } catch (_) { return; }
+    if (curSize <= lastSize) return;
+    let chunk = '';
+    try {
+      const fd = fs.openSync(logPath, 'r');
+      const buf = Buffer.alloc(curSize - lastSize);
+      fs.readSync(fd, buf, 0, buf.length, lastSize);
+      fs.closeSync(fd);
+      chunk = buf.toString('utf8');
+    } catch (_) { return; }
+    lastSize = curSize;
+    // Original Qt splash shows the daemon's uiInterface.InitMessage(...)
+    // strings via an in-process signal. The daemon runs out-of-process for
+    // us, so we tail debug.log. Only the messages with a matching LogPrintf
+    // appear here; the InitMessage-only ones (per-block progress, etc.)
+    // cannot be surfaced without a daemon patch.
+    //
+    // Each rewrite below uses the ORIGINAL Alias string verbatim — no
+    // fabricated text. Sources cited inline.
+    const interesting = [
+      [/Verifying database integrity/i,  'Verifying database integrity...'],   // init.cpp:668
+      [/Loading block index/i,           'Loading block index...'],            // init.cpp:830 LogPrintf
+      [/Verifying last (\d+) blocks at level/i, m => 'Validating last ' + m[1] + ' block...'],  // main.cpp Verify + matches init.cpp:847 wording
+      [/Loading wallet/i,                'Loading wallet...'],                 // init.cpp:905
+      [/Rescanning last (\d+) blocks \(from block (\d+)\)/i, m => 'Rescanning last ' + m[1] + ' blocks (from block ' + m[2] + ')...'],   // daemon's own wording
+      [/Done loading/i,                  'Core started!'],                     // init.cpp:1075 InitMessage; debug.log has "Done loading"
+    ];
+    for (const line of chunk.split(/\r?\n/)) {
+      if (!line) continue;
+      for (const [re, out] of interesting) {
+        const m = line.match(re);
+        if (m) { splashStatus(typeof out === 'function' ? out(m) : out); break; }
+      }
+    }
+  }, 400);
 }
 
 // Methods the renderer polls speculatively that the daemon rejects for
@@ -203,12 +298,38 @@ ipcMain.handle('alias:import-wallet-dat', async (_event, srcPath) => {
   return true;
 });
 
-ipcMain.handle('alias:wizard-complete', () => {
+ipcMain.handle('alias:wizard-complete', async () => {
   // Persist a flag so isFirstLaunch knows the wizard has been completed,
   // independent of whether the daemon auto-created wallet.dat.
   settings.set('wizardCompleted', true);
   if (wizardWindow) { wizardWindow.close(); wizardWindow = null; }
+
+  // The wizard's last action was `encryptwallet`, which causes the
+  // daemon to write the new wallet.dat then call StartShutdown and EXIT
+  // (not restart — original Alias's encrypt-and-restart was an in-
+  // process Qt action; here the daemon is a separate process). Our
+  // child-process exit handler nulled daemonProc. We must re-spawn it
+  // explicitly so the wallet UI has something to talk to.
+  createSplashWindow();
+  splashStatus('Loading wallet...');
+  if (!daemonProc) {
+    // startDaemon() internally calls tailDaemonLogToSplash so the user
+    // sees "Loading block index... / Loading wallet... / Core started!"
+    // progression on the splash mirroring the original Qt InitMessage.
+    startDaemon();
+  } else {
+    // Daemon somehow still alive — at least restart the log tailer
+    // against the same debug.log so the splash shows current activity.
+    tailDaemonLogToSplash(path.join(getDataDir(), 'debug.log'));
+  }
+  // Wait up to 5 min — daemon needs to LoadBlockIndex (~90 s for the
+  // bootstrap chain), Verify last 2500 blocks, and load the encrypted
+  // wallet before binding RPC.
+  await waitForRpcReady(5 * 60 * 1000);
+
+  splashStatus('...Start UI...');
   createMainWindow();
+  // mainWindow.once('ready-to-show') closes the splash + shows main.
   mainWindow.webContents.once('did-finish-load', () => { startupComplete = true; });
 });
 ipcMain.handle('alias:wizard-cancel', () => {
@@ -269,6 +390,7 @@ ipcMain.handle('alias:passphrase-result', (event, payload) => {
   if (win && typeof win.__resolvePassphrase === 'function') win.__resolvePassphrase(payload);
 });
 ipcMain.handle('alias:quit', () => app.quit());
+
 
 // Options — persisted in electron-store under `options`. UI-side options (e.g.
 // MinimizeToTray, DisplayUnit) live entirely here; daemon-side options
@@ -549,7 +671,7 @@ function createSplashWindow() {
     frame: false,
     resizable: false, minimizable: false, maximizable: false,
     movable: false,
-    alwaysOnTop: true,
+    alwaysOnTop: false,  // user must be able to focus other windows during long rescan
     transparent: false,
     title: 'ALIAS',
     icon: APP_ICON,
@@ -643,7 +765,12 @@ function createMainWindow() {
   // Keep our window title — Electron otherwise replaces it with the page's
   // <title> on load. Matches original SpectreGUI::setWindowTitle().
   mainWindow.on('page-title-updated', (e) => { e.preventDefault(); });
+  // ready-to-show fires on the first paint — well before did-finish-load
+  // (which waits for every CSS/JS/image to settle). Close the splash here
+  // so the main window doesn't appear underneath the alwaysOnTop splash
+  // for the seconds it takes the renderer to finish loading.
   mainWindow.once('ready-to-show', () => {
+    closeSplash();
     mainWindow.show();
     mainWindow.focus();
   });
@@ -667,9 +794,23 @@ function createMainWindow() {
       settings.set('mainBounds', b);
     }
     const opts = settings.get('options') || {};
-    if (process.platform !== 'darwin' && (opts.MinimizeToTray || opts.MinimizeOnClose) && !app.isQuiting) {
+    const wantsHide = process.platform !== 'darwin'
+                   && (opts.MinimizeToTray || opts.MinimizeOnClose)
+                   && !app.isQuiting;
+    if (wantsHide) {
       e.preventDefault();
       if (mainWindow && !mainWindow.isDestroyed()) mainWindow.hide();
+      return;
+    }
+    // Full quit. The X-click path used to rely on window-all-closed to
+    // chain into gracefulStopDaemon + app.quit, but any lingering hidden
+    // BrowserWindow (debug/about/splash still in the middle of close) holds
+    // window-all-closed from firing, leaving the tray icon and daemon
+    // alive indefinitely. Trigger app.quit directly so before-quit destroys
+    // the tray and gracefulStopDaemon kills aliaswalletd + tor.
+    if (!app.isQuiting) {
+      app.isQuiting = true;
+      setImmediate(() => app.quit());
     }
   });
   mainWindow.on('closed', () => { mainWindow = null; });
@@ -736,29 +877,41 @@ async function routeStartup() {
   const firstLaunch = isFirstLaunch();
 
   // Flow:
-  //   Encrypted wallet  : unlock dialog FIRST (no splash before it) →
-  //                       splash → main window.
+  //   First launch      : wizard directly, NO splash. Daemon starts in
+  //                       the background. Fresh data dir = fast startup,
+  //                       so no progress UI is needed before the wizard.
+  //   Encrypted wallet  : splash → unlock dialog → splash → main window.
   //   Unencrypted       : splash → main window.
-  //   First launch      : setup wizard (no splash).
-  //
-  // Daemon starts in the background while we wait — no UI is shown until
-  // we know which path to take (this means the user sees nothing for the
-  // few seconds the daemon takes to come up; matches the requested flow).
 
-  startDaemon();
-  const ready = await waitForRpcReady(20000);
-  if (!ready) {
-    console.error('Daemon RPC never came up — opening main window anyway.');
-    createSplashWindow();
-    splashStatus('Daemon failed to start');
-    createMainWindow();
+  if (firstLaunch) {
+    console.log('[setup] no wallet.dat — opening Setup Wizard (no splash).');
+    startDaemon();
+    // Daemon needs to be FULLY RPC-ready (not just port-bound) before
+    // the wizard's wallet pages run, otherwise commands like `mnemonic`
+    // and `extkey import` hit ECONNREFUSED or 500. With the bootstrap
+    // installed by the NSIS installer, LoadBlockIndex of ~2.8M blocks
+    // takes ~90 s — give it 5 min headroom.
+    const ready = await waitForRpcReady(5 * 60 * 1000);
+    if (!ready) {
+      console.error('Daemon RPC did not come up in 5 minutes on first launch.');
+    }
+    createWizardWindow();
+    startupComplete = true;
     return;
   }
 
-  if (firstLaunch) {
-    console.log('[setup] no wallet.dat — opening Setup Wizard.');
-    createWizardWindow();
-    startupComplete = true;
+  // Returning user: spawn daemon SILENTLY and probe encryption state
+  // BEFORE deciding on UI. The user wants:
+  //   - encrypted+locked → unlock dialog FIRST (no splash behind),
+  //                        then splash, then main
+  //   - unencrypted      → splash from the start, then main
+  startDaemon();
+  const ready = await waitForRpcReady(30 * 60 * 1000);  // 30 minutes
+  if (!ready) {
+    console.error('Daemon RPC never came up after 30 minutes.');
+    createSplashWindow();
+    splashStatus('Daemon failed to start');
+    createMainWindow();
     return;
   }
 
@@ -770,14 +923,20 @@ async function routeStartup() {
   } catch (e) { console.warn('[startup] getinfo failed during unlock check:', e.message); }
 
   if (isLocked) {
-    console.log('[startup] wallet encrypted+locked — prompting for passphrase first.');
+    console.log('[startup] wallet encrypted+locked — prompting for passphrase first (no splash behind).');
     const ok = await promptUnlockAtLogin();
-    if (!ok) { console.log('[startup] unlock cancelled — quitting.'); app.quit(); return; }
+    if (!ok) {
+      console.log('[startup] unlock cancelled — quitting.');
+      app.quit(); return;
+    }
   }
 
-  // After unlock (or for unencrypted wallets): splash → main window.
+  // Now show splash → main. Splash gives the user something to look at
+  // while the renderer's index.html loads + its qwebchannel-shim does
+  // the initial round-trip with the daemon (~1-2 s).
   createSplashWindow();
   splashStatus(isLocked ? 'Loading wallet...' : 'Loading...');
+  // Final message before window.loadIndex() — spectre.cpp:350
   splashStatus('...Start UI...');
   createMainWindow();
   // Close splash once main window has finished loading. Fallback: force-show
@@ -973,6 +1132,11 @@ app.on('before-quit', (e) => {
     try { settings.set('mainBounds', mainWindow.getContentBounds()); } catch (_) {}
   }
   if (trayIcon) { try { trayIcon.destroy(); } catch (_) {} trayIcon = null; }
+  // Force-destroy every BrowserWindow so a lingering hidden child (debug,
+  // about, splash mid-close) cannot keep the app process alive.
+  for (const w of BrowserWindow.getAllWindows()) {
+    try { w.destroy(); } catch (_) {}
+  }
   // before-quit may fire before window-all-closed. If the daemon is still
   // alive, hold the quit while we ask it to stop gracefully.
   if (daemonProc && !shuttingDown) {

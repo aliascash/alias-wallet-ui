@@ -13,6 +13,9 @@
   // NewMnemonic_{Settings,Result,Verification}, Recover, Encrypt). Original
   // had no "done" page — Finish on encrypt closes the wizard and main app
   // opens.
+  // Wallet wizard — runs AFTER the NSIS installer has done its work
+  // (language, license, components-with-bootstrap, install). The first
+  // page is the original Qt SetupWalletWizard intro: "Set Up Your Wallet".
   const PATHS = {
     new:     ['intro', 'new-settings', 'new-result', 'new-verify', 'encrypt'],
     recover: ['intro', 'recover',                                    'encrypt'],
@@ -42,7 +45,10 @@
     const t = PAGE_TITLES[id] || { title: 'ALIAS Wallet Setup', subtitle: '' };
     document.getElementById('wizard-title').textContent    = t.title;
     document.getElementById('wizard-subtitle').textContent = t.subtitle;
-    // Intro uses the watermark sidebar; everything else uses the header band.
+    // Intro (Set Up Your Wallet — the wallet-wizard transition point)
+    // uses the watermark sidebar like the original Qt SetupWalletWizard.
+    // Every other page uses the header band — including the installer-
+    // style pages (language, license, components, ready, downloading).
     document.body.classList.toggle('mode-watermark', id === 'intro');
     document.body.classList.toggle('mode-header',    id !== 'intro');
   }
@@ -53,6 +59,25 @@
   }
 
   function rpc(method, params) { return window.aliasBridge.rpc(method, params || []); }
+
+  // Retry an RPC call up to N times on transient errors (ECONNREFUSED,
+  // 500). Daemon goes through phases on startup where it answers
+  // getinfo but rejects wallet commands; this gives those commands a
+  // few extra seconds before we surface the failure to the user.
+  async function rpcRetry(method, params, tries = 8, delayMs = 1500) {
+    let lastErr;
+    for (let i = 0; i < tries; i++) {
+      try { return await rpc(method, params); }
+      catch (e) {
+        lastErr = e;
+        const msg = String(e && e.message || e);
+        const transient = /ECONNREFUSED|status code 5\d\d|timeout/i.test(msg);
+        if (!transient) throw e;
+        await new Promise(r => setTimeout(r, delayMs));
+      }
+    }
+    throw lastErr;
+  }
 
   // ---------- page-specific handlers ----------
 
@@ -68,8 +93,10 @@
     if (pw !== pwc) { alert('Passwords do not match.'); return false; }
     // mnemonic new [password] [language] [nBytesEntropy] [bip44]
     // All params are .get_str()'d server-side — pass everything as a string.
+    // rpcRetry handles the case where the daemon is still loading the
+    // bootstrap-installed block index when the user clicks Next.
     try {
-      const r = await rpc('mnemonic', ['new', pw, lang, '32', 'false']);
+      const r = await rpcRetry('mnemonic', ['new', pw, lang, '32', 'false']);
       mnemonicWords = (r && r.mnemonic ? String(r.mnemonic) : '').split(/\s+/).filter(Boolean);
       masterKey = r && r.master;
       if (mnemonicWords.length < 12 || !masterKey) {
@@ -192,7 +219,7 @@
     if (pw !== pwc) { alert('Passwords do not match.'); return false; }
     if (phrase.split(/\s+/).length !== 24) { alert('Enter exactly 24 words.'); return false; }
     try {
-      const r = await rpc('mnemonic', ['decode', pw, phrase, 'false']);
+      const r = await rpcRetry('mnemonic', ['decode', pw, phrase, 'false']);
       masterKey = r && r.master;
       if (!masterKey) { alert('mnemonic decode returned no master key: ' + JSON.stringify(r)); return false; }
     } catch (e) { alert('mnemonic decode failed: ' + e.message); return false; }
@@ -220,24 +247,27 @@
   async function installMasterKey() {
     const KEY_LABEL = 'Wizard Master';
     const ACC_LABEL = 'Wizard Account';
-    await rpc('extkey', ['import', masterKey, KEY_LABEL, 'false', 'false']);
-    const list = await rpc('extkey', ['list']);
+    // Each call uses rpcRetry — the daemon can be mid-LoadBlockIndex /
+    // mid-rescan when the user clicks Finish, and a single transient
+    // 500 shouldn't surface as "Setup failed".
+    await rpcRetry('extkey', ['import', masterKey, KEY_LABEL, 'false', 'false']);
+    const list = await rpcRetry('extkey', ['list']);
     const entries = Array.isArray(list) ? list : [];
     const newKey = entries.find((e) => e.label === KEY_LABEL && e.type === 'Loose');
     if (!newKey || !newKey.id) throw new Error('imported master key not found in extkey list');
-    await rpc('extkey', ['setmaster', newKey.id]);
-    await rpc('extkey', ['deriveaccount', ACC_LABEL]);
-    const list2 = await rpc('extkey', ['list']);
+    await rpcRetry('extkey', ['setmaster', newKey.id]);
+    await rpcRetry('extkey', ['deriveaccount', ACC_LABEL]);
+    const list2 = await rpcRetry('extkey', ['list']);
     const entries2 = Array.isArray(list2) ? list2 : [];
     const newAcc = entries2.find((e) => e.label === ACC_LABEL && e.type === 'Account');
-    if (newAcc && newAcc.id) await rpc('extkey', ['setdefaultaccount', newAcc.id]);
+    if (newAcc && newAcc.id) await rpcRetry('extkey', ['setdefaultaccount', newAcc.id]);
 
     // Create the two default addresses the original Alias UI shows in
     // Receive — "Default Public Address" and "Default Private Address".
     // Without these, listreceivedbyaddress returns empty until the user
     // generates one manually.
-    try { await rpc('getnewaddress',        ['Default Public Address']);  } catch (_) {}
-    try { await rpc('getnewstealthaddress', ['Default Private Address']); } catch (_) {}
+    try { await rpcRetry('getnewaddress',        ['Default Public Address']);  } catch (_) {}
+    try { await rpcRetry('getnewstealthaddress', ['Default Private Address']); } catch (_) {}
   }
 
   function setEncryptError(msg, target) {
@@ -293,6 +323,8 @@
     pw.removeEventListener('input', clearOnType);  pw.addEventListener('input', clearOnType);
     pwc.removeEventListener('input', clearOnType); pwc.addEventListener('input', clearOnType);
   }
+
+  // ---------- nav glue ----------
 
   // ---------- nav glue ----------
 
