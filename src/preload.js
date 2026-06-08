@@ -11,7 +11,7 @@ contextBridge.exposeInMainWorld('aliasBridge', {
   // Wizard
   pickWalletDat:   () => ipcRenderer.invoke('alias:pick-wallet-dat'),
   importWalletDat: (srcPath) => ipcRenderer.invoke('alias:import-wallet-dat', srcPath),
-  wizardComplete:  () => ipcRenderer.invoke('alias:wizard-complete'),
+  wizardComplete:  (passphrase) => ipcRenderer.invoke('alias:wizard-complete', passphrase),
   wizardCancel:    () => ipcRenderer.invoke('alias:wizard-cancel'),
   // Passphrase dialog
   openPassphrase:    (mode) => ipcRenderer.invoke('alias:open-passphrase', mode),

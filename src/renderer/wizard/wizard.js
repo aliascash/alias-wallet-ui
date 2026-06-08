@@ -26,6 +26,7 @@
   let idx  = 0;
   let masterKey = null;        // BIP32 ext key from mnemonic new/decode — what we import
   let mnemonicWords = [];      // 24-word array shown to user (new flow)
+  let encryptPassphrase = null; // captured on encrypt page so wizard-complete can re-unlock the restarted daemon
 
   // Verbatim from setupwalletwizard.cpp's setTitle / setSubTitle on each
   // QWizardPage. The header band shows these per page.
@@ -306,6 +307,11 @@
       alert('Setup failed: ' + (e.message || e));
       return false;
     }
+    // Stash so wizardComplete can hand it to main.js — the restarted
+    // daemon needs an explicit walletpassphrase before the main window
+    // opens, otherwise it boots locked and the renderer's first poll
+    // catches a half-initialised wallet (icons stuck on HTML defaults).
+    encryptPassphrase = passphrase;
     return true;
   }
 
@@ -366,7 +372,7 @@
     // wizard-complete directly. Matches original QWizard's Finish button.
     if (idx === PATHS[path].length - 1) {
       if (!(await onLeavePage(cur))) return;
-      window.aliasBridge.wizardComplete();
+      window.aliasBridge.wizardComplete(encryptPassphrase);
       return;
     }
     await goto(idx + 1);

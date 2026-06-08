@@ -176,16 +176,38 @@ function startDaemon() {
     stdio: isDev ? 'inherit' : 'ignore',
     windowsHide: true,
   });
-  daemonProc.on('exit', (code) => {
-    console.log(`aliaswalletd exited with code ${code}`);
+  daemonProc.on('exit', (code, signal) => {
+    console.log(`aliaswalletd exited code=${code} signal=${signal}`);
     daemonProc = null;
+    // Auto-respawn watchdog: if the daemon dies UNEXPECTEDLY (not
+    // because we're shutting down the app, not because gracefulStop is
+    // in progress), spawn it again after a short backoff. We've seen
+    // the daemon die mid-sync without any shutdown log or Windows
+    // crash event (possibly Tor child dying, possibly OOM, possibly an
+    // unhandled C++ exception). Whatever the cause, the user shouldn't
+    // have to manually relaunch to keep sync going.
+    if (!app.isQuiting && !shuttingDown) {
+      const backoffMs = 3000;
+      console.log(`[watchdog] daemon died unexpectedly — respawning in ${backoffMs} ms`);
+      // Kill any lingering Tor child (the daemon spawned it via
+      // CreateProcessA so it's not parented to us; if the daemon dies
+      // Tor stays orphaned and keeps port 9089 bound, which would
+      // prevent a fresh daemon from launching its own Tor).
+      try {
+        spawn('taskkill', ['/F', '/IM', 'tor.exe'], { windowsHide: true, stdio: 'ignore' });
+      } catch (_) {}
+      setTimeout(() => {
+        if (!app.isQuiting && !shuttingDown && !daemonProc) {
+          startDaemon();
+        }
+      }, backoffMs);
+    }
   });
-  // Start tailing debug.log so the splash can show the daemon's startup
-  // phase ("Loading block index...", "Loading wallet...", etc.) the same
-  // way the original Qt UI did via uiInterface.InitMessage. The daemon
-  // runs out-of-process so we can't tap that boost signal directly; the
-  // log is the cleanest surrogate.
-  tailDaemonLogToSplash(path.join(dataDir, 'debug.log'));
+  // NB: log tailer is NOT started here. Callers that want the splash
+  // to mirror "Loading block index... / Loading wallet... / Core
+  // started!" must call tailDaemonLogToSplash() THEMSELVES *after*
+  // createSplashWindow() — otherwise the tailer's setInterval body
+  // sees splashWindow=null and immediately clears itself.
 }
 
 // One-shot poller: every 400 ms read whatever has been appended to
@@ -298,7 +320,7 @@ ipcMain.handle('alias:import-wallet-dat', async (_event, srcPath) => {
   return true;
 });
 
-ipcMain.handle('alias:wizard-complete', async () => {
+ipcMain.handle('alias:wizard-complete', async (_event, passphrase) => {
   // Persist a flag so isFirstLaunch knows the wizard has been completed,
   // independent of whether the daemon auto-created wallet.dat.
   settings.set('wizardCompleted', true);
@@ -311,21 +333,52 @@ ipcMain.handle('alias:wizard-complete', async () => {
   // child-process exit handler nulled daemonProc. We must re-spawn it
   // explicitly so the wallet UI has something to talk to.
   createSplashWindow();
+  // tail BEFORE the daemon starts writing so we don't miss early
+  // "Loading block index..." lines.
+  tailDaemonLogToSplash(path.join(getDataDir(), 'debug.log'));
   splashStatus('Loading wallet...');
-  if (!daemonProc) {
-    // startDaemon() internally calls tailDaemonLogToSplash so the user
-    // sees "Loading block index... / Loading wallet... / Core started!"
-    // progression on the splash mirroring the original Qt InitMessage.
-    startDaemon();
-  } else {
-    // Daemon somehow still alive — at least restart the log tailer
-    // against the same debug.log so the splash shows current activity.
-    tailDaemonLogToSplash(path.join(getDataDir(), 'debug.log'));
+
+  // CRITICAL RACE: when this IPC arrives, the daemon received
+  // encryptwallet and is mid-shutdown (Finalise / Flush / StopNode
+  // running) but the process hasn't exited yet — daemonProc is still
+  // non-null. A simple `if (!daemonProc) startDaemon()` would skip
+  // spawning a fresh daemon, then waitForRpcReady would poll an
+  // RPC port that's about to close. Wait for the current process
+  // to actually exit (with a 15 s cap in case shutdown hangs) before
+  // spawning a fresh one.
+  if (daemonProc) {
+    splashStatus('Restarting wallet daemon...');
+    await new Promise((resolve) => {
+      const t = setTimeout(resolve, 15000);
+      daemonProc.once('exit', () => { clearTimeout(t); resolve(); });
+    });
+    // OS needs a beat to release the bound ports (36657, 37347) and
+    // wallet.dat file handles before a fresh daemon can bind them.
+    await new Promise(r => setTimeout(r, 1500));
   }
+  startDaemon();
   // Wait up to 5 min — daemon needs to LoadBlockIndex (~90 s for the
   // bootstrap chain), Verify last 2500 blocks, and load the encrypted
   // wallet before binding RPC.
   await waitForRpcReady(5 * 60 * 1000);
+
+  // Unlock the freshly-encrypted wallet BEFORE opening the main window.
+  // Without this, the wallet boots locked and the renderer's first
+  // poll catches a half-initialised daemon — sync icon sticks on its
+  // HTML default "Checking wallet state with network" and only 4 icons
+  // render (encryption padlock stays hidden until poll fires
+  // successfully). The user only sees correct state after a manual
+  // close + relaunch (which goes through routeStartup's unlock path).
+  if (passphrase) {
+    try {
+      await rpc('walletpassphrase', [passphrase, SESSION_UNLOCK_SECS]);
+    } catch (e) {
+      // Non-fatal — main window can still open. Most likely cause:
+      // wallet ended up unencrypted somehow; user can lock/unlock
+      // manually from the UI.
+      console.warn('[wizard-complete] walletpassphrase failed:', e.message);
+    }
+  }
 
   splashStatus('...Start UI...');
   createMainWindow();
@@ -684,11 +737,27 @@ function createSplashWindow() {
   });
   splashWindow.loadFile(path.join(__dirname, '..', 'renderer', 'splash', 'index.html'));
   splashWindow.on('closed', () => { splashWindow = null; });
+  // The splash renderer registers its IPC listener inside the IIFE that
+  // runs on script load — typically ~50 ms after createSplashWindow().
+  // Any splashStatus() call we make in that window is silently dropped
+  // because Electron's ipcRenderer doesn't buffer. Replay the latest
+  // buffered text once the renderer is ready so the first message
+  // actually lands.
+  splashWindow.webContents.once('did-finish-load', () => {
+    if (lastSplashStatusText && splashWindow && !splashWindow.isDestroyed()) {
+      splashWindow.webContents.send('alias:splash-status', lastSplashStatusText);
+    }
+  });
 }
 
+// Latest splash status text — buffered so we can replay it as soon as
+// the splash renderer is loaded (see createSplashWindow above).
+let lastSplashStatusText = '';
 function splashStatus(text) {
+  const t = String(text || '');
+  lastSplashStatusText = t;
   if (splashWindow && !splashWindow.isDestroyed()) {
-    splashWindow.webContents.send('alias:splash-status', String(text || ''));
+    splashWindow.webContents.send('alias:splash-status', t);
   }
 }
 
@@ -873,6 +942,16 @@ async function promptUnlockAtLogin() {
   }
 }
 
+// Open the passphrase dialog and return what the user typed WITHOUT
+// attempting the unlock RPC. Used in routeStartup so the unlock dialog
+// can appear before the daemon is ready — the actual walletpassphrase
+// call happens later, with a splash showing daemon-load progress.
+async function collectPassphraseAtLogin() {
+  const r = await openPassphraseDialog('unlocklogin');
+  if (!r || !r.passphrase) return null;
+  return { passphrase: r.passphrase, stakingOnly: !!r.stakingOnly };
+}
+
 async function routeStartup() {
   const firstLaunch = isFirstLaunch();
 
@@ -900,43 +979,80 @@ async function routeStartup() {
     return;
   }
 
-  // Returning user: spawn daemon SILENTLY and probe encryption state
-  // BEFORE deciding on UI. The user wants:
-  //   - encrypted+locked → unlock dialog FIRST (no splash behind),
-  //                        then splash, then main
-  //   - unencrypted      → splash from the start, then main
+  // Returning user. UX requirement:
+  //   unlock dialog FIRST (no waiting screen)
+  //   → splash (showing daemon's "Loading block index..." progression)
+  //   → main window
+  //
+  // The previous design awaited waitForRpcReady BEFORE showing any UI,
+  // which meant ~90 seconds of staring at the tray icon while the
+  // bootstrap-installed chain was loaded.
+  //
+  // The new design:
+  //   1. Start daemon in the background (no await).
+  //   2. Pop the unlock dialog IMMEDIATELY and collect the passphrase
+  //      WITHOUT calling walletpassphrase yet (daemon isn't ready).
+  //   3. When the user submits, show the splash with the daemon's
+  //      live log tail. waitForRpcReady runs here, with progress UI.
+  //   4. Send walletpassphrase with the collected passphrase. If the
+  //      wallet is unencrypted (edge case — our wizard always
+  //      encrypts), the RPC errors with "running with an unencrypted
+  //      wallet" which we treat as success.
+  //   5. createMainWindow → splash closes on ready-to-show.
+  //
+  // On wrong passphrase, the dialog re-prompts WITHOUT re-running
+  // waitForRpcReady — the daemon stays up across retries.
   startDaemon();
-  const ready = await waitForRpcReady(30 * 60 * 1000);  // 30 minutes
-  if (!ready) {
-    console.error('Daemon RPC never came up after 30 minutes.');
-    createSplashWindow();
-    splashStatus('Daemon failed to start');
-    createMainWindow();
-    return;
-  }
 
-  let isLocked = false;
-  try {
-    const info = await rpc('getinfo', []);
-    const isEncrypted = info && info.unlocked_until !== undefined;
-    isLocked = isEncrypted && info.unlocked_until === 0;
-  } catch (e) { console.warn('[startup] getinfo failed during unlock check:', e.message); }
-
-  if (isLocked) {
-    console.log('[startup] wallet encrypted+locked — prompting for passphrase first (no splash behind).');
-    const ok = await promptUnlockAtLogin();
-    if (!ok) {
+  let daemonReady = false;
+  while (true) {
+    // 1. Collect passphrase — no daemon needed.
+    const collected = await collectPassphraseAtLogin();
+    if (!collected) {
       console.log('[startup] unlock cancelled — quitting.');
       app.quit(); return;
     }
+
+    // 2. Show splash + wait for daemon (first iteration only).
+    if (!daemonReady) {
+      createSplashWindow();
+      // Forward daemon's "Loading block index... / Verifying last N
+      // blocks... / Loading wallet... / Core started!" lines from
+      // debug.log to the splash status text. MUST run after
+      // createSplashWindow — the tailer self-cancels if splashWindow
+      // is null when its first tick fires.
+      tailDaemonLogToSplash(path.join(getDataDir(), 'debug.log'));
+      splashStatus('Loading wallet...');
+      const ready = await waitForRpcReady(30 * 60 * 1000);
+      if (!ready) {
+        console.error('Daemon RPC never came up after 30 minutes.');
+        splashStatus('Daemon failed to start');
+        createMainWindow();
+        return;
+      }
+      daemonReady = true;
+    }
+
+    // 3. Try to unlock.
+    try {
+      const params = [collected.passphrase, SESSION_UNLOCK_SECS];
+      if (collected.stakingOnly) params.push(true);
+      await rpc('walletpassphrase', params);
+      break;  // unlock success
+    } catch (e) {
+      const msg = String(e && e.message || e);
+      if (/unencrypted/i.test(msg)) {
+        // Wallet is not encrypted — no unlock needed, continue to main.
+        break;
+      }
+      // Wrong passphrase. Close splash so the next unlock dialog isn't
+      // hidden behind it, then loop.
+      console.error('[startup] unlock failed:', msg);
+      closeSplash();
+    }
   }
 
-  // Now show splash → main. Splash gives the user something to look at
-  // while the renderer's index.html loads + its qwebchannel-shim does
-  // the initial round-trip with the daemon (~1-2 s).
-  createSplashWindow();
-  splashStatus(isLocked ? 'Loading wallet...' : 'Loading...');
-  // Final message before window.loadIndex() — spectre.cpp:350
+  // 4. Final message before window.loadIndex() — spectre.cpp:350
   splashStatus('...Start UI...');
   createMainWindow();
   // Close splash once main window has finished loading. Fallback: force-show
@@ -1118,13 +1234,21 @@ async function gracefulStopDaemon() {
 // Without this flag, that gap fires `window-all-closed` → gracefulStopDaemon
 // → app.quit, killing the freshly-shown main window ~1s later.
 let startupComplete = false;
-app.on('window-all-closed', async () => {
-  if (!startupComplete) {
-    console.log('[startup] window-all-closed during routing — ignoring');
-    return;
-  }
-  await gracefulStopDaemon();
-  if (process.platform !== 'darwin') app.quit();
+// `window-all-closed` used to call gracefulStopDaemon + app.quit. That
+// turned out to be the source of phantom daemon shutdowns: any brief
+// gap between BrowserWindows (passphrase dialog closing → main window
+// reopening, splash close mid-handoff, child window's `closed` event
+// firing before the next window's `ready-to-show`, etc.) would fire
+// this and tear the daemon down even though the user was still using
+// the app. The only legitimate quit paths are:
+//   - User clicks X on main window → mainWindow.on('close') calls
+//     app.quit(), which fires before-quit, which stops the daemon
+//   - User picks Exit from tray → menu click calls app.quit()
+//   - User chooses File → Exit menu accelerator → app.quit()
+// All three go through before-quit, so this handler being a no-op is
+// safe: the daemon is always cleaned up when the user actually quits.
+app.on('window-all-closed', () => {
+  // No-op. Daemon teardown is handled exclusively by before-quit.
 });
 app.on('before-quit', (e) => {
   app.isQuiting = true;  // unblock the close-event minimize-to-tray hold
