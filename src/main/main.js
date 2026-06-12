@@ -171,7 +171,15 @@ function startDaemon() {
   // terminal where they ran `npm start`. In packaged builds Electron
   // has no console, so we 'ignore' the pipes to avoid the OS opening
   // one for buffering.
-  daemonProc = spawn(daemonPath, [`-datadir=${dataDir}`, '-server'], {
+  // Opt-in faster IBD: set ALIAS_DISABLEWALLET=1 (env var) to launch the
+  // daemon with -disablewallet. Wallet still loads (RPC works) but per-block
+  // scan is skipped. Next normal launch without the var will rescan forward.
+  const daemonArgs = [`-datadir=${dataDir}`, '-server'];
+  if (process.env.ALIAS_DISABLEWALLET === '1') {
+    daemonArgs.push('-disablewallet');
+    console.log('ALIAS_DISABLEWALLET=1 — launching daemon with -disablewallet');
+  }
+  daemonProc = spawn(daemonPath, daemonArgs, {
     cwd: path.dirname(daemonPath),
     stdio: isDev ? 'inherit' : 'ignore',
     windowsHide: true,

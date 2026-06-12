@@ -1,0 +1,155 @@
+# DECISION LOG
+# Trigger: push to main + workflow_dispatch (swap to workflow_run/repository_dispatch once daemon CI is live).
+# Daemon: latest release from oxmmty/ALIAS-wallet-dev; pin with --tag v<ver> for reproducible builds.
+#   Daemon assets are named Alias-<release>-<sha>-Win64.zip / Mac.zip / Linux.zip (from oxmmty/ALIAS-wallet-dev).
+# Signing: optional — CSC_LINK + CSC_KEY_PASSWORD enable it; unsigned builds trigger SmartScreen/Gatekeeper warnings.
+# Auth: GITHUB_TOKEN covers this repo; swap GH_TOKEN to a PAT (secrets.DAEMON_REPO_PAT) if daemon repo is private/cross-org.
+
+name: Build and Release Installers
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            daemon_pattern: "*Win64.zip"
+            stage_dir: resources/win32/x64
+            daemon_bin: aliaswalletd.exe
+            build_script: build:win
+            artifact_glob: "dist/ALIAS*.exe"
+
+          - os: macos-latest
+            daemon_pattern: "*Mac.zip"
+            stage_dir: resources/darwin/x64
+            daemon_bin: aliaswalletd
+            build_script: build:mac
+            artifact_glob: "dist/*.dmg"
+
+          - os: ubuntu-latest
+            daemon_pattern: "*Linux.zip"
+            stage_dir: resources/linux/x64
+            daemon_bin: aliaswalletd
+            build_script: build:linux
+            # multiline so softprops/action-gh-release (splits files on newlines) uploads both
+            artifact_glob: |
+              dist/*.AppImage
+              dist/*.deb
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      # Change to secrets.DAEMON_REPO_PAT if ALIAS-wallet-dev is private/cross-org.
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        shell: bash
+        run: npm ci
+
+      # Stage the daemon binary before electron-builder runs so that the
+      # extraResources rule copies it into the packaged app's daemon/ directory.
+      # The path resources/${platform}/${arch}/ matches the electron-builder config:
+      #   from: "resources/${platform}/${arch}" -> to: "daemon"
+      - name: Download daemon release asset
+        shell: bash
+        run: |
+          gh release download \
+            --repo oxmmty/ALIAS-wallet-dev \
+            --pattern "${{ matrix.daemon_pattern }}" \
+            --dir daemon-asset
+
+      - name: Stage daemon binary
+        shell: bash
+        run: |
+          mkdir -p "${{ matrix.stage_dir }}"
+
+          # Find the downloaded archive (zip or tar.gz).
+          archive=$(find daemon-asset -type f \( -name "*.zip" -o -name "*.tar.gz" \) | head -1)
+          if [ -z "$archive" ]; then
+            echo "ERROR: no archive found in daemon-asset/ matching ${{ matrix.daemon_pattern }}"
+            exit 1
+          fi
+
+          # Extract into a staging directory.
+          mkdir -p daemon-extracted
+          case "$archive" in
+            *.tar.gz) tar -xzf "$archive" -C daemon-extracted ;;
+            *.zip)    unzip -q "$archive" -d daemon-extracted ;;
+          esac
+
+          # Locate the daemon binary anywhere inside the extracted tree.
+          daemon_src=$(find daemon-extracted -type f -name "${{ matrix.daemon_bin }}" | head -1)
+          if [ -z "$daemon_src" ]; then
+            echo "ERROR: ${{ matrix.daemon_bin }} not found inside $(basename "$archive"). Cannot stage daemon binary."
+            exit 1
+          fi
+          cp "$daemon_src" "${{ matrix.stage_dir }}/${{ matrix.daemon_bin }}"
+          # Mac and linux binaries must be executable.
+          chmod +x "${{ matrix.stage_dir }}/${{ matrix.daemon_bin }}"
+          echo "Staged $daemon_src -> ${{ matrix.stage_dir }}/${{ matrix.daemon_bin }}"
+
+          # Copy Tor bundle if present in the archive (optional but expected).
+          tor_src=$(find daemon-extracted -type d -name "Tor" | head -1)
+          if [ -n "$tor_src" ]; then
+            cp -r "$tor_src" "${{ matrix.stage_dir }}/Tor"
+            echo "Staged Tor bundle -> ${{ matrix.stage_dir }}/Tor"
+          else
+            echo "No Tor directory found in archive; skipping Tor bundle staging."
+          fi
+
+      - name: Verify daemon binary is staged (fail fast if missing)
+        shell: bash
+        run: |
+          daemon_path="${{ matrix.stage_dir }}/${{ matrix.daemon_bin }}"
+          if [ ! -f "$daemon_path" ]; then
+            echo "FATAL: $daemon_path does not exist. Expected daemon asset matching '${{ matrix.daemon_pattern }}'. Daemon staging failed."
+            exit 1
+          fi
+          echo "Daemon binary confirmed at $daemon_path"
+
+      - name: Build installer
+        shell: bash
+        run: npm run ${{ matrix.build_script }}
+        env:
+          # Code-signing is optional. Provide both secrets to enable signing.
+          # Without them electron-builder builds an unsigned installer.
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+
+      - name: Determine release tag
+        id: tag
+        shell: bash
+        run: |
+          tag="v$(node -p "require('./package.json').version")"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Release tag: $tag"
+
+      # All three OS jobs publish into the same release tag so users find
+      # win + mac + linux installers together in one release.
+      - name: Publish to GitHub Release
+        # pin to a full commit SHA for stricter supply-chain hardening
+        uses: softprops/action-gh-release@v2.0.8
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: "ALIAS Wallet ${{ steps.tag.outputs.tag }}"
+          prerelease: true
+          files: ${{ matrix.artifact_glob }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

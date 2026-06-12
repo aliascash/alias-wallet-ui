@@ -1119,9 +1119,10 @@ window.addEventListener('unhandledrejection', (e) => {
     const $icon = $('#connectionsIcon');
     const $txt  = $('#connectionsIconText');
     if (!$icon.length) return;
-    const n = Math.max(0, Math.min(12, Number(connections) || 0));
-    $icon.attr('src', 'assets/svg/connection-' + n + '.svg');
-    $icon.attr('data-title', n + ' active connection(s) to ALIAS network');
+    const actual = Number(connections) || 0;
+    const svgIdx = Math.max(0, Math.min(12, actual));
+    $icon.attr('src', 'assets/svg/connection-' + svgIdx + '.svg');
+    $icon.attr('data-title', actual + ' active connection(s) to ALIAS network');
     if (connections > 0) {
       $icon.removeClass('fa-spin');
       $txt.text(String(connections)).removeClass('none');
