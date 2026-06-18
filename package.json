@@ -46,7 +46,8 @@
     ],
     "linux": {
       "target": ["AppImage", "deb"],
-      "category": "Finance"
+      "category": "Finance",
+      "maintainer": "Alias Developers <dev@alias.cash>"
     },
     "win": {
       "target": ["nsis", "portable"]

@@ -46,8 +46,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     env:
-      # Change to secrets.DAEMON_REPO_PAT if ALIAS-wallet-dev is private/cross-org.
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # ALIAS-wallet-dev is a separate private repo, so the repo-scoped
+      # GITHUB_TOKEN cannot read its releases. Use a PAT (repo:read on
+      # ALIAS-wallet-dev) stored as secret DAEMON_REPO_PAT; fall back to
+      # GITHUB_TOKEN only if the PAT is unset (same-repo/public case).
+      GH_TOKEN: ${{ secrets.DAEMON_REPO_PAT || secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout repository
