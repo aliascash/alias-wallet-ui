@@ -54,7 +54,7 @@
   }
 
   function welcome() {
-    append('Welcome to the Alias RPC console.', 'console-out');
+    append('Welcome to the ALIAS RPC console.', 'console-out');
     append("Use up and down arrows to navigate history, type 'help' for a list of commands.", 'console-out');
     append('', '');
   }

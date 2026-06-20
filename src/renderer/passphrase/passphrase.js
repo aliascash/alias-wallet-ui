@@ -1,5 +1,5 @@
 // Multi-mode passphrase dialog. Mirrors src/qt/askpassphrasedialog.{cpp,ui}
-// and src/qt/forms/askpassphrasedialog.ui from the original Alias 4.4.0.
+// and src/qt/forms/askpassphrasedialog.ui from the original ALIAS 4.4.0.
 //
 // All visible text comes from that source — keep this file's strings in
 // sync with the C++ implementation.

@@ -263,7 +263,7 @@
     const newAcc = entries2.find((e) => e.label === ACC_LABEL && e.type === 'Account');
     if (newAcc && newAcc.id) await rpcRetry('extkey', ['setdefaultaccount', newAcc.id]);
 
-    // Create the two default addresses the original Alias UI shows in
+    // Create the two default addresses the original ALIAS UI shows in
     // Receive — "Default Public Address" and "Default Private Address".
     // Without these, listreceivedbyaddress returns empty until the user
     // generates one manually.
@@ -286,7 +286,7 @@
   }
 
   async function onLeaveEncrypt() {
-    // Original Alias's Page_EncryptWallet has no "skip" option — encryption
+    // Original ALIAS's Page_EncryptWallet has no "skip" option — encryption
     // is required to finish setup (matches Screenshot_15).
     const pw  = document.getElementById('encrypt-password').value;
     const pwc = document.getElementById('encrypt-password-confirm').value;

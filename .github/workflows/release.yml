@@ -1,7 +1,7 @@
 # DECISION LOG
 # Trigger: push to main + workflow_dispatch (swap to workflow_run/repository_dispatch once daemon CI is live).
-# Daemon: latest release from oxmmty/ALIAS-wallet-dev; pin with --tag v<ver> for reproducible builds.
-#   Daemon assets are named Alias-<release>-<sha>-Win64.zip / Mac.zip / Linux.zip (from oxmmty/ALIAS-wallet-dev).
+# Daemon: latest release from the daemon repo (set repo var DAEMON_REPO, default aliascash/alias-wallet); pin with --tag v<ver> for reproducible builds.
+#   Daemon assets are named ALIAS-<release>-<sha>-Win64.zip / Mac.zip / Linux.zip.
 # Signing: optional — CSC_LINK + CSC_KEY_PASSWORD enable it; unsigned builds trigger SmartScreen/Gatekeeper warnings.
 # Auth: GITHUB_TOKEN covers this repo; swap GH_TOKEN to a PAT (secrets.DAEMON_REPO_PAT) if daemon repo is private/cross-org.
 
@@ -49,9 +49,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     env:
-      # ALIAS-wallet-dev is a separate private repo, so the repo-scoped
+      # The daemon repo is separate, so the repo-scoped
       # GITHUB_TOKEN cannot read its releases. Use a PAT (repo:read on
-      # ALIAS-wallet-dev) stored as secret DAEMON_REPO_PAT; fall back to
+      # the daemon repo) stored as secret DAEMON_REPO_PAT; fall back to
       # GITHUB_TOKEN only if the PAT is unset (same-repo/public case).
       GH_TOKEN: ${{ secrets.DAEMON_REPO_PAT || secrets.GITHUB_TOKEN }}
 
@@ -77,7 +77,7 @@ jobs:
         shell: bash
         run: |
           gh release download \
-            --repo oxmmty/ALIAS-wallet-dev \
+            --repo ${{ vars.DAEMON_REPO || 'aliascash/alias-wallet' }} \
             --pattern "${{ matrix.daemon_pattern }}" \
             --dir daemon-asset
 

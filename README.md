@@ -1,6 +1,6 @@
-# Alias Wallet Desktop
+# ALIAS Wallet Desktop
 
-Electron-based desktop front-end for Alias Wallet. Replaces the Qt-based GUI from the legacy `alias-wallet` repo while keeping the original `alias-wallet-ui` HTML/CSS/JS look unchanged.
+Electron-based desktop front-end for ALIAS Wallet. Replaces the Qt-based GUI from the legacy `alias-wallet` repo while keeping the original `alias-wallet-ui` HTML/CSS/JS look unchanged.
 
 ## Architecture
 
@@ -62,7 +62,7 @@ In dev mode (`--dev`) the daemon is loaded from `../alias-modernized/dist/<platf
 
 ### Tor dependency
 
-The Alias daemon hardcodes a Tor subprocess and refuses to start without `Tor/tor.exe` (Windows / macOS) or `tor` on `$PATH` (Linux) next to the binary. There is no `-noonion` flag.
+The ALIAS daemon hardcodes a Tor subprocess and refuses to start without `Tor/tor.exe` (Windows / macOS) or `tor` on `$PATH` (Linux) next to the binary. There is no `-noonion` flag.
 
 We ship the Tor Project's **Expert Bundle** (statically linked, no DLLs):
 
@@ -94,12 +94,14 @@ Electron's main process seeds `geoip` / `geoip6` into the user data dir's `tor/`
 ## Building installers
 
 ```bash
-npm run build:win    # → dist/Alias Wallet Setup <version>.exe (nsis)
-npm run build:linux  # → dist/Alias Wallet-<version>.AppImage + .deb
-npm run build:mac    # → dist/Alias Wallet-<version>.dmg
+npm run build:win    # → dist/ALIAS Wallet Setup <version>.exe (nsis)
+npm run build:linux  # → dist/ALIAS Wallet-<version>.AppImage + .deb
+npm run build:mac    # → dist/ALIAS Wallet-<version>.dmg
 ```
 
 Each installer bundles the daemon from `resources/<platform>/<arch>/` into the packaged app under `resources/daemon/`.
+
+CI/CD: the GitHub Actions secrets and variables required by the release workflow are documented in [CI-SECRETS.md](CI-SECRETS.md).
 
 ## RPC contract
 

@@ -278,7 +278,7 @@ window.addEventListener('unhandledrejection', (e) => {
       try {
         const addr = await rpc(cmd, label ? [label] : []);
         dispatch('bridge', 'newAddressResult', true, '', addr, !!send);
-        // Original Alias Qt's WalletModel auto-refreshed the address tables
+        // Original ALIAS Qt's WalletModel auto-refreshed the address tables
         // via a Qt model signal. Mirror that by pushing the new entry into
         // the Receive + Address Book tables right away — the 8s poll loop
         // would otherwise leave the new row invisible for several seconds.
@@ -303,7 +303,7 @@ window.addEventListener('unhandledrejection', (e) => {
       }
     },
     deleteAddress: async function (address) {
-      // Original Alias's WalletModel called DelAddressBookName directly on
+      // Original ALIAS's WalletModel called DelAddressBookName directly on
       // the wallet. The daemon doesn't expose that as RPC, so we mirror the
       // user-visible outcome by clearing the label via setaccount('') —
       // which is the closest equivalent for own addresses (Bitcoin's RPC
@@ -1367,7 +1367,7 @@ window.addEventListener('unhandledrejection', (e) => {
   function handleAliasUri(uri) {
     const r = parseAliasUri(uri);
     if (!r) return;
-    // Original Alias passed amount as int64 satoshis (CAmount). The UI's
+    // Original ALIAS passed amount as int64 satoshis (CAmount). The UI's
     // send.js divides by 1E8 to display. Convert from ALIAS units in the
     // URI accordingly.
     const amountSats = Math.round(r.amount * 1e8);

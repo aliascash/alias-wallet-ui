@@ -250,7 +250,7 @@ function tailDaemonLogToSplash(logPath) {
     // appear here; the InitMessage-only ones (per-block progress, etc.)
     // cannot be surfaced without a daemon patch.
     //
-    // Each rewrite below uses the ORIGINAL Alias string verbatim — no
+    // Each rewrite below uses the ORIGINAL ALIAS string verbatim — no
     // fabricated text. Sources cited inline.
     const interesting = [
       [/Verifying database integrity/i,  'Verifying database integrity...'],   // init.cpp:668
@@ -336,7 +336,7 @@ ipcMain.handle('alias:wizard-complete', async (_event, passphrase) => {
 
   // The wizard's last action was `encryptwallet`, which causes the
   // daemon to write the new wallet.dat then call StartShutdown and EXIT
-  // (not restart — original Alias's encrypt-and-restart was an in-
+  // (not restart — original ALIAS's encrypt-and-restart was an in-
   // process Qt action; here the daemon is a separate process). Our
   // child-process exit handler nulled daemonProc. We must re-spawn it
   // explicitly so the wallet UI has something to talk to.
@@ -394,7 +394,7 @@ ipcMain.handle('alias:wizard-complete', async (_event, passphrase) => {
   mainWindow.webContents.once('did-finish-load', () => { startupComplete = true; });
 });
 ipcMain.handle('alias:wizard-cancel', () => {
-  // Match original Alias behavior: cancelling the wizard exits the app
+  // Match original ALIAS behavior: cancelling the wizard exits the app
   // (spectre.cpp:254 `if (!wizard.exec()) return 0;`). Because we don't
   // mark wizardCompleted, the next launch will re-fire the wizard.
   settings.set('wizardCompleted', false);
@@ -510,7 +510,7 @@ ipcMain.handle('alias:load-translation', (_event, locale) => {
   catch (_) { return null; }
 });
 
-// Debug window — mirrors the original Alias QDialog "Alias - Debug window"
+// Debug window — mirrors the original ALIAS QDialog "ALIAS - Debug window"
 // at 740x480 with Information / Console / Network Traffic tabs.
 let debugWindow = null;
 ipcMain.handle('alias:open-debug', () => {
@@ -804,7 +804,7 @@ function createWizardWindow() {
 }
 
 function createMainWindow() {
-  // Match the original Alias v4.4.0 client window: ~1280×720 content area
+  // Match the original ALIAS v4.4.0 client window: ~1280×720 content area
   // (1296×759 outer with Windows chrome — 16:9).
   let saved = settings.get('mainBounds') || { width: 1280, height: 720 };
   // Validate saved bounds against current displays — a window restored from
@@ -827,7 +827,7 @@ function createMainWindow() {
     y:      Number.isFinite(saved.y) ? saved.y : undefined,
     useContentSize: true,
     // Title format mirrors original SpectreGUI ctor:
-    //   setWindowTitle(tr("Alias") + " - " + tr("Client") + " - " + CLIENT_PLAIN_VERSION)
+    //   setWindowTitle(tr("ALIAS") + " - " + tr("Client") + " - " + CLIENT_PLAIN_VERSION)
     title: `ALIAS - Client - v${app.getVersion()}.0`,
     icon: APP_ICON,
     show: false,  // shown explicitly after did-finish-load to avoid white flash
