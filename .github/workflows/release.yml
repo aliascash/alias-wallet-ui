@@ -128,10 +128,42 @@ jobs:
           fi
 
           # Extract into a staging directory.
+          #
+          # Do not extract zips with `unzip`. The Windows daemon archive is
+          # built by PowerShell Compress-Archive, which writes entry names with
+          # BACKSLASH separators ("ALIAS\\aliaswalletd.exe"). Info-ZIP on the
+          # Windows runner prints
+          #     warning: ... appears to use backslashes as path separators
+          # and returns exit status 1 ("warning error") even though extraction
+          # succeeded. This step runs under `bash -e`, so that non-zero status
+          # aborted the whole job. Python's zipfile has no such behaviour, is
+          # present on every runner, and lets us normalise the separators.
           mkdir -p daemon-extracted
+          PY=$(command -v python3 || command -v python)
+          if [ -z "$PY" ]; then
+            echo "ERROR: neither python3 nor python found on PATH; cannot extract $archive"
+            exit 1
+          fi
           case "$archive" in
             *.tar.gz) tar -xzf "$archive" -C daemon-extracted ;;
-            *.zip)    unzip -q "$archive" -d daemon-extracted ;;
+            *.zip)
+              "$PY" - "$archive" <<'EOF'
+          import os, sys, zipfile
+          archive = sys.argv[1]
+          dest = "daemon-extracted"
+          with zipfile.ZipFile(archive) as z:
+              for info in z.infolist():
+                  name = info.filename.replace("\\", "/")
+                  if name.endswith("/"):
+                      os.makedirs(os.path.join(dest, name), exist_ok=True)
+                      continue
+                  target = os.path.join(dest, name)
+                  os.makedirs(os.path.dirname(target), exist_ok=True)
+                  with z.open(info) as src, open(target, "wb") as out:
+                      out.write(src.read())
+          print("extracted", archive, "->", dest)
+          EOF
+              ;;
           esac
 
           # Locate the daemon binary anywhere inside the extracted tree.
