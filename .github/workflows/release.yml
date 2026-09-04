@@ -1,6 +1,7 @@
 # DECISION LOG
 # Trigger: push to main + workflow_dispatch (swap to workflow_run/repository_dispatch once daemon CI is live).
-# Daemon: latest release from the daemon repo (set repo var DAEMON_REPO, default aliascash/alias-wallet); pin with --tag v<ver> for reproducible builds.
+# Daemon: pin with the daemon_tag workflow input or repo var DAEMON_TAG (e.g. Build54);
+#   defaults to DEFAULT_DAEMON_TAG in this file; last resort is the daemon repo latest FULL release.
 #   Daemon assets are named ALIAS-<release>-<sha>-Win64.zip / Mac.zip / Linux.zip.
 # Signing: optional — CSC_LINK + CSC_KEY_PASSWORD enable it; unsigned builds trigger SmartScreen/Gatekeeper warnings.
 # Auth: GITHUB_TOKEN covers this repo; swap GH_TOKEN to a PAT (secrets.DAEMON_REPO_PAT) if daemon repo is private/cross-org.
@@ -12,6 +13,13 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      daemon_tag:
+        description: >-
+          Daemon release tag to bundle (e.g. Build54). Leave empty to use the
+          repo variable DAEMON_TAG, else DEFAULT_DAEMON_TAG pinned in this workflow.
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -49,6 +57,12 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     env:
+      # Daemon build bundled by a plain push to main. Pinned in-repo so the
+      # build is reproducible and cannot silently fall back to the newest
+      # FULL release (4.4.x) — the develop pipeline publishes prereleases,
+      # which `gh release view` does not consider latest. Override per-run
+      # with the daemon_tag input, or repo-wide with the DAEMON_TAG variable.
+      DEFAULT_DAEMON_TAG: Build55
       # The daemon repo is separate, so the repo-scoped
       # GITHUB_TOKEN cannot read its releases. Use a PAT (repo:read on
       # the daemon repo) stored as secret DAEMON_REPO_PAT; fall back to
@@ -73,10 +87,30 @@ jobs:
       # extraResources rule copies it into the packaged app's daemon/ directory.
       # The path resources/${platform}/${arch}/ matches the electron-builder config:
       #   from: "resources/${platform}/${arch}" -> to: "daemon"
+      # `gh release download` with no --tag resolves to the repo's *latest*
+      # release, which excludes prereleases. The daemon's develop pipeline
+      # publishes prereleases (Build<n>), so without an explicit tag this
+      # silently bundles the last full release (4.4.x) instead of the build
+      # the UI was tested against. Resolve the tag explicitly.
+      - name: Resolve daemon release tag
+        id: daemon_tag
+        shell: bash
+        run: |
+          tag="${{ inputs.daemon_tag || vars.DAEMON_TAG || env.DEFAULT_DAEMON_TAG }}"
+          if [ -z "$tag" ]; then
+            tag=$(gh release view \
+                    --repo ${{ vars.DAEMON_REPO || 'aliascash/alias-wallet' }} \
+                    --json tagName --jq .tagName)
+            echo "No pinned tag; falling back to latest full release: $tag"
+          else
+            echo "Using pinned daemon tag: $tag"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
       - name: Download daemon release asset
         shell: bash
         run: |
-          gh release download \
+          gh release download "${{ steps.daemon_tag.outputs.tag }}" \
             --repo ${{ vars.DAEMON_REPO || 'aliascash/alias-wallet' }} \
             --pattern "${{ matrix.daemon_pattern }}" \
             --dir daemon-asset
