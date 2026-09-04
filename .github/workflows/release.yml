@@ -11,7 +11,10 @@ name: Build and Release Installers
 on:
   push:
     branches:
+      # `main` on the standalone desktop repo; `electron-desktop` is the branch
+      # this codebase lives on in aliascash/alias-wallet-ui.
       - main
+      - electron-desktop
   workflow_dispatch:
     inputs:
       daemon_tag:
