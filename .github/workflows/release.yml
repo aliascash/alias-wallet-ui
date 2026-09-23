@@ -180,6 +180,29 @@ jobs:
           chmod +x "${{ matrix.stage_dir }}/${{ matrix.daemon_bin }}"
           echo "Staged $daemon_src -> ${{ matrix.stage_dir }}/${{ matrix.daemon_bin }}"
 
+          # The Windows daemon is dynamically linked (MSVC runtime, Boost,
+          # OpenSSL, BerkeleyDB). Stage the DLLs it imports, following imports
+          # through the DLLs themselves, so it can start on a clean machine.
+          "$PY" - "$daemon_src" "${{ matrix.stage_dir }}" <<'EOF'
+          import os, re, shutil, sys
+          exe, stage = sys.argv[1], sys.argv[2]
+          d = os.path.dirname(exe)
+          have = {f.lower(): f for f in os.listdir(d) if f.lower().endswith('.dll')}
+          def imports(path):
+              return {m.decode().lower() for m in re.findall(rb'[A-Za-z0-9_\-]+\.dll', open(path, 'rb').read())}
+          todo, done = imports(exe), set()
+          while todo:
+              n = todo.pop()
+              if n in done or n not in have:
+                  continue
+              done.add(n)
+              todo |= imports(os.path.join(d, have[n]))
+          for n in sorted(done):
+              shutil.copy2(os.path.join(d, have[n]), stage)
+              print("Staged DLL", have[n])
+          print("Staged", len(done), "DLLs")
+          EOF
+
           # Copy Tor bundle if present in the archive (optional but expected).
           tor_src=$(find daemon-extracted -type d -name "Tor" | head -1)
           if [ -n "$tor_src" ]; then
