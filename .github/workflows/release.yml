@@ -39,6 +39,7 @@ jobs:
           # architecture must not decide what gets built, because the daemon
           # staged below is downloaded per arch and has to match.
           - os: windows-latest
+            label: win-x64
             electron_arch: x64
             daemon_pattern: "*Win64.zip"
             stage_dir: resources/win32/x64
@@ -47,6 +48,7 @@ jobs:
             artifact_glob: "dist/ALIAS*x64.exe"
 
           - os: windows-latest
+            label: win-ia32
             electron_arch: ia32
             daemon_pattern: "*Win32.zip"
             stage_dir: resources/win32/ia32
@@ -55,6 +57,7 @@ jobs:
             artifact_glob: "dist/ALIAS*ia32.exe"
 
           - os: macos-15-intel
+            label: mac-x64
             electron_arch: x64
             daemon_pattern: "*Mac.zip"
             stage_dir: resources/darwin/x64
@@ -63,6 +66,7 @@ jobs:
             artifact_glob: "dist/*x64.dmg"
 
           - os: macos-latest
+            label: mac-arm64
             electron_arch: arm64
             daemon_pattern: "*Mac-arm64.zip"
             stage_dir: resources/darwin/arm64
@@ -71,6 +75,7 @@ jobs:
             artifact_glob: "dist/*arm64.dmg"
 
           - os: ubuntu-latest
+            label: linux-x64
             electron_arch: x64
             daemon_pattern: "*Linux.zip"
             stage_dir: resources/linux/x64
@@ -82,6 +87,7 @@ jobs:
               dist/*.deb
 
     runs-on: ${{ matrix.os }}
+    name: ${{ matrix.label }}
 
     env:
       # The daemon repo is separate, so the repo-scoped
@@ -262,14 +268,26 @@ jobs:
           fi
           echo "Daemon binary confirmed at $daemon_path"
 
+      # Code-signing is optional. Provide both secrets to enable signing.
+      # They must not be exported when unset: electron-builder treats a DEFINED
+      # but empty CSC_LINK as a certificate path, resolves it to the workspace
+      # and dies with "<workspace> not a file". So pass them under different
+      # names and only export the real ones when a certificate is actually set.
       - name: Build installer
         shell: bash
-        run: npm run ${{ matrix.build_script }} -- --${{ matrix.electron_arch }}
         env:
-          # Code-signing is optional. Provide both secrets to enable signing.
-          # Without them electron-builder builds an unsigned installer.
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          CSC_LINK_IN: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD_IN: ${{ secrets.CSC_KEY_PASSWORD }}
+        run: |
+          if [ -n "$CSC_LINK_IN" ]; then
+            echo "Code-signing certificate present; building signed."
+            export CSC_LINK="$CSC_LINK_IN"
+            export CSC_KEY_PASSWORD="$CSC_KEY_PASSWORD_IN"
+          else
+            echo "No code-signing certificate; building unsigned."
+            export CSC_IDENTITY_AUTO_DISCOVERY=false
+          fi
+          npm run ${{ matrix.build_script }} -- --${{ matrix.electron_arch }}
 
       - name: Determine release tag
         id: tag

@@ -51,10 +51,7 @@
       "maintainer": "ALIAS Developers <dev@alias.cash>"
     },
     "win": {
-      "target": ["nsis", "portable"]
-    },
-    "portable": {
-      "artifactName": "${productName}-Portable-${version}-${arch}.${ext}"
+      "target": ["nsis"]
     },
     "nsis": {
       "artifactName": "${productName}-Setup-${version}-${arch}.${ext}",
