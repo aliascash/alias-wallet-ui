@@ -40,6 +40,7 @@
         "filter": [
           "aliaswalletd",
           "aliaswalletd.exe",
+          "*.dll",
           "Tor/**/*"
         ]
       }
@@ -52,7 +53,11 @@
     "win": {
       "target": ["nsis", "portable"]
     },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}-${arch}.${ext}"
+    },
     "nsis": {
+      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}",
       "perMachine": false,
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
@@ -69,7 +74,8 @@
     },
     "mac": {
       "target": ["dmg"],
-      "category": "public.app-category.finance"
+      "category": "public.app-category.finance",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     }
   }
 }

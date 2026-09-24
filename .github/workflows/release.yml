@@ -1,8 +1,10 @@
 # DECISION LOG
 # Trigger: push to main + workflow_dispatch (swap to workflow_run/repository_dispatch once daemon CI is live).
-# Daemon: pin with the daemon_tag workflow input or repo var DAEMON_TAG (e.g. Build54);
-#   defaults to DEFAULT_DAEMON_TAG in this file; last resort is the daemon repo latest FULL release.
-#   Daemon assets are named ALIAS-<release>-<sha>-Win64.zip / Mac.zip / Linux.zip.
+# Daemon: by default the newest Build<n> prerelease from the daemon repo's dev branch.
+#   Pin a specific build with the daemon_tag input or the DAEMON_TAG repo variable when
+#   cutting a release, so that build is reproducible.
+#   Daemon assets are named ALIAS-<release>-<sha>-Win64.zip / Win32.zip / Mac.zip /
+#   Mac-arm64.zip / Linux.zip.
 # Signing: optional — CSC_LINK + CSC_KEY_PASSWORD enable it; unsigned builds trigger SmartScreen/Gatekeeper warnings.
 # Auth: GITHUB_TOKEN covers this repo; swap GH_TOKEN to a PAT (secrets.DAEMON_REPO_PAT) if daemon repo is private/cross-org.
 
@@ -19,8 +21,8 @@ on:
     inputs:
       daemon_tag:
         description: >-
-          Daemon release tag to bundle (e.g. Build54). Leave empty to use the
-          repo variable DAEMON_TAG, else DEFAULT_DAEMON_TAG pinned in this workflow.
+          Daemon release tag to bundle (e.g. Build67). Leave empty to use the
+          repo variable DAEMON_TAG, else the newest Build<n> daemon prerelease.
         required: false
         default: ''
 
@@ -33,21 +35,43 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # electron_arch is passed to electron-builder explicitly: the runner
+          # architecture must not decide what gets built, because the daemon
+          # staged below is downloaded per arch and has to match.
           - os: windows-latest
+            electron_arch: x64
             daemon_pattern: "*Win64.zip"
             stage_dir: resources/win32/x64
             daemon_bin: aliaswalletd.exe
             build_script: build:win
-            artifact_glob: "dist/ALIAS*.exe"
+            artifact_glob: "dist/ALIAS*x64.exe"
 
-          - os: macos-latest
+          - os: windows-latest
+            electron_arch: ia32
+            daemon_pattern: "*Win32.zip"
+            stage_dir: resources/win32/ia32
+            daemon_bin: aliaswalletd.exe
+            build_script: build:win
+            artifact_glob: "dist/ALIAS*ia32.exe"
+
+          - os: macos-15-intel
+            electron_arch: x64
             daemon_pattern: "*Mac.zip"
             stage_dir: resources/darwin/x64
             daemon_bin: aliaswalletd
             build_script: build:mac
-            artifact_glob: "dist/*.dmg"
+            artifact_glob: "dist/*x64.dmg"
+
+          - os: macos-latest
+            electron_arch: arm64
+            daemon_pattern: "*Mac-arm64.zip"
+            stage_dir: resources/darwin/arm64
+            daemon_bin: aliaswalletd
+            build_script: build:mac
+            artifact_glob: "dist/*arm64.dmg"
 
           - os: ubuntu-latest
+            electron_arch: x64
             daemon_pattern: "*Linux.zip"
             stage_dir: resources/linux/x64
             daemon_bin: aliaswalletd
@@ -60,12 +84,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     env:
-      # Daemon build bundled by a plain push to main. Pinned in-repo so the
-      # build is reproducible and cannot silently fall back to the newest
-      # FULL release (4.4.x) — the develop pipeline publishes prereleases,
-      # which `gh release view` does not consider latest. Override per-run
-      # with the daemon_tag input, or repo-wide with the DAEMON_TAG variable.
-      DEFAULT_DAEMON_TAG: Build55
       # The daemon repo is separate, so the repo-scoped
       # GITHUB_TOKEN cannot read its releases. Use a PAT (repo:read on
       # the daemon repo) stored as secret DAEMON_REPO_PAT; fall back to
@@ -99,12 +117,21 @@ jobs:
         id: daemon_tag
         shell: bash
         run: |
-          tag="${{ inputs.daemon_tag || vars.DAEMON_TAG || env.DEFAULT_DAEMON_TAG }}"
+          tag="${{ inputs.daemon_tag || vars.DAEMON_TAG }}"
           if [ -z "$tag" ]; then
-            tag=$(gh release view \
-                    --repo ${{ vars.DAEMON_REPO || 'aliascash/alias-wallet' }} \
-                    --json tagName --jq .tagName)
-            echo "No pinned tag; falling back to latest full release: $tag"
+            # Newest daemon build from the dev branch. Deliberately not
+            # `gh release view`: that returns the latest FULL release, which is
+            # a 4.4.x Qt build from master with no Mac.zip and a daemon from the
+            # other stack. Daemon builds are prereleases tagged Build<run number>,
+            # and the releases API returns newest first.
+            tag=$(gh api "repos/${{ vars.DAEMON_REPO || 'aliascash/alias-wallet' }}/releases" \
+                    --jq '[.[] | select(.prerelease) | select(.tag_name | test("^Build[0-9]+$")) | .tag_name][0]')
+            if [ -z "$tag" ] || [ "$tag" = "null" ]; then
+              echo "ERROR: no Build<n> daemon prerelease found in the daemon repo."
+              echo "Publish one from the dev branch, or pin a tag with the daemon_tag input."
+              exit 1
+            fi
+            echo "Using latest daemon build: $tag"
           else
             echo "Using pinned daemon tag: $tag"
           fi
@@ -164,6 +191,12 @@ jobs:
                   os.makedirs(os.path.dirname(target), exist_ok=True)
                   with z.open(info) as src, open(target, "wb") as out:
                       out.write(src.read())
+                  # zipfile does not restore permissions, so an extracted
+                  # Tor/tor.real would land as 0644 and fail to exec. Windows
+                  # zips carry no unix mode (0), so this is a no-op there.
+                  mode = info.external_attr >> 16
+                  if mode:
+                      os.chmod(target, mode & 0o777)
           print("extracted", archive, "->", dest)
           EOF
               ;;
@@ -207,6 +240,13 @@ jobs:
           tor_src=$(find daemon-extracted -type d -name "Tor" | head -1)
           if [ -n "$tor_src" ]; then
             cp -r "$tor_src" "${{ matrix.stage_dir }}/Tor"
+            # Belt and braces: the daemon cannot launch a non-executable Tor.
+            for t in tor.real tor tor.exe; do
+              [ -f "${{ matrix.stage_dir }}/Tor/$t" ] && chmod +x "${{ matrix.stage_dir }}/Tor/$t"
+            done
+            if [ -d "${{ matrix.stage_dir }}/Tor/PluggableTransports" ]; then
+              chmod +x "${{ matrix.stage_dir }}"/Tor/PluggableTransports/* || true
+            fi
             echo "Staged Tor bundle -> ${{ matrix.stage_dir }}/Tor"
           else
             echo "No Tor directory found in archive; skipping Tor bundle staging."
@@ -224,7 +264,7 @@ jobs:
 
       - name: Build installer
         shell: bash
-        run: npm run ${{ matrix.build_script }}
+        run: npm run ${{ matrix.build_script }} -- --${{ matrix.electron_arch }}
         env:
           # Code-signing is optional. Provide both secrets to enable signing.
           # Without them electron-builder builds an unsigned installer.
