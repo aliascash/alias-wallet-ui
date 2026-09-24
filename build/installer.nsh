@@ -69,7 +69,12 @@
 !define BOOTSTRAP_URL "https://download.alias.cash/files/bootstrap/BootstrapChain.zip"
 ; A single reset used to abort the whole multi-GB transfer. /RESUME continues
 ; from the bytes already on disk, so retrying costs only what was lost.
-!define BOOTSTRAP_TRIES 5
+; Kept low on purpose. The original Inno Setup installer downloaded this fine
+; on machines where NScurl fails, because Inno used Windows' own HTTP stack
+; while NScurl carries its own libcurl and TLS. When the failure is a reset
+; during the handshake, more NScurl attempts will not help -- get to the
+; Windows-native downloaders below quickly instead.
+!define BOOTSTRAP_TRIES 2
 
 ; TLS options, in one place so the HEAD and the GET stay identical.
 ;
@@ -182,10 +187,35 @@ SectionEnd
   Goto bootstrap_try
 
   bootstrap_failed:
-  ; Security software that intercepts TLS can block this download while the
-  ; browser on the same machine works, so always offer the manual route.
+  ; NScurl exhausted its attempts. Error 0x23 with "connection was reset"
+  ; means the TCP connection is killed during the TLS handshake -- not a
+  ; distrusted certificate, which would be 0x3C. Security software commonly
+  ; does this to an unsigned installer running from %TEMP% while leaving the
+  ; browser alone, so retry through binaries Windows ships and AV already
+  ; trusts. Both support resume, so they continue from whatever NScurl got.
+  DetailPrint "Retrying with Windows' own downloader (this can take a while, with no progress bar) ..."
+
+  ; 1) curl.exe -- present since Windows 10 1803, signed by Microsoft.
+  nsExec::ExecToLog 'curl.exe -L --fail --retry 3 --retry-delay 5 --retry-connrefused \
+                     -C - -o "$1" "${BOOTSTRAP_URL}"'
+  Pop $3
+  DetailPrint "curl.exe returned: $3"
+  StrCmp $3 "0" download_ok
+
+  ; 2) BITS -- a Windows service does the transfer, so the installer process
+  ;    itself never opens the socket. Often allowed where the rest is not.
+  DetailPrint "Retrying with Background Intelligent Transfer Service ..."
+  nsExec::ExecToLog 'powershell -NoProfile -ExecutionPolicy Bypass -Command \
+                     "Start-BitsTransfer -Source \'${BOOTSTRAP_URL}\' -Destination \'$1\'"'
+  Pop $3
+  DetailPrint "BITS returned: $3"
+  StrCmp $3 "0" download_ok
+
+  ; Everything failed. The browser works on these machines, so point there.
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-    "Bootstrap download failed after ${BOOTSTRAP_TRIES} attempts: $2$\n$\n\
+    "Bootstrap download failed: $2$\n$\n\
+     This usually means antivirus or a firewall is blocking the installer from \
+     downloading, even though your browser can.$\n$\n\
      ALIAS will still install and can sync from peers on first run, but that is slow.$\n$\n\
      To use the bootstrap instead, download this in your browser:$\n\
      ${BOOTSTRAP_URL}$\n$\n\
