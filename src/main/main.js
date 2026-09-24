@@ -86,10 +86,29 @@ function getDaemonPath() {
 // the original v4.4.0 wallet (and any pre-extracted blockchain bootstrap)
 // uses, forcing a full Initial Block Download from genesis over Tor — which
 // takes days instead of minutes.
+// The installer writes the directory it chose into datadir.txt next to the
+// executable, because the location depends on whether the user installed for
+// all users (shared, %ProgramData%\ALIAS) or only themselves (%APPDATA%\ALIAS).
+// Without that file -- dev runs, or a build started by hand -- fall back to
+// the per-user default. The daemon is always launched with an explicit
+// -datadir, so this is the single source of truth.
+let cachedDataDir = null;
 function getDataDir() {
-  if (process.platform === 'win32') return path.join(os.homedir(), 'AppData', 'Roaming', 'Aliaswallet');
-  if (process.platform === 'darwin') return path.join(os.homedir(), 'Library', 'Application Support', 'Aliaswallet');
-  return path.join(os.homedir(), '.aliaswallet');
+  if (cachedDataDir) return cachedDataDir;
+  if (!isDev) {
+    try {
+      const recorded = fs.readFileSync(
+        path.join(path.dirname(process.execPath), 'datadir.txt'), 'utf8').trim();
+      if (recorded) {
+        cachedDataDir = recorded;
+        return cachedDataDir;
+      }
+    } catch (e) { /* no marker file; use the per-user default below */ }
+  }
+  if (process.platform === 'win32') cachedDataDir = path.join(os.homedir(), 'AppData', 'Roaming', 'ALIAS');
+  else if (process.platform === 'darwin') cachedDataDir = path.join(os.homedir(), 'Library', 'Application Support', 'ALIAS');
+  else cachedDataDir = path.join(os.homedir(), '.alias');
+  return cachedDataDir;
 }
 
 function writeAliasConf() {
@@ -120,20 +139,26 @@ function seedTorFiles(daemonPath, dataDir) {
   }
 }
 
-// One-time migration: earlier builds of this Electron shell pointed the
-// daemon at `%APPDATA%\Alias` instead of the daemon's actual default,
-// `%APPDATA%\Aliaswallet`. Any wallet that synced under the old path lives
-// in the wrong folder. On startup, if the legacy folder exists with the
+// One-time migration: earlier builds stored everything in `Aliaswallet`
+// (and before that, `Alias`). The data directory is now `ALIAS`, chosen to
+// match the installed application name. Any wallet that synced under the old
+// path lives in the wrong folder. On startup, if the legacy folder exists with the
 // real wallet and the canonical folder either doesn't exist or holds only
 // stale data, move the legacy folder into place. Older canonical data, if
 // any, is renamed to a timestamped backup — nothing is deleted.
 function migrateLegacyDataDir() {
   const canonical = getDataDir();
   let legacy;
-  if (process.platform === 'win32')      legacy = path.join(os.homedir(), 'AppData', 'Roaming', 'Alias');
-  else if (process.platform === 'darwin')legacy = path.join(os.homedir(), 'Library', 'Application Support', 'Alias');
-  else                                   legacy = path.join(os.homedir(), '.alias');
-  if (legacy === canonical) return;
+  if (process.platform === 'win32')      legacy = path.join(os.homedir(), 'AppData', 'Roaming', 'Aliaswallet');
+  else if (process.platform === 'darwin')legacy = path.join(os.homedir(), 'Library', 'Application Support', 'Aliaswallet');
+  else                                   legacy = path.join(os.homedir(), '.aliaswallet');
+  // Windows and default macOS are case-insensitive, so the older "Alias"
+  // folder IS the new "ALIAS" one -- only "Aliaswallet" is a distinct
+  // directory that needs moving.
+  const sameDir = process.platform === 'linux'
+    ? legacy === canonical
+    : legacy.toLowerCase() === canonical.toLowerCase();
+  if (sameDir) return;
   const legacyWallet    = path.join(legacy, 'wallet.dat');
   const canonicalWallet = path.join(canonical, 'wallet.dat');
   if (!fs.existsSync(legacyWallet)) return;  // nothing to migrate

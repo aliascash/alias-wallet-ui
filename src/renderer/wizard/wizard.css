@@ -28,13 +28,13 @@ body {
   background: #3b3855;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  /* border-box so the padding stays inside the 140px band */
   box-sizing: border-box;
-  padding: 0 16px;
 }
-/* Fill the sidebar width rather than sitting small in the middle. The logo
-   is square (viewBox 0 0 1000 1000), so height follows width and cannot
-   overflow the full-height bar. */
+/* No CSS padding here on purpose. The artwork occupies only the middle 77.5%
+   of the SVG's 1000x1000 viewBox (x 113..888), so it already carries ~11%
+   whitespace each side. At width:100% of the 140px bar that renders as a
+   ~108px logo with ~16px visual margins -- adding CSS padding on top of it
+   made the logo look small, which is the bug this fixes. */
 .wizard-sidebar img { width: 100%; height: auto; opacity: 0.95; user-select: none; -webkit-user-drag: none; }
 
 .wizard-right {

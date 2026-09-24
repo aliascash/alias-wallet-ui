@@ -61,7 +61,7 @@
       "perMachine": false,
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "allowElevation": false,
+      "allowElevation": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "ALIAS",
