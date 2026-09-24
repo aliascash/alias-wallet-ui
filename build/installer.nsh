@@ -1,9 +1,13 @@
 ; installer.nsh — injected by electron-builder via `nsis.include`.
 ;
 ; Adds an OPTIONAL "Bootstrap Blockchain Data" component that downloads
-; the ~3.95 GB BootstrapChain.zip from download.alias.cash and extracts
-; it into %APPDATA%\Aliaswallet. Mirrors the original Alias 4.4.0 Inno
-; Setup installer's [Components] section.
+; BootstrapChain.zip from download.alias.cash and extracts it into
+; %APPDATA%\Aliaswallet. Mirrors the original Alias 4.4.0 Inno Setup
+; installer's [Components] section.
+;
+; The archive is rebuilt periodically and its size changes (it was 3.95 GB,
+; it is now 5.43 GB), so the size is read from the server at run time and
+; never compiled in.
 ;
 ; Flow:
 ;   Language selector (electron-builder MUI_LANGDLL)  →
@@ -37,17 +41,39 @@
 ; defined yet when the NSIS compiler expands this macro.)
 !macro customInit
   SectionSetText 1 "Install ALIAS Wallet"
+
+  ; Ask the server how big the archive is, so the component label never
+  ; carries a stale number. Fails safe: no size shown if the HEAD does not
+  ; come back, and the installer carries on either way.
+  StrCpy $R0 ""
+  NScurl::http HEAD "${BOOTSTRAP_URL}" "" /CONNECTTIMEOUT 10000 /TIMEOUT 20000 /SILENT /END
+  Pop $R1
+  StrCmp $R1 "OK" 0 bootstrap_size_unknown
+    NScurl::query "@FILESIZE@"
+    Pop $R0
+  bootstrap_size_unknown:
+  StrCmp $R0 "" 0 bootstrap_size_known
+    SectionSetText 0 "Bootstrap Blockchain Data"
+    Goto bootstrap_size_done
+  bootstrap_size_known:
+    SectionSetText 0 "Bootstrap Blockchain Data ($R0)"
+  bootstrap_size_done:
 !macroend
 
 ; Point NSIS at the INetC plugin we bundled under build/nsis-plugins/.
 ; BUILD_RESOURCES_DIR is electron-builder's macro for the project's
 ; build/ folder.
+!define BOOTSTRAP_URL "https://download.alias.cash/files/bootstrap/BootstrapChain.zip"
+; A single reset used to abort the whole multi-GB transfer. /RESUME continues
+; from the bytes already on disk, so retrying costs only what was lost.
+!define BOOTSTRAP_TRIES 5
+
 !addplugindir /x86-unicode "${BUILD_RESOURCES_DIR}\nsis-plugins\x86-unicode"
 !addplugindir /x86-ansi    "${BUILD_RESOURCES_DIR}\nsis-plugins\x86-ansi"
 !addplugindir /amd64-unicode "${BUILD_RESOURCES_DIR}\nsis-plugins\amd64-unicode"
 
 ; OPTIONAL section — checked by default but user can uncheck.
-Section "Bootstrap Blockchain Data (3.95 GB)" SecBootstrap
+Section "Bootstrap Blockchain Data" SecBootstrap
   ; Destination is the daemon's hardcoded data dir
   ; (util.cpp GetDefaultDataDir() = %APPDATA%\Aliaswallet on Windows).
   StrCpy $0 "$APPDATA\Aliaswallet"
@@ -57,21 +83,35 @@ Section "Bootstrap Blockchain Data (3.95 GB)" SecBootstrap
   IfFileExists $1 0 +2
     Delete $1
 
-  DetailPrint "Downloading BootstrapChain.zip (3.95 GB) from download.alias.cash ..."
   ; NScurl /PAGE mode drives the standard installer-page progress bar
   ; directly. No popup, no URL / file path / byte counts on display, and
-  ; the bar updates smoothly with bytes-received (NScurl correctly
-  ; honours the server's Content-Length: 3,953,414,083 header — INetC
-  ; previously locked the bar at 0% until completion).
-  NScurl::http GET "https://download.alias.cash/files/bootstrap/BootstrapChain.zip" "$1" \
-               /CANCEL /RESUME /END
+  ; the bar updates smoothly with bytes-received.
+  ;
+  ; NScurl has no retry option of its own, so loop here. A dropped
+  ; connection part-way through a multi-GB download is common; without this
+  ; the first drop aborted the whole thing and the user saw only an error.
+  StrCpy $4 0
+  bootstrap_try:
+  IntOp $4 $4 + 1
+  DetailPrint "Downloading BootstrapChain.zip from download.alias.cash (attempt $4 of ${BOOTSTRAP_TRIES}) ..."
+  NScurl::http GET "${BOOTSTRAP_URL}" "$1" /CANCEL /RESUME /END
   Pop $2
   DetailPrint "NScurl returned: $2"
   StrCmp $2 "OK" download_ok
-    MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "Bootstrap download failed: $2$\n$\n\
-       ALIAS will still install, but the wallet will need to sync from peers on first run (slow)."
-    Goto bootstrap_done
+  StrCmp $2 "Cancelled" bootstrap_done
+  StrCmp $2 "Canceled" bootstrap_done
+  IntCmp $4 ${BOOTSTRAP_TRIES} bootstrap_failed bootstrap_wait bootstrap_failed
+
+  bootstrap_wait:
+  DetailPrint "Attempt $4 failed ($2). Resuming in 10 seconds ..."
+  Sleep 10000
+  Goto bootstrap_try
+
+  bootstrap_failed:
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+    "Bootstrap download failed after ${BOOTSTRAP_TRIES} attempts: $2$\n$\n\
+     ALIAS will still install, but the wallet will need to sync from peers on first run (slow)."
+  Goto bootstrap_done
 
   download_ok:
   DetailPrint "Extracting blockchain data into $0 ..."

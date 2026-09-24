@@ -50,6 +50,9 @@
       "category": "Finance",
       "maintainer": "ALIAS Developers <dev@alias.cash>"
     },
+    "deb": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
     "win": {
       "target": ["nsis"]
     },

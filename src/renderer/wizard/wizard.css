@@ -28,8 +28,14 @@ body {
   background: #3b3855;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
+  /* border-box so the padding stays inside the 140px band */
+  box-sizing: border-box;
+  padding: 0 16px;
 }
-.wizard-sidebar img { width: 78px; opacity: 0.95; user-select: none; -webkit-user-drag: none; }
+/* Fill the sidebar width rather than sitting small in the middle. The logo
+   is square (viewBox 0 0 1000 1000), so height follows width and cannot
+   overflow the full-height bar. */
+.wizard-sidebar img { width: 100%; height: auto; opacity: 0.95; user-select: none; -webkit-user-drag: none; }
 
 .wizard-right {
   flex: 1; min-width: 0;
