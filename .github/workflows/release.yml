@@ -134,10 +134,20 @@ jobs:
             # a 4.4.x Qt build from master with no Mac.zip and a daemon from the
             # other stack. Daemon builds are prereleases tagged Build<run number>,
             # and the releases API returns newest first.
+            # Newest Build that actually HAS this platform's asset. Picking
+            # merely the newest tag is wrong: the daemon's prepareRelease job
+            # creates the release before the platform jobs upload to it, so a
+            # build still in flight appears as an empty Build<n> and every
+            # download here fails.
+            suffix='${{ matrix.daemon_pattern }}'; suffix="${suffix#\*}"
             tag=$(gh api "repos/${{ vars.DAEMON_REPO || 'aliascash/alias-wallet' }}/releases" \
-                    --jq '[.[] | select(.prerelease) | select(.tag_name | test("^Build[0-9]+$")) | .tag_name][0]')
+                  | jq -r --arg s "$suffix" '[ .[]
+                        | select(.prerelease)
+                        | select(.tag_name | test("^Build[0-9]+$"))
+                        | select(any(.assets[]; .name | endswith($s)))
+                        | .tag_name ][0]')
             if [ -z "$tag" ] || [ "$tag" = "null" ]; then
-              echo "ERROR: no Build<n> daemon prerelease found in the daemon repo."
+              echo "ERROR: no Build<n> daemon prerelease has an asset matching ${{ matrix.daemon_pattern }}."
               echo "Publish one from the dev branch, or pin a tag with the daemon_tag input."
               exit 1
             fi
