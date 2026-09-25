@@ -83,7 +83,7 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Components]
 Name: "main";      Description: "Install ALIAS Wallet"; Types: full compact custom; Flags: fixed
-Name: "bootstrap"; Description: "Blockchain data (speeds up the first sync)"; Types: full
+Name: "bootstrap"; Description: "Bootstrap Blockchain Data"; Types: full
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"
@@ -94,12 +94,11 @@ Source: "app\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createall
 ; Downloaded straight from the server and unpacked, no plugin needed (Inno
 ; 6.4+). It lands in {autoappdata} rather than the data dir because the
 ; archive has its own BootstrapChain\ top-level folder -- CurStepChanged
-; below moves the contents into place. Skipped when a chain is already there,
-; so a reinstall does not pull 5 GB again.
+; below moves the contents into place.
 Source: "{#BootstrapURL}"; DestName: "BootstrapChain.zip"; DestDir: "{autoappdata}"; \
   ExternalSize: {#BootstrapSize}; \
   Flags: external download extractarchive ignoreversion; \
-  Components: bootstrap; Check: BootstrapWanted
+  Components: bootstrap
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -116,12 +115,6 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}
 function DataDir(): String;
 begin
   Result := ExpandConstant('{autoappdata}\{#MyAppName}');
-end;
-
-// Don't re-download when the chain is already present.
-function BootstrapWanted(): Boolean;
-begin
-  Result := not FileExists(DataDir() + '\blk0001.dat');
 end;
 
 // Move BootstrapChain\* up into the data dir. The archive nests everything
