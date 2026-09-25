@@ -369,11 +369,31 @@ ipcMain.handle('alias:rpc', async (_event, method, params) => {
   try {
     return await rpc(method, params);
   } catch (e) {
-    // The wizard now opens before the daemon is RPC-ready, so an early call
-    // can land while it is still loading the block index. Wait for it once
-    // and retry rather than surfacing a connection error to the user.
+    // The wizard opens before the daemon is RPC-ready, so an early call can
+    // land while it is still starting. Wait briefly and retry once.
+    //
+    // The wait is deliberately short. It was 5 minutes, which turned a fast
+    // error into a silent hang: the user pressed Next in the wizard and
+    // nothing happened at all, with no way to tell whether it was working.
+    // Better to come back quickly and say what is wrong.
     if (/ECONNREFUSED|ECONNRESET|socket hang up/i.test(String(e && e.message || e))) {
-      if (await waitForRpcReady(5 * 60 * 1000)) {
+      // Poll in short slices so the wizard's title bar can report that the
+      // daemon is still coming up. Loading a bootstrap-sized index takes
+      // ~90 s, so the ceiling has to be generous -- but it must never wait
+      // in silence, which is what made Next look dead.
+      const deadline = Date.now() + 3 * 60 * 1000;
+      let ready = false;
+      while (!ready && Date.now() < deadline) {
+        ready = await waitForRpcReady(5000);
+        if (!ready && wizardWindow && !wizardWindow.isDestroyed()) {
+          const left = Math.ceil((deadline - Date.now()) / 1000);
+          wizardWindow.setTitle(`ALIAS Wallet Setup - starting wallet daemon (${left}s)`);
+        }
+      }
+      if (wizardWindow && !wizardWindow.isDestroyed()) {
+        wizardWindow.setTitle('ALIAS Wallet Setup');
+      }
+      if (ready) {
         try {
           return await rpc(method, params);
         } catch (e2) {
@@ -381,6 +401,10 @@ ipcMain.handle('alias:rpc', async (_event, method, params) => {
           throw e2;
         }
       }
+      if (SILENT_RPC_METHODS.has(method)) return null;
+      throw new Error(
+        'The wallet daemon did not start. Check that no other program is ' +
+        'using its port, then restart ALIAS.');
     }
     if (SILENT_RPC_METHODS.has(method)) return null;
     throw e;
