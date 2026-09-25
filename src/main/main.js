@@ -822,8 +822,24 @@ function createWizardWindow() {
       nodeIntegration: false,
     },
   });
+  // Setup is now in progress. Record it before the wizard is even shown:
+  // the daemon is already running and will have created an empty wallet.dat,
+  // so if this flag stayed unset an interrupted wizard would look like a
+  // finished install to isFirstLaunch()'s grandfather rule, and the user
+  // would get the unlock dialog instead of the wizard on the next launch.
+  settings.set('wizardCompleted', false);
+
   wizardWindow.loadFile(path.join(__dirname, '..', 'renderer', 'wizard', 'index.html'));
-  wizardWindow.on('closed', () => { wizardWindow = null; });
+  wizardWindow.on('closed', () => {
+    wizardWindow = null;
+    // Closing with the window's X used to do nothing at all: the app stayed
+    // alive with only a tray icon and the daemon running, so the next launch
+    // hit the single-instance lock, quit immediately, and looked like it had
+    // failed to start. Treat X exactly like the Cancel button.
+    if (app.isQuiting || settings.get('wizardCompleted') === true) return;
+    app.isQuiting = true;
+    app.quit();
+  });
   attachDevHooks(wizardWindow);
   attachScreenshotHook(wizardWindow);
 }
@@ -992,7 +1008,7 @@ async function routeStartup() {
   //   First launch      : wizard directly, NO splash. Daemon starts in
   //                       the background. Fresh data dir = fast startup,
   //                       so no progress UI is needed before the wizard.
-  //   Encrypted wallet  : splash → unlock dialog → splash → main window.
+  //   Encrypted wallet  : unlock dialog → splash → main window.
   //   Unencrypted       : splash → main window.
 
   if (firstLaunch) {

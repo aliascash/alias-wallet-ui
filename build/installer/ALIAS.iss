@@ -66,7 +66,11 @@ SolidCompression=yes
 WizardStyle=modern
 LicenseFile=..\license.txt
 SetupIconFile=..\icon.ico
-WizardSmallImageFile=..\installerHeader.bmp
+; installerHeader.bmp is 150x57 -- an NSIS banner shape. Inno's modern wizard
+; small image slot is roughly square, so that got stretched into the distorted
+; logo in the corner. These are generated from build/icon.png at the sizes Inno
+; expects, with a 2x variant for HiDPI.
+WizardSmallImageFile=wizard-small.bmp,wizard-small@2x.bmp
 WizardImageFile=..\installerSidebar.bmp
 
 ; Required for the `extractarchive` flag below.
