@@ -128,12 +128,27 @@ procedure MoveBootstrapIntoPlace();
 var
   Extracted, Target: String;
   FindRec: TFindRec;
+  Failed: Integer;
 begin
   Extracted := ExpandConstant('{autoappdata}\BootstrapChain');
   Target := DataDir();
-  if not DirExists(Extracted) then
-    exit;
 
+  // Only relevant when the user asked for the bootstrap. If they did and the
+  // folder is not here, the download or the extraction went somewhere we did
+  // not expect -- say so, because the alternative is a silent success
+  // followed by the wallet syncing from genesis with no explanation.
+  if not DirExists(Extracted) then
+  begin
+    if WizardIsComponentSelected('bootstrap') and not FileExists(Target + '\blk0001.dat') then
+      MsgBox('The blockchain data was downloaded but could not be found at:' #13#10 +
+             Extracted + #13#10#13#10 +
+             'ALIAS will still work, but it will sync from the network, which is slow.' #13#10 +
+             'You can extract BootstrapChain.zip manually into:' #13#10 + Target,
+             mbError, MB_OK);
+    exit;
+  end;
+
+  Failed := 0;
   if not DirExists(Target) then
     ForceDirectories(Target);
 
@@ -144,13 +159,22 @@ begin
         Continue;
       // RenameFile moves directories too, and both paths are on one volume.
       if not RenameFile(Extracted + '\' + FindRec.Name, Target + '\' + FindRec.Name) then
+      begin
         Log('Could not move ' + FindRec.Name + ' into ' + Target);
+        Failed := Failed + 1;
+      end;
     until not FindNext(FindRec);
   finally
     FindClose(FindRec);
   end;
 
   DelTree(Extracted, True, True, True);
+
+  if Failed > 0 then
+    MsgBox('Could not move ' + IntToStr(Failed) + ' blockchain file(s) into:' #13#10 +
+           Target + #13#10#13#10 +
+           'ALIAS will sync from the network instead. The remaining files are in:' #13#10 +
+           Extracted, mbError, MB_OK);
 end;
 
 // The app reads this to find the data directory, because it depends on

@@ -279,6 +279,16 @@ function tailDaemonLogToSplash(logPath) {
     // fabricated text. Sources cited inline.
     const interesting = [
       [/Verifying database integrity/i,  'Verifying database integrity...'],   // init.cpp:668
+      // Emitted by the daemon's LoadBlockIndex progress callback (init.cpp).
+      // mode 0 = reading the index, 1 = chain trust, 2 = validating. The
+      // daemon does not know the total while it is still reading, so this
+      // shows the running count rather than done/total.
+      [/Init progress: mode=(\d+) count=(\d+)/i, (m) => {
+        const n = Number(m[2]).toLocaleString();
+        if (m[1] === '0') return `Loading block index... (${n})`;
+        if (m[1] === '1') return `Calculating chain trust... (${n})`;
+        return `Validating last ${n} blocks...`;
+      }],
       [/Loading block index/i,           'Loading block index...'],            // init.cpp:830 LogPrintf
       [/Verifying last (\d+) blocks at level/i, m => 'Validating last ' + m[1] + ' block...'],  // main.cpp Verify + matches init.cpp:847 wording
       [/Loading wallet/i,                'Loading wallet...'],                 // init.cpp:905
