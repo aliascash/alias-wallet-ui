@@ -129,6 +129,16 @@ begin
   Result := True;
 end;
 
+// ExtractArchive requires this callback; unpacking ~5 GB takes a while, so
+// use it to keep the byte counter moving instead of passing a stub.
+function OnExtractionProgress(const ArchiveName, FileName: String; const Progress, ProgressMax: Int64): Boolean;
+begin
+  if ProgressMax > 0 then
+    WizardForm.StatusLabel.Caption :=
+      'Extracting blockchain data: ' + GB(Progress) + ' of ' + GB(ProgressMax);
+  Result := True;
+end;
+
 procedure InitializeWizard();
 begin
   DownloadPage := CreateDownloadPage('Downloading blockchain data',
@@ -191,7 +201,7 @@ begin
 
   WizardForm.StatusLabel.Caption := 'Extracting blockchain data...';
   try
-    ExtractArchive(Zip, Stage, '', True);
+    ExtractArchive(Zip, Stage, '', True, @OnExtractionProgress);
   except
     MsgBox('The blockchain data could not be extracted:' #13#10#13#10 +
            AddPeriod(GetExceptionMessage) + #13#10#13#10 +
