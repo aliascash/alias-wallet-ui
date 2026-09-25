@@ -341,6 +341,19 @@ ipcMain.handle('alias:rpc', async (_event, method, params) => {
   try {
     return await rpc(method, params);
   } catch (e) {
+    // The wizard now opens before the daemon is RPC-ready, so an early call
+    // can land while it is still loading the block index. Wait for it once
+    // and retry rather than surfacing a connection error to the user.
+    if (/ECONNREFUSED|ECONNRESET|socket hang up/i.test(String(e && e.message || e))) {
+      if (await waitForRpcReady(5 * 60 * 1000)) {
+        try {
+          return await rpc(method, params);
+        } catch (e2) {
+          if (SILENT_RPC_METHODS.has(method)) return null;
+          throw e2;
+        }
+      }
+    }
     if (SILENT_RPC_METHODS.has(method)) return null;
     throw e;
   }
@@ -1040,20 +1053,15 @@ async function routeStartup() {
     // hit ECONNREFUSED or 500. Loading a bootstrap-sized index takes ~90 s,
     // hence the 5 min ceiling.
     //
-    // This wait used to happen with no window at all: the user clicked the
-    // app, got a tray icon and nothing else for minutes, and reasonably
-    // concluded it had failed to start. Show the same splash the returning-
-    // user path uses, so the daemon's progress is visible while we wait.
-    createSplashWindow();
-    tailDaemonLogToSplash(path.join(getDataDir(), 'debug.log'));
-    splashStatus('Starting ALIAS...');
-    const ready = await waitForRpcReady(5 * 60 * 1000);
-    if (!ready) {
-      console.error('Daemon RPC did not come up in 5 minutes on first launch.');
-      splashStatus('Daemon is taking longer than expected...');
-    }
-    closeSplash();
+    // Show the wizard straight away. Its first page only asks how the user
+    // wants to create keys, which needs no daemon, and awaiting RPC here left
+    // them staring at a tray icon for minutes. The pages that DO need RPC are
+    // covered by the retry in the alias:rpc handler, and the block index is
+    // shown on the splash after the wizard finishes (alias:wizard-complete).
     createWizardWindow();
+    waitForRpcReady(5 * 60 * 1000).then((ready) => {
+      if (!ready) console.error('Daemon RPC did not come up in 5 minutes on first launch.');
+    });
     startupComplete = true;
     return;
   }
