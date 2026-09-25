@@ -346,6 +346,44 @@ function chooseRpcPort(preferred) {
   });
 }
 
+// A daemon from an earlier session can outlive the app -- the app being
+// killed, a crash, or the wizard being closed before the quit path runs. It
+// keeps the data directory locked, so the daemon we spawn next exits
+// immediately and the UI waits forever on a port nobody serves. Ask the
+// survivor to stop, using the credentials and port from the conf IT was
+// started with, before we overwrite that conf.
+async function stopOrphanedDaemon(dataDir) {
+  let port, user, pass;
+  try {
+    const conf = fs.readFileSync(path.join(dataDir, 'alias.conf'), 'utf8');
+    const mPort = conf.match(/^rpcport=(\d+)$/m);
+    const mUser = conf.match(/^rpcuser=(.+)$/m);
+    const mPass = conf.match(/^rpcpassword=(.+)$/m);
+    if (!mPort || !mPass) return;
+    port = Number(mPort[1]);
+    user = mUser ? mUser[1].trim() : RPC_USER;
+    pass = mPass[1].trim();
+  } catch (e) { return; }   // no previous conf: nothing could be running
+
+  const call = (method) => axios.post(`http://${RPC_HOST}:${port}/`,
+    { jsonrpc: '1.0', id: Date.now(), method, params: [] },
+    { auth: { username: user, password: pass }, proxy: false, timeout: 4000 });
+
+  try { await call('getinfo'); } catch (e) { return; }  // nothing alive there
+
+  console.warn(`[startup] a daemon from a previous session is still running on port ${port}; stopping it`);
+  try { await call('stop'); } catch (e) { /* it may drop the connection as it exits */ }
+
+  for (let i = 0; i < 60; i++) {
+    await new Promise(r => setTimeout(r, 500));
+    try { await call('getinfo'); } catch (e) { 
+      console.log('[startup] previous daemon has exited');
+      return;
+    }
+  }
+  console.error('[startup] previous daemon did not exit; the new one may fail to start');
+}
+
 async function rpc(method, params = []) {
   const res = await axios.post(`http://${RPC_HOST}:${RPC_PORT}/`, {
     jsonrpc: '1.0',
@@ -1364,6 +1402,9 @@ app.whenReady().then(async () => {
     // it's created.
   }
   createTray();
+  // Before anything else, and before writeAliasConf() replaces the conf that
+  // holds its credentials.
+  await stopOrphanedDaemon(getDataDir());
   const port = await chooseRpcPort(RPC_PORT);
   if (port !== RPC_PORT) {
     console.warn(`[startup] RPC port ${RPC_PORT} is in use by another program; using ${port}`);
