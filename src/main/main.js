@@ -60,7 +60,12 @@ const settings = new Store({
 const RPC_PORT = 36657;
 const RPC_HOST = '127.0.0.1';
 const RPC_USER = 'aliaswallet';
-const RPC_PASS = crypto.randomBytes(24).toString('hex');
+// Regenerated per launch, but adopted from an existing alias.conf when one is
+// present -- see writeAliasConf(). A daemon left running from an earlier
+// session keeps serving with the password it was started with, so minting a
+// fresh one each launch made every RPC call fail with 401 against that
+// survivor. The file is written 0600 either way.
+let RPC_PASS = crypto.randomBytes(24).toString('hex');
 
 let daemonProc = null;
 let mainWindow = null;
@@ -115,6 +120,12 @@ function writeAliasConf() {
   const dataDir = getDataDir();
   fs.mkdirSync(dataDir, { recursive: true });
   const confPath = path.join(dataDir, 'alias.conf');
+  // Keep the password that a still-running daemon is already authenticating
+  // with, rather than locking ourselves out of it.
+  try {
+    const m = fs.readFileSync(confPath, 'utf8').match(/^rpcpassword=(.+)$/m);
+    if (m && m[1].trim()) RPC_PASS = m[1].trim();
+  } catch (e) { /* no existing conf; keep the freshly generated password */ }
   const lines = [
     `rpcuser=${RPC_USER}`,
     `rpcpassword=${RPC_PASS}`,
@@ -1022,17 +1033,26 @@ async function routeStartup() {
   //   Unencrypted       : splash → main window.
 
   if (firstLaunch) {
-    console.log('[setup] no wallet.dat — opening Setup Wizard (no splash).');
+    console.log('[setup] no wallet.dat — opening Setup Wizard.');
     startDaemon();
-    // Daemon needs to be FULLY RPC-ready (not just port-bound) before
-    // the wizard's wallet pages run, otherwise commands like `mnemonic`
-    // and `extkey import` hit ECONNREFUSED or 500. With the bootstrap
-    // installed by the NSIS installer, LoadBlockIndex of ~2.8M blocks
-    // takes ~90 s — give it 5 min headroom.
+    // The daemon must be FULLY RPC-ready (not just port-bound) before the
+    // wizard's wallet pages run, otherwise `mnemonic` and `extkey import`
+    // hit ECONNREFUSED or 500. Loading a bootstrap-sized index takes ~90 s,
+    // hence the 5 min ceiling.
+    //
+    // This wait used to happen with no window at all: the user clicked the
+    // app, got a tray icon and nothing else for minutes, and reasonably
+    // concluded it had failed to start. Show the same splash the returning-
+    // user path uses, so the daemon's progress is visible while we wait.
+    createSplashWindow();
+    tailDaemonLogToSplash(path.join(getDataDir(), 'debug.log'));
+    splashStatus('Starting ALIAS...');
     const ready = await waitForRpcReady(5 * 60 * 1000);
     if (!ready) {
       console.error('Daemon RPC did not come up in 5 minutes on first launch.');
+      splashStatus('Daemon is taking longer than expected...');
     }
+    closeSplash();
     createWizardWindow();
     startupComplete = true;
     return;
