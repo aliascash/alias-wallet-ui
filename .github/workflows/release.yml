@@ -50,7 +50,7 @@ jobs:
             artifact_glob: "dist/ALIAS-Setup-*-x64.exe"
 
           - os: windows-latest
-            label: win-ia32
+            label: win-x86
             electron_arch: ia32
             unpacked_dir: dist/win-ia32-unpacked
             iss_arch: x86
