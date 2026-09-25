@@ -7,6 +7,7 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 const axios = require('axios');
 const crypto = require('crypto');
+const net = require('net');
 const os = require('os');
 const Store = require('electron-store');
 
@@ -57,7 +58,11 @@ const settings = new Store({
   defaults: { mainBounds: { width: 1280, height: 720 } },
 });
 
-const RPC_PORT = 36657;
+// The daemon's traditional port, but only a preference. Anything on the
+// machine can take it first -- VS Code was observed holding it -- and the app
+// would then send RPC to that process and get an unexplained 401 while the
+// daemon's own log stayed empty. chooseRpcPort() falls back to a free port.
+let RPC_PORT = 36657;
 const RPC_HOST = '127.0.0.1';
 const RPC_USER = 'aliaswallet';
 // Regenerated per launch, but adopted from an existing alias.conf when one is
@@ -323,6 +328,24 @@ function tailDaemonLogToSplash(logPath) {
 // ipcMain from logging "Error occurred in handler" on every poll.
 const SILENT_RPC_METHODS = new Set(['listanonoutputs', 'getaccount']);
 
+// Pick the RPC port before the daemon is launched. Tries the usual one and
+// otherwise lets the OS hand us a free one; the number is written into
+// alias.conf, so the daemon and the app always agree.
+function chooseRpcPort(preferred) {
+  return new Promise((resolve) => {
+    const probe = net.createServer();
+    probe.once('error', () => {
+      const any = net.createServer();
+      any.once('error', () => resolve(preferred));
+      any.listen(0, RPC_HOST, () => {
+        const port = any.address().port;
+        any.close(() => resolve(port));
+      });
+    });
+    probe.listen(preferred, RPC_HOST, () => probe.close(() => resolve(preferred)));
+  });
+}
+
 async function rpc(method, params = []) {
   const res = await axios.post(`http://${RPC_HOST}:${RPC_PORT}/`, {
     jsonrpc: '1.0',
@@ -331,6 +354,11 @@ async function rpc(method, params = []) {
     params,
   }, {
     auth: { username: RPC_USER, password: RPC_PASS },
+    // Never route loopback RPC through a proxy. Axios honours HTTP_PROXY and
+    // friends by default, and a proxy that drops the Authorization header
+    // turns every call into a 401 that never reaches the daemon -- so the
+    // daemon logs nothing and the failure looks like a wrong password.
+    proxy: false,
     timeout: 30000,
   });
   if (res.data.error) throw new Error(res.data.error.message);
@@ -1281,7 +1309,7 @@ function buildAppMenu() {
   ]);
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Original SpectreGUI builds the menu bar with File/Settings/Help.
   // On macOS the bar is visible at top-of-screen; on Win/Linux it is created
   // then hidden (`appMenuBar->hide()`) so accelerators (Ctrl+Q, Ctrl+,, etc.)
@@ -1293,6 +1321,11 @@ app.whenReady().then(() => {
     // it's created.
   }
   createTray();
+  const port = await chooseRpcPort(RPC_PORT);
+  if (port !== RPC_PORT) {
+    console.warn(`[startup] RPC port ${RPC_PORT} is in use by another program; using ${port}`);
+    RPC_PORT = port;
+  }
   return routeStartup();
 });
 // Graceful daemon shutdown: prefer the JSON-RPC 'stop' command (lets the
