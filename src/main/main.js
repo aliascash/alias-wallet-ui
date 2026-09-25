@@ -524,6 +524,25 @@ function openPassphraseDialog(mode) {
     });
     const url = `file://${path.join(__dirname, '..', 'renderer', 'passphrase', 'index.html').replace(/\\/g, '/')}#${mode}`;
     win.loadURL(url);
+
+    // Height depends on the mode: changepass shows three passphrase rows and
+    // needs ~300px where one-row modes fit in 280, and the warning text wraps
+    // to different heights per mode too. Measure the laid-out content and fit
+    // the window to it instead of guessing a constant that clips the buttons.
+    win.webContents.once('did-finish-load', async () => {
+      try {
+        const needed = await win.webContents.executeJavaScript(
+          '(() => { const b = document.getElementById("btn-ok") || document.querySelector("button");' +
+          ' if (!b) return 0;' +
+          ' const pad = parseFloat(getComputedStyle(document.body).paddingBottom) || 0;' +
+          ' return Math.ceil(b.getBoundingClientRect().bottom + pad); })()');
+        if (needed > 0 && !win.isDestroyed()) {
+          const [w] = win.getContentSize();
+          win.setContentSize(w, Math.min(Math.max(needed + 12, 240), 700));
+          win.center();
+        }
+      } catch (e) { /* keep the default size */ }
+    });
     win.on('closed', () => { if (passphrasePending) { passphrasePending(null); passphrasePending = null; } });
     attachDevHooks(win);
     win.__resolvePassphrase = (payload) => {
