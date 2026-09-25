@@ -54,7 +54,6 @@
       "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "win": {
-      "comment": "dir only: Inno Setup (build/installer/ALIAS.iss) builds the installer from this output. NSIS cannot report progress on the >4GB bootstrap download because its integers are 32-bit.",
       "target": ["dir"]
     },
     "nsis": {
