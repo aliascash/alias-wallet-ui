@@ -41,20 +41,24 @@ jobs:
           - os: windows-latest
             label: win-x64
             electron_arch: x64
+            unpacked_dir: dist/win-unpacked
+            iss_arch: x64
             daemon_pattern: "*Win64.zip"
             stage_dir: resources/win32/x64
             daemon_bin: aliaswalletd.exe
             build_script: build:win
-            artifact_glob: "dist/ALIAS*x64.exe"
+            artifact_glob: "dist/ALIAS-Setup-*-x64.exe"
 
           - os: windows-latest
             label: win-ia32
             electron_arch: ia32
+            unpacked_dir: dist/win-ia32-unpacked
+            iss_arch: x86
             daemon_pattern: "*Win32.zip"
             stage_dir: resources/win32/ia32
             daemon_bin: aliaswalletd.exe
             build_script: build:win
-            artifact_glob: "dist/ALIAS*ia32.exe"
+            artifact_glob: "dist/ALIAS-Setup-*-x86.exe"
 
           - os: macos-15-intel
             label: mac-x64
@@ -288,6 +292,29 @@ jobs:
             export CSC_IDENTITY_AUTO_DISCOVERY=false
           fi
           npm run ${{ matrix.build_script }} -- --${{ matrix.electron_arch }}
+
+      # electron-builder only produces the unpacked app on Windows; Inno Setup
+      # turns it into the installer. Inno is preinstalled on the runner image
+      # (6.7.1), which is new enough for the built-in download/extractarchive
+      # flags -- no InnoDownloadPlugin needed.
+      - name: Build Windows installer with Inno Setup
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json | ConvertFrom-Json).version
+          $app = "build/installer/app"
+          if (Test-Path $app) { Remove-Item $app -Recurse -Force }
+          New-Item -ItemType Directory -Path $app -Force | Out-Null
+          Copy-Item "${{ matrix.unpacked_dir }}/*" $app -Recurse -Force
+
+          $iscc = Join-Path (Get-ChildItem "C:\Program Files (x86)\Inno Setup*" -Directory |
+                             Select-Object -First 1).FullName "ISCC.exe"
+          & $iscc "/DArch=${{ matrix.iss_arch }}" "/DMyAppVersion=$version" "build/installer/ALIAS.iss"
+          if ($LASTEXITCODE -ne 0) { throw "ISCC failed with $LASTEXITCODE" }
+
+          $out = "dist/ALIAS-Setup-$version-${{ matrix.iss_arch }}.exe"
+          if (-not (Test-Path $out)) { throw "Installer not produced at $out" }
+          "{0:N1} MB  {1}" -f ((Get-Item $out).Length / 1MB), $out
 
       - name: Determine release tag
         id: tag

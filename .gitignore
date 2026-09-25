@@ -31,3 +31,6 @@ Thumbs.db
 # Local environment overrides
 .env
 .env.local
+
+# electron-builder output staged for the Inno Setup build
+build/installer/app/
