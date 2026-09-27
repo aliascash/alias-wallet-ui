@@ -125,11 +125,22 @@ function writeAliasConf() {
   const dataDir = getDataDir();
   fs.mkdirSync(dataDir, { recursive: true });
   const confPath = path.join(dataDir, 'alias.conf');
-  // Keep the password that a still-running daemon is already authenticating
-  // with, rather than locking ourselves out of it.
+  // These five are ours and are rewritten every launch. Everything else in
+  // the file belongs to the user -- addnode=, staking=, proxy= and so on --
+  // and used to be destroyed on every start, so there was no way to pin a
+  // peer or change any daemon setting that stuck.
+  const MANAGED = ['rpcuser', 'rpcpassword', 'rpcport', 'rpcallowip', 'server'];
+  const preserved = [];
   try {
-    const m = fs.readFileSync(confPath, 'utf8').match(/^rpcpassword=(.+)$/m);
+    const existing = fs.readFileSync(confPath, 'utf8');
+    // Keep the password a still-running daemon is already authenticating with.
+    const m = existing.match(/^rpcpassword=(.+)$/m);
     if (m && m[1].trim()) RPC_PASS = m[1].trim();
+    for (const line of existing.split(/\r?\n/)) {
+      const key = line.split('=')[0].trim();
+      if (!line.trim() || MANAGED.includes(key)) continue;
+      preserved.push(line);
+    }
   } catch (e) { /* no existing conf; keep the freshly generated password */ }
   const lines = [
     `rpcuser=${RPC_USER}`,
@@ -137,15 +148,38 @@ function writeAliasConf() {
     `rpcport=${RPC_PORT}`,
     `rpcallowip=127.0.0.1`,
     `server=1`,
-  ].join('\n');
+    ...preserved,
+  ].join('\n') + '\n';
   fs.writeFileSync(confPath, lines, { mode: 0o600 });
   return dataDir;
+}
+
+// Tor 0.4.7 removed v2 onion services and REFUSES TO START when its
+// HiddenServiceDir holds one. An ALIAS install from the 4.4.x era created a
+// v2 service, and it survives an upgrade untouched -- so Tor exits at once,
+// the daemon restarts it, and the wallet sits with no peers because every
+// connection is over onion. Retire the old directory so Tor builds a fresh
+// v3 service. Only our inbound address changes; nothing references it.
+function retireV2OnionService(dataDir) {
+  const onionDir = path.join(dataDir, 'tor', 'onion');
+  if (!fs.existsSync(onionDir)) return;
+  // A v3 service always has this key; a v2 one never does.
+  if (fs.existsSync(path.join(onionDir, 'hs_ed25519_secret_key'))) return;
+  try {
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const retired = onionDir + '.v2-' + stamp;
+    fs.renameSync(onionDir, retired);
+    console.warn('[tor] retired a v2 onion service that modern Tor rejects:', retired);
+  } catch (e) {
+    console.error('[tor] could not retire the v2 onion service:', e.message);
+  }
 }
 
 function seedTorFiles(daemonPath, dataDir) {
   const torSrcDir = path.join(path.dirname(daemonPath), 'Tor');
   const torDstDir = path.join(dataDir, 'tor');
   fs.mkdirSync(torDstDir, { recursive: true });
+  retireV2OnionService(dataDir);
   for (const name of ['geoip', 'geoip6']) {
     const src = path.join(torSrcDir, name);
     const dst = path.join(torDstDir, name);
