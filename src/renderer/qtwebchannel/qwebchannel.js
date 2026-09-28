@@ -78,6 +78,14 @@ window.addEventListener('unhandledrejection', (e) => {
     return window.aliasBridge.rpc(method, params || []);
   }
 
+  // The daemon hardcodes "Alias Foundation" in walletdb.cpp for the dev
+  // contribution address. Display it rebranded, in every path that shows a
+  // label, so the address list and the selected value never disagree.
+  const LABEL_REWRITES = { 'Alias Foundation': 'ALIAS Foundation' };
+  function rebrandLabel(label) {
+    return LABEL_REWRITES[label] || label;
+  }
+
   function logRpcError(label, err) {
     console.warn('[shim] ' + label + ' failed:', err && err.message ? err.message : err);
   }
@@ -170,7 +178,12 @@ window.addEventListener('unhandledrejection', (e) => {
     // status === 2: locked → prompt to unlock
     const r = await askPassphrase('unlock');
     if (!r || !r.passphrase) return;
-    try { await rpc('walletpassphrase', [r.passphrase, 60]); }
+    // A deliberate unlock from the menu should last the session, not 60s like
+    // the one-shot unlock above, and must forward the staking-only choice --
+    // otherwise ticking the box had no effect.
+    const params = [r.passphrase, 86400];
+    if (r.stakingOnly) params.push(true);
+    try { await rpc('walletpassphrase', params); }
     catch (e) { logRpcError('walletpassphrase', e); }
   }
 
@@ -245,11 +258,15 @@ window.addEventListener('unhandledrejection', (e) => {
 
     // --- address book ---
     getAddressLabel: async function (address) {
+      // Same rebrand the address list applies (see rebrandLabel). Without it
+      // the lookup dialog showed "ALIAS Foundation" while picking that row
+      // refilled the field with the daemon's raw "Alias Foundation", because
+      // this path reads getaccount directly.
       // Stealth addresses fail validateaddress server-side (CBitcoinAddress
       // can't parse them) — skip silently rather than logging a 500 warning
       // for every poll.
       if (typeof address === 'string' && address.length > 60) return '';
-      try { return await rpc('getaccount', [address]) || ''; }
+      try { return rebrandLabel(await rpc('getaccount', [address]) || ''); }
       catch (_) { return ''; }
     },
     // UI handler: function getAddressLabelResult(result) — single arg = label.
@@ -1509,11 +1526,10 @@ window.addEventListener('unhandledrejection', (e) => {
         // walletdb.cpp for the dev contribution address — rebrand it to
         // "ALIAS Foundation" at display time.
         const OWN_HINT = /^(Default|Initial) /;
-        const LABEL_REWRITES = { 'Alias Foundation': 'ALIAS Foundation' };
         for (const r of (Array.isArray(byAddr) ? byAddr : [])) {
           if (!r.address) continue;
           const rawLbl = r.account || '';
-          const lbl    = LABEL_REWRITES[rawLbl] || rawLbl;
+          const lbl    = rebrandLabel(rawLbl);
           const isOwn  = !lbl || OWN_HINT.test(lbl);
           items.push({
             address:     r.address,

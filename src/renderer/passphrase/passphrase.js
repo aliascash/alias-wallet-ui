@@ -62,6 +62,11 @@
       document.title = 'Unlock wallet';
       break;
     case 'unlock':
+      // Offer staking here too. Without it there was no way to unlock for
+      // staking from the menu at all -- only the login prompt had the option,
+      // so the wallet sat on "Initializing staking..." until the next restart.
+      stakingText.textContent = 'Keep wallet unlocked for staking.';
+      stakingRow.hidden = false;
       rowPass2.hidden = true;
       rowPass3.hidden = true;
       warningLabel.innerHTML = 'This operation needs your wallet passphrase to unlock the wallet.';
