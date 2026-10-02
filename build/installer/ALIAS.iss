@@ -13,6 +13,10 @@
 ;     during the TLS handshake) while the same machine downloads fine in a
 ;     browser. Inno uses the Windows HTTP stack, which those machines allow.
 ;
+; The bootstrap download is currently DISABLED: the installer offers only
+; "Install ALIAS Wallet" and shows no component selection page. Everything
+; needed to bring it back is commented out in place, tagged BOOTSTRAP-DISABLED.
+;
 ; Build:  ISCC.exe /DArch=x64 ALIAS.iss        (or /DArch=x86)
 ;         expects the app in .\app and this file's assets one level up.
 ; ============================================================================
@@ -31,7 +35,8 @@
   #define Arch "x64"
 #endif
 
-#define BootstrapURL "https://download.alias.cash/files/bootstrap/BootstrapChain.zip"
+; BOOTSTRAP-DISABLED
+;#define BootstrapURL "https://download.alias.cash/files/bootstrap/BootstrapChain.zip"
 
 [Setup]
 AppName={#MyAppName}
@@ -68,8 +73,8 @@ SetupIconFile=..\icon.ico
 WizardSmallImageFile=wizard-small.bmp,wizard-small@2x.bmp
 WizardImageFile=..\installerSidebar.bmp
 
-; Required for the `extractarchive` flag below.
-ArchiveExtraction=full
+; BOOTSTRAP-DISABLED - required only for the ExtractArchive call below.
+;ArchiveExtraction=full
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -80,15 +85,20 @@ Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
 Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 
-[Components]
-Name: "main";      Description: "Install ALIAS Wallet"; Types: full compact custom; Flags: fixed
-Name: "bootstrap"; Description: "Bootstrap Blockchain Data"; Types: full
+; BOOTSTRAP-DISABLED - the whole section is gone, not just the bootstrap line.
+; A lone fixed "main" entry would still render a Select Components page with one
+; permanently ticked box. Inno omits the page entirely when there are no
+; components, which is what we want. Restoring both lines restores the page.
+;[Components]
+;Name: "main";      Description: "Install ALIAS Wallet"; Types: full compact custom; Flags: fixed
+;Name: "bootstrap"; Description: "Bootstrap Blockchain Data"; Types: full
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"
 
 [Files]
-Source: "app\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: main
+;Source: "app\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: main   ; BOOTSTRAP-DISABLED
+Source: "app\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; The bootstrap is deliberately not listed here. A declarative external
 ; download can only draw a bare progress bar; it is scripted further down so
@@ -103,8 +113,9 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}
   Flags: nowait postinstall skipifsilent
 
 [Code]
-var
-  DownloadPage: TDownloadWizardPage;
+// BOOTSTRAP-DISABLED
+//var
+//  DownloadPage: TDownloadWizardPage;
 
 // The data directory follows the install scope: %APPDATA%\ALIAS for a
 // per-user install, C:\ProgramData\ALIAS for all users. {autoappdata} already
@@ -114,135 +125,138 @@ begin
   Result := ExpandConstant('{autoappdata}\{#MyAppName}');
 end;
 
-function GB(const Bytes: Int64): String;
-begin
-  Result := Format('%.2f GB', [Bytes / 1073741824.0]);
-end;
+// BOOTSTRAP-DISABLED
+// function GB(const Bytes: Int64): String;
+// begin
+//   Result := Format('%.2f GB', [Bytes / 1073741824.0]);
+// end;
+//
+// // Reporting the byte counts is the whole reason the download is scripted.
+// function OnDownloadProgress(const Url, FileName: String; const Progress, ProgressMax: Int64): Boolean;
+// begin
+//   if ProgressMax > 0 then
+//     DownloadPage.SetText('Blockchain data: ' + GB(Progress) + ' of ' + GB(ProgressMax), '')
+//   else
+//     DownloadPage.SetText('Blockchain data: ' + GB(Progress) + ' downloaded', '');
+//   Result := True;
+// end;
+//
+// // ExtractArchive requires this callback; unpacking ~5 GB takes a while, so
+// // use it to keep the byte counter moving instead of passing a stub.
+// function OnExtractionProgress(const ArchiveName, FileName: String; const Progress, ProgressMax: Int64): Boolean;
+// begin
+//   if ProgressMax > 0 then
+//     WizardForm.StatusLabel.Caption :=
+//       'Extracting blockchain data: ' + GB(Progress) + ' of ' + GB(ProgressMax);
+//   Result := True;
+// end;
 
-// Reporting the byte counts is the whole reason the download is scripted.
-function OnDownloadProgress(const Url, FileName: String; const Progress, ProgressMax: Int64): Boolean;
-begin
-  if ProgressMax > 0 then
-    DownloadPage.SetText('Blockchain data: ' + GB(Progress) + ' of ' + GB(ProgressMax), '')
-  else
-    DownloadPage.SetText('Blockchain data: ' + GB(Progress) + ' downloaded', '');
-  Result := True;
-end;
+// BOOTSTRAP-DISABLED
+// procedure InitializeWizard();
+// begin
+//   DownloadPage := CreateDownloadPage('Downloading blockchain data',
+//     'Setup is downloading the blockchain so your wallet does not have to sync from the network.',
+//     @OnDownloadProgress);
+// end;
+//
+// function NextButtonClick(CurPageID: Integer): Boolean;
+// begin
+//   Result := True;
+//   if (CurPageID = wpReady) and WizardIsComponentSelected('bootstrap') then
+//   begin
+//     DownloadPage.Clear;
+//     DownloadPage.Add('{#BootstrapURL}', 'BootstrapChain.zip', '');
+//     DownloadPage.Show;
+//     try
+//       try
+//         DownloadPage.Download;
+//       except
+//         // Cancelled or failed: still install the application, the wallet can
+//         // sync from the network instead.
+//         MsgBox('The blockchain data could not be downloaded:' #13#10#13#10 +
+//                AddPeriod(GetExceptionMessage) + #13#10#13#10 +
+//                'ALIAS will still install and will sync from the network.',
+//                mbInformation, MB_OK);
+//       end;
+//     finally
+//       DownloadPage.Hide;
+//     end;
+//   end;
+// end;
 
-// ExtractArchive requires this callback; unpacking ~5 GB takes a while, so
-// use it to keep the byte counter moving instead of passing a stub.
-function OnExtractionProgress(const ArchiveName, FileName: String; const Progress, ProgressMax: Int64): Boolean;
-begin
-  if ProgressMax > 0 then
-    WizardForm.StatusLabel.Caption :=
-      'Extracting blockchain data: ' + GB(Progress) + ' of ' + GB(ProgressMax);
-  Result := True;
-end;
-
-procedure InitializeWizard();
-begin
-  DownloadPage := CreateDownloadPage('Downloading blockchain data',
-    'Setup is downloading the blockchain so your wallet does not have to sync from the network.',
-    @OnDownloadProgress);
-end;
-
-function NextButtonClick(CurPageID: Integer): Boolean;
-begin
-  Result := True;
-  if (CurPageID = wpReady) and WizardIsComponentSelected('bootstrap') then
-  begin
-    DownloadPage.Clear;
-    DownloadPage.Add('{#BootstrapURL}', 'BootstrapChain.zip', '');
-    DownloadPage.Show;
-    try
-      try
-        DownloadPage.Download;
-      except
-        // Cancelled or failed: still install the application, the wallet can
-        // sync from the network instead.
-        MsgBox('The blockchain data could not be downloaded:' #13#10#13#10 +
-               AddPeriod(GetExceptionMessage) + #13#10#13#10 +
-               'ALIAS will still install and will sync from the network.',
-               mbInformation, MB_OK);
-      end;
-    finally
-      DownloadPage.Hide;
-    end;
-  end;
-end;
-
-// Move one entry into place, REPLACING whatever is there. RenameFile fails if
-// the destination exists, and after any previous run the data dir already
-// holds a small blk0001.dat and a txleveldb folder -- exactly the entries the
-// bootstrap has to overwrite.
-function MoveReplacing(const Src, Dst: String): Boolean;
-begin
-  if DirExists(Dst) then
-    DelTree(Dst, True, True, True)
-  else if FileExists(Dst) then
-    DeleteFile(Dst);
-  Result := RenameFile(Src, Dst);
-end;
-
-procedure InstallBootstrap();
-var
-  Zip, Stage, Src, Target: String;
-  FindRec: TFindRec;
-  Moved, Failed: Integer;
-begin
-  Zip := ExpandConstant('{tmp}\BootstrapChain.zip');
-  if not FileExists(Zip) then
-    exit;  // component not selected, or the download did not complete
-
-  Target := DataDir();
-  Stage := ExpandConstant('{tmp}\BootstrapExtract');
-  ForceDirectories(Stage);
-  ForceDirectories(Target);
-
-  WizardForm.StatusLabel.Caption := 'Extracting blockchain data...';
-  try
-    ExtractArchive(Zip, Stage, '', True, @OnExtractionProgress);
-  except
-    MsgBox('The blockchain data could not be extracted:' #13#10#13#10 +
-           AddPeriod(GetExceptionMessage) + #13#10#13#10 +
-           'ALIAS will sync from the network instead.', mbError, MB_OK);
-    exit;
-  end;
-
-  // The archive wraps everything in BootstrapChain\; tolerate both layouts.
-  Src := Stage + '\BootstrapChain';
-  if not DirExists(Src) then
-    Src := Stage;
-
-  Moved := 0;
-  Failed := 0;
-  WizardForm.StatusLabel.Caption := 'Installing blockchain data...';
-  if FindFirst(Src + '\*', FindRec) then
-  try
-    repeat
-      if (FindRec.Name = '.') or (FindRec.Name = '..') then
-        Continue;
-      if MoveReplacing(Src + '\' + FindRec.Name, Target + '\' + FindRec.Name) then
-        Moved := Moved + 1
-      else
-      begin
-        Failed := Failed + 1;
-        Log('Could not move ' + FindRec.Name + ' into ' + Target);
-      end;
-    until not FindNext(FindRec);
-  finally
-    FindClose(FindRec);
-  end;
-
-  DelTree(Stage, True, True, True);
-  DeleteFile(Zip);
-
-  if (Moved = 0) or (Failed > 0) then
-    MsgBox('Blockchain data: ' + IntToStr(Moved) + ' item(s) installed, ' +
-           IntToStr(Failed) + ' failed.' #13#10#13#10 +
-           'If the wallet starts syncing from the beginning, extract ' +
-           'BootstrapChain.zip manually into:' #13#10 + Target, mbError, MB_OK);
-end;
+// BOOTSTRAP-DISABLED
+// // Move one entry into place, REPLACING whatever is there. RenameFile fails if
+// // the destination exists, and after any previous run the data dir already
+// // holds a small blk0001.dat and a txleveldb folder -- exactly the entries the
+// // bootstrap has to overwrite.
+// function MoveReplacing(const Src, Dst: String): Boolean;
+// begin
+//   if DirExists(Dst) then
+//     DelTree(Dst, True, True, True)
+//   else if FileExists(Dst) then
+//     DeleteFile(Dst);
+//   Result := RenameFile(Src, Dst);
+// end;
+//
+// procedure InstallBootstrap();
+// var
+//   Zip, Stage, Src, Target: String;
+//   FindRec: TFindRec;
+//   Moved, Failed: Integer;
+// begin
+//   Zip := ExpandConstant('{tmp}\BootstrapChain.zip');
+//   if not FileExists(Zip) then
+//     exit;  // component not selected, or the download did not complete
+//
+//   Target := DataDir();
+//   Stage := ExpandConstant('{tmp}\BootstrapExtract');
+//   ForceDirectories(Stage);
+//   ForceDirectories(Target);
+//
+//   WizardForm.StatusLabel.Caption := 'Extracting blockchain data...';
+//   try
+//     ExtractArchive(Zip, Stage, '', True, @OnExtractionProgress);
+//   except
+//     MsgBox('The blockchain data could not be extracted:' #13#10#13#10 +
+//            AddPeriod(GetExceptionMessage) + #13#10#13#10 +
+//            'ALIAS will sync from the network instead.', mbError, MB_OK);
+//     exit;
+//   end;
+//
+//   // The archive wraps everything in BootstrapChain\; tolerate both layouts.
+//   Src := Stage + '\BootstrapChain';
+//   if not DirExists(Src) then
+//     Src := Stage;
+//
+//   Moved := 0;
+//   Failed := 0;
+//   WizardForm.StatusLabel.Caption := 'Installing blockchain data...';
+//   if FindFirst(Src + '\*', FindRec) then
+//   try
+//     repeat
+//       if (FindRec.Name = '.') or (FindRec.Name = '..') then
+//         Continue;
+//       if MoveReplacing(Src + '\' + FindRec.Name, Target + '\' + FindRec.Name) then
+//         Moved := Moved + 1
+//       else
+//       begin
+//         Failed := Failed + 1;
+//         Log('Could not move ' + FindRec.Name + ' into ' + Target);
+//       end;
+//     until not FindNext(FindRec);
+//   finally
+//     FindClose(FindRec);
+//   end;
+//
+//   DelTree(Stage, True, True, True);
+//   DeleteFile(Zip);
+//
+//   if (Moved = 0) or (Failed > 0) then
+//     MsgBox('Blockchain data: ' + IntToStr(Moved) + ' item(s) installed, ' +
+//            IntToStr(Failed) + ' failed.' #13#10#13#10 +
+//            'If the wallet starts syncing from the beginning, extract ' +
+//            'BootstrapChain.zip manually into:' #13#10 + Target, mbError, MB_OK);
+// end;
 
 // The app reads this to find the data directory, because it depends on
 // whether this was an all-users or a per-user install.
@@ -256,7 +270,7 @@ begin
   if CurStep = ssPostInstall then
   begin
     WriteDataDirMarker();
-    InstallBootstrap();
+//    InstallBootstrap();   // BOOTSTRAP-DISABLED
   end;
 end;
 
