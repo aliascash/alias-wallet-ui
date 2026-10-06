@@ -945,6 +945,7 @@ function createSplashWindow() {
       nodeIntegration: false,
     },
   });
+  fitToWorkArea(splashWindow);
   splashWindow.loadFile(path.join(__dirname, '..', 'renderer', 'splash', 'index.html'));
   splashWindow.on('closed', () => { splashWindow = null; });
   // The splash renderer registers its IPC listener inside the IIFE that
@@ -1021,6 +1022,27 @@ function createWizardWindow() {
   attachScreenshotHook(wizardWindow);
 }
 
+// Windows display scaling shrinks the work area measured in DIPs: a 1080p
+// screen at 150% leaves 1280x720, and at 175% only 1097x617. Our fixed window
+// sizes are in DIPs too, so past 125% they are larger than the whole screen --
+// the window hangs off the bottom, the UI looks oversized and the lower edge
+// (buttons, status bar) is unreachable. Qt sized its windows against the
+// screen; Electron does not, so clamp here. Called after creation because only
+// then are the frame dimensions known, and getBounds() is the outer rect.
+function fitToWorkArea(win) {
+  const { screen } = require('electron');
+  const area = screen.getDisplayMatching(win.getBounds()).workArea;
+  const b = win.getBounds();
+  const width  = Math.min(b.width,  area.width);
+  const height = Math.min(b.height, area.height);
+  if (width === b.width && height === b.height) return;
+  win.setBounds({
+    width, height,
+    x: Math.max(area.x, Math.min(b.x, area.x + area.width  - width)),
+    y: Math.max(area.y, Math.min(b.y, area.y + area.height - height)),
+  });
+}
+
 function createMainWindow() {
   // Match the original ALIAS v4.4.0 client window: ~1280×720 content area
   // (1296×759 outer with Windows chrome — 16:9).
@@ -1056,6 +1078,7 @@ function createMainWindow() {
       nodeIntegration: false,
     },
   });
+  fitToWorkArea(mainWindow);
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
   // Keep our window title — Electron otherwise replaces it with the page's
   // <title> on load. Matches original SpectreGUI::setWindowTitle().
