@@ -5,7 +5,7 @@
 
   // Tab switching
   const tabs = document.querySelectorAll('.tab');
-  const panes = { information: $('tab-information'), console: $('tab-console'), network: $('tab-network'), peers: $('tab-peers') };
+  const panes = { information: $('tab-information'), console: $('tab-console'), peers: $('tab-peers') };
   tabs.forEach((btn) => btn.addEventListener('click', () => {
     tabs.forEach((b) => b.classList.toggle('active', b === btn));
     Object.entries(panes).forEach(([k, el]) => el.style.display = (k === btn.dataset.tab ? '' : 'none'));
@@ -21,21 +21,27 @@
       const info = await rpc('getinfo', []);
       $('info-client-name').textContent = 'ALIAS Core';
       $('info-client-version').textContent = info.version || 'N/A';
-      $('info-openssl-version').textContent = info.openssl_version || 'N/A';
-      $('info-bdb-version').textContent = info.bdb_version || 'N/A';
       $('info-build-date').textContent = info.build_date || (info.version || '').replace(/.* - /, '').replace(/\)$/, '') || 'N/A';
       $('info-network-name').textContent = info.testnet ? 'testnet' : 'main';
       $('info-connections').textContent = String(info.connections != null ? info.connections : 'N/A');
       $('info-blocks').textContent = String(info.blocks != null ? info.blocks : 'N/A');
-      $('info-startup-time').textContent = info.startuptime ? new Date(info.startuptime * 1000).toLocaleString() : 'N/A';
+      // getinfo has no startup time; the main process started the daemon,
+      // so ask it.
+      const started = bridge.daemonStartedAt ? await bridge.daemonStartedAt() : null;
+      $('info-startup-time').textContent = started ? new Date(started).toLocaleString() : 'N/A';
     } catch (e) { /* tolerate */ }
     try {
       const tip = await rpc('getbestblockhash', []);
       if (tip) {
         const blk = await rpc('getblock', [tip]);
-        $('info-blocks-est').textContent = String(blk.height != null ? blk.height : 'N/A');
         $('info-last-block-time').textContent = blk.time ? new Date(blk.time * 1000).toLocaleString() : 'N/A';
       }
+    } catch (e) { /* tolerate */ }
+    try {
+      const peers = await rpc('getpeerinfo', []);
+      const best = (Array.isArray(peers) ? peers : [])
+        .reduce((m, p) => Math.max(m, Number(p.chainheight) || 0), 0);
+      if (best > 0) $('info-blocks-est').textContent = String(best);
     } catch (e) { /* tolerate */ }
   }
 
@@ -110,22 +116,88 @@
     welcome();
   });
 
-  // Network tab — totals + peer list
+  // Traffic totals (Information tab) + peer list
+  function formatBytes(n) {
+    const v = Number(n);
+    if (!isFinite(v)) return 'N/A';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let i = 0, x = v;
+    while (x >= 1024 && i < units.length - 1) { x /= 1024; i++; }
+    return (i === 0 ? x : x.toFixed(2)) + ' ' + units[i];
+  }
+  function formatTime(unixSecs) {
+    const v = Number(unixSecs);
+    return v > 0 ? new Date(v * 1000).toLocaleString() : '';
+  }
+
+  // Selected peer survives a refresh, so the detail panel does not clear
+  // itself every 5 seconds while being read.
+  let selectedPeer = null;
+
+  function showPeerDetail(p) {
+    const set = (id, v) => { $(id).textContent = v == null ? '' : String(v); };
+    set('peer-addr', p.addr);
+    set('peer-direction', p.inbound ? 'Inbound' : 'Outbound');
+    set('peer-subver', p.subver);
+    set('peer-version', p.version);
+    set('peer-services', p.services);
+    set('peer-chainheight', p.chainheight);
+    set('peer-conntime', formatTime(p.conntime));
+    set('peer-lastsend', formatTime(p.lastsend));
+    set('peer-lastrecv', formatTime(p.lastrecv));
+    set('peer-bytessent', formatBytes(p.bytessent));
+    set('peer-bytesrecv', formatBytes(p.bytesrecv));
+    set('peer-pingtime', p.pingtime != null ? Math.round(Number(p.pingtime) * 1000) + ' ms' : '');
+    set('peer-timeoffset', p.timeoffset != null ? p.timeoffset + ' s' : '');
+    set('peer-banscore', p.banscore);
+    $('peer-detail').style.display = '';
+    $('peer-hint').style.display = 'none';
+  }
+
   async function refreshNetwork() {
     try {
       const info = await rpc('getnettotals', []);
-      $('net-in').textContent = info && info.totalbytesrecv != null ? info.totalbytesrecv + ' B' : 'N/A';
-      $('net-out').textContent = info && info.totalbytessent != null ? info.totalbytessent + ' B' : 'N/A';
+      $('net-in').textContent = info && info.totalbytesrecv != null ? formatBytes(info.totalbytesrecv) : 'N/A';
+      $('net-out').textContent = info && info.totalbytessent != null ? formatBytes(info.totalbytessent) : 'N/A';
     } catch (e) { /* tolerate — RPC may not exist on this fork */ }
     try {
       const peers = await rpc('getpeerinfo', []);
+      const list = Array.isArray(peers) ? peers : [];
       const $tbody = document.querySelector('#peer-table tbody');
       $tbody.innerHTML = '';
-      for (const p of (Array.isArray(peers) ? peers : [])) {
+      let stillConnected = null;
+      for (const p of list) {
         const tr = document.createElement('tr');
-        const pingMs = (p.pingtime != null) ? (Math.round(Number(p.pingtime) * 1000) + ' ms') : '';
-        tr.innerHTML = `<td>${p.addr || ''}</td><td>${p.subver || p.version || ''}</td><td>${pingMs}</td>`;
+        // textContent, not innerHTML: subver is whatever the remote peer
+        // chose to call itself.
+        const cells = [
+          p.addr || '',
+          p.subver || p.version || '',
+          p.pingtime != null ? Math.round(Number(p.pingtime) * 1000) + ' ms' : '',
+        ];
+        for (const text of cells) {
+          const td = document.createElement('td');
+          td.textContent = text;
+          tr.appendChild(td);
+        }
+        if (selectedPeer && p.addr === selectedPeer) {
+          tr.classList.add('selected');
+          stillConnected = p;
+        }
+        tr.addEventListener('click', () => {
+          selectedPeer = p.addr;
+          for (const row of $tbody.children) row.classList.remove('selected');
+          tr.classList.add('selected');
+          showPeerDetail(p);
+        });
         $tbody.appendChild(tr);
+      }
+      if (stillConnected) showPeerDetail(stillConnected);
+      else if (selectedPeer) {
+        // The peer we were looking at has gone away.
+        selectedPeer = null;
+        $('peer-detail').style.display = 'none';
+        $('peer-hint').style.display = '';
       }
     } catch (e) { /* tolerate */ }
   }
@@ -142,98 +214,6 @@
       append(String(h), 'console-out');
     } catch (e) { append('help failed: ' + e.message, 'console-err'); }
   });
-
-  // TrafficGraphWidget port — 800 rolling samples of in/out KB/s drawn on
-  // a black canvas, green-fill for recv, red-fill for sent. Range select
-  // changes update interval (range * 60 * 1000 / 800 ms per sample).
-  const DESIRED_SAMPLES = 800;
-  const XMARGIN = 10, YMARGIN = 10;
-  const canvas = $('traffic-graph');
-  const ctx = canvas.getContext('2d');
-  let samplesIn = [], samplesOut = [];
-  let lastBytesIn = 0, lastBytesOut = 0, lastTimestamp = 0;
-  let fMax = 0;
-  let graphTimer = null;
-
-  function resizeCanvas() {
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = Math.max(200, Math.floor(rect.width));
-    canvas.height = 160;
-  }
-  resizeCanvas();
-  window.addEventListener('resize', () => { resizeCanvas(); drawGraph(); });
-
-  function drawPath(samples, fillStyle, strokeStyle) {
-    if (!samples.length) return;
-    const w = canvas.width - XMARGIN * 2, h = canvas.height - YMARGIN * 2;
-    ctx.beginPath();
-    let x = XMARGIN + w;
-    ctx.moveTo(x, YMARGIN + h);
-    for (let i = 0; i < samples.length; i++) {
-      x = XMARGIN + w - w * i / DESIRED_SAMPLES;
-      const y = YMARGIN + h - (h * samples[i] / fMax);
-      ctx.lineTo(x, y);
-    }
-    ctx.lineTo(x, YMARGIN + h);
-    ctx.fillStyle = fillStyle;
-    ctx.fill();
-    ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  }
-  function drawGraph() {
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (fMax <= 0) return;
-    const w = canvas.width - XMARGIN * 2, h = canvas.height - YMARGIN * 2;
-    // x-axis baseline
-    ctx.strokeStyle = '#888'; ctx.lineWidth = 1; ctx.beginPath();
-    ctx.moveTo(XMARGIN, YMARGIN + h); ctx.lineTo(XMARGIN + w, YMARGIN + h); ctx.stroke();
-    // KB/s labels at order-of-magnitude
-    const base = Math.floor(Math.log10(fMax));
-    const val = Math.pow(10, base);
-    ctx.fillStyle = '#888'; ctx.font = '10px Consolas, monospace';
-    ctx.fillText(val + ' KB/s', XMARGIN, YMARGIN + h - h * val / fMax);
-    for (let y = val; y < fMax; y += val) {
-      const yy = YMARGIN + h - h * y / fMax;
-      ctx.beginPath(); ctx.moveTo(XMARGIN, yy); ctx.lineTo(XMARGIN + w, yy); ctx.stroke();
-    }
-    drawPath(samplesIn,  'rgba(0,255,0,0.5)',  '#0c0');
-    drawPath(samplesOut, 'rgba(255,0,0,0.5)',  '#c00');
-  }
-
-  async function sampleRates() {
-    try {
-      const nt = await rpc('getnettotals', []);
-      const bytesIn  = Number(nt && nt.totalbytesrecv) || 0;
-      const bytesOut = Number(nt && nt.totalbytessent) || 0;
-      const now = (nt && nt.timemillis) || performance.now();
-      if (lastTimestamp > 0) {
-        const dt = Math.max(1, now - lastTimestamp);
-        const inRate  = (bytesIn  - lastBytesIn ) / 1024 * 1000 / dt;
-        const outRate = (bytesOut - lastBytesOut) / 1024 * 1000 / dt;
-        samplesIn.unshift(Math.max(0, inRate));
-        samplesOut.unshift(Math.max(0, outRate));
-        while (samplesIn.length  > DESIRED_SAMPLES) samplesIn.pop();
-        while (samplesOut.length > DESIRED_SAMPLES) samplesOut.pop();
-        fMax = Math.max(0, ...samplesIn, ...samplesOut);
-      }
-      lastBytesIn = bytesIn;
-      lastBytesOut = bytesOut;
-      lastTimestamp = now;
-      drawGraph();
-    } catch (_) { /* tolerate */ }
-  }
-  function setGraphRange(mins) {
-    if (graphTimer) clearInterval(graphTimer);
-    samplesIn = []; samplesOut = []; fMax = 0; lastTimestamp = 0;
-    drawGraph();
-    const interval = Math.max(250, Math.floor(mins * 60 * 1000 / DESIRED_SAMPLES));
-    graphTimer = setInterval(sampleRates, interval);
-  }
-  $('graph-range').addEventListener('change', (e) => setGraphRange(Number(e.target.value) || 5));
-  $('graph-clear').addEventListener('click', () => setGraphRange(Number($('graph-range').value) || 5));
-  setGraphRange(5);
 
   // Refresh on load + every 5s while window is open
   refreshInfo();

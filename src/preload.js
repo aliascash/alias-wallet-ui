@@ -36,6 +36,7 @@ contextBridge.exposeInMainWorld('aliasBridge', {
   onUriOpen:         (cb) => ipcRenderer.on('alias:uri-open', (_e, uri) => cb(uri)),
   loadTranslation:   (locale) => ipcRenderer.invoke('alias:load-translation', locale),
   getOptions:        () => ipcRenderer.invoke('alias:get-options'),
+  daemonStartedAt:   () => ipcRenderer.invoke('alias:daemon-started-at'),
   setOptions:        (changes) => ipcRenderer.invoke('alias:set-options', changes),
   // Splash receives status updates pushed from main via send().
   onSplashStatus:    (cb) => ipcRenderer.on('alias:splash-status', (_e, text) => cb(text)),

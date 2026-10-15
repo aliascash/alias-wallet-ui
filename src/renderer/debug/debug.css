@@ -38,14 +38,11 @@ body { display: flex; flex-direction: column; }
 #console-input { flex: 1; padding: 4px; font-family: Consolas, monospace; font-size: 12px; border: 1px solid #ccc; }
 #console-clear { margin-left: 8px; padding: 4px 10px; }
 
-.net-grid { border-collapse: collapse; margin-bottom: 12px; }
-.net-grid th, .net-grid td { padding: 4px 12px; text-align: left; }
-.net-graph-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; font-size: 12px; color: #444; }
-.graph-legend { margin-left: auto; }
-.graph-legend .dot-in  { display: inline-block; width: 10px; height: 10px; background: #0c0; margin-right: 4px; }
-.graph-legend .dot-out { display: inline-block; width: 10px; height: 10px; background: #c00; margin: 0 4px 0 12px; }
-#traffic-graph { display: block; width: 100%; height: 160px; background: #000; border: 1px solid #c8c8c8; margin-bottom: 12px; }
 .peer-hint { color: #666; padding: 6px 0; }
 .peer-grid { border-collapse: collapse; width: 100%; font-size: 12px; }
 .peer-grid th, .peer-grid td { padding: 4px 8px; border-bottom: 1px solid #eee; text-align: left; }
 .peer-grid thead { background: #f3f3f3; }
+.peer-grid tbody tr { cursor: pointer; }
+.peer-grid tbody tr:hover { background: #f7f7f7; }
+.peer-grid tbody tr.selected { background: #e8f0fe; }
+.peer-detail { margin-top: 12px; }

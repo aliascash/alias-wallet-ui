@@ -1,7 +1,7 @@
 // Electron main process — launches aliaswalletd, exposes JSON-RPC bridge
 // to the renderer, owns the BrowserWindow.
 
-const { app, BrowserWindow, Menu, ipcMain, dialog, shell, Tray, Notification, nativeImage } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog, shell, Tray, Notification, nativeImage, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -51,11 +51,11 @@ const initialUriArg = process.argv.find((a) => typeof a === 'string' && a.starts
 
 // ---------- persistent settings ----------
 //
-// Saved at <userData>/config.json. Currently tracks window bounds so the app
-// reopens at the user's last size/position.
+// Saved at <userData>/config.json. Tracks window bounds so the app reopens at
+// the user's last size/position, and the zoom override (0 = follow the display).
 const settings = new Store({
   name: 'config',
-  defaults: { mainBounds: { width: 1280, height: 720 } },
+  defaults: { mainBounds: { width: 1280, height: 720 }, mainZoom: 0 },
 });
 
 // The daemon's traditional port, but only a preference. Anything on the
@@ -73,6 +73,8 @@ const RPC_USER = 'aliaswallet';
 let RPC_PASS = crypto.randomBytes(24).toString('hex');
 
 let daemonProc = null;
+// No RPC reports when the daemon came up, but we are the ones who start it.
+let daemonStartedAt = null;
 let mainWindow = null;
 let wizardWindow = null;
 let splashWindow = null;
@@ -254,6 +256,7 @@ function startDaemon() {
     daemonArgs.push('-disablewallet');
     console.log('ALIAS_DISABLEWALLET=1 — launching daemon with -disablewallet');
   }
+  daemonStartedAt = Date.now();
   daemonProc = spawn(daemonPath, daemonArgs, {
     cwd: path.dirname(daemonPath),
     stdio: isDev ? 'inherit' : 'ignore',
@@ -598,11 +601,12 @@ function openPassphraseDialog(mode) {
     if (passphrasePending) { resolve(null); return; }
     passphrasePending = resolve;
     const parent = mainWindow || wizardWindow;
+    const passSize = fitSize(620, 280);
     const win = new BrowserWindow({
       // Original askpassphrasedialog.ui geometry was 598×209; bumped to
       // 280 so the new padded layout shows the OK/Cancel buttons fully.
-      width: 620, height: 280, useContentSize: true,
-      minWidth: 550, minHeight: 240,
+      width: passSize.width, height: passSize.height, useContentSize: true,
+      minWidth: Math.min(550, passSize.width), minHeight: Math.min(240, passSize.height),
       // Modal requires a parent on Linux; if none yet (startup unlock), the
       // dialog is a standalone always-on-top window.
       parent: parent || undefined,
@@ -627,6 +631,10 @@ function openPassphraseDialog(mode) {
     // the window to it instead of guessing a constant that clips the buttons.
     win.webContents.once('did-finish-load', async () => {
       try {
+        // Zoom first: it changes the viewport width, so the warning text wraps
+        // differently and `needed` would otherwise be measured against the
+        // wrong layout.
+        win.webContents.setZoomFactor(passSize.scale);
         const needed = await win.webContents.executeJavaScript(
           '(() => { const b = document.getElementById("btn-ok") || document.querySelector("button");' +
           ' if (!b) return 0;' +
@@ -634,7 +642,10 @@ function openPassphraseDialog(mode) {
           ' return Math.ceil(b.getBoundingClientRect().bottom + pad); })()');
         if (needed > 0 && !win.isDestroyed()) {
           const [w] = win.getContentSize();
-          win.setContentSize(w, Math.min(Math.max(needed + 12, 240), 700));
+          const maxH = Math.round(screen.getPrimaryDisplay().workArea.height * 0.8);
+          // `needed` is in page pixels, the frame is in scaled units.
+          const h = Math.round(Math.min(Math.max(needed + 12, 240), 700) * passSize.scale);
+          win.setContentSize(w, Math.min(h, maxH));
           win.center();
         }
       } catch (e) { /* keep the default size */ }
@@ -661,7 +672,11 @@ ipcMain.handle('alias:quit', () => app.quit());
 const DEFAULT_OPTIONS = {
   StartAtStartup:    false,
   DetachDatabases:   false,
-  Fee:               0.0001,
+  // Amounts are satoshis: the legacy Options page formats any input with
+  // class "amount" through unit.format(v, 0), which divides by 1e8, and
+  // writes it back through unit.parse, which multiplies. Storing 0.0001 here
+  // made the fee field render as 0.00000000.
+  Fee:               10000,
   Staking:           true,
   StakingDonation:   '0',
   ReserveBalance:    0,
@@ -675,11 +690,12 @@ const DEFAULT_OPTIONS = {
   ThinFullIndex:     false,
   ThinIndexWindow:   4096,
   DisplayUnit:       0,
-  DisplayAddresses:  false,
+  DisplayAddresses:  true,
   Language:          'en',
   RowsPerPage:       25,
   VisibleTransactions: [],
 };
+ipcMain.handle('alias:daemon-started-at', () => daemonStartedAt);
 ipcMain.handle('alias:get-options', () => {
   const stored = settings.get('options') || {};
   return Object.assign({}, DEFAULT_OPTIONS, stored);
@@ -692,11 +708,11 @@ ipcMain.handle('alias:set-options', async (_event, changes) => {
   // Mirror daemon-side options that have RPC equivalents.
   try {
     if (Object.prototype.hasOwnProperty.call(changes, 'Fee'))
-      await rpc('settxfee', [Number(changes.Fee) || 0]);
+      await rpc('settxfee', [(Number(changes.Fee) || 0) / 1e8]);
   } catch (_) {}
   try {
     if (Object.prototype.hasOwnProperty.call(changes, 'ReserveBalance'))
-      await rpc('reservebalance', [true, Number(changes.ReserveBalance) || 0]);
+      await rpc('reservebalance', [true, (Number(changes.ReserveBalance) || 0) / 1e8]);
   } catch (_) {}
   return true;
 });
@@ -717,8 +733,9 @@ ipcMain.handle('alias:load-translation', (_event, locale) => {
 let debugWindow = null;
 ipcMain.handle('alias:open-debug', () => {
   if (debugWindow && !debugWindow.isDestroyed()) { debugWindow.focus(); return; }
+  const debugSize = fitSize(740, 480);
   debugWindow = new BrowserWindow({
-    width: 740, height: 480, useContentSize: true,
+    width: debugSize.width, height: debugSize.height, useContentSize: true,
     parent: mainWindow || undefined,
     modal: false,
     title: 'ALIAS - Debug window',
@@ -729,6 +746,7 @@ ipcMain.handle('alias:open-debug', () => {
     },
   });
   debugWindow.setMenu(null);
+  zoomToFit(debugWindow, displayScale());
   debugWindow.loadFile(path.join(__dirname, '..', 'renderer', 'debug', 'index.html'));
   attachDevHooks(debugWindow);
   debugWindow.on('closed', () => { debugWindow = null; });
@@ -743,8 +761,9 @@ ipcMain.handle('alias:open-debug-log', async () => {
 let coinControlWindow = null;
 ipcMain.handle('alias:open-coin-control', () => {
   if (coinControlWindow && !coinControlWindow.isDestroyed()) { coinControlWindow.focus(); return; }
+  const ccSize = fitSize(760, 480);
   coinControlWindow = new BrowserWindow({
-    width: 760, height: 480, useContentSize: true,
+    width: ccSize.width, height: ccSize.height, useContentSize: true,
     parent: mainWindow || undefined,
     modal: false,
     title: 'Coin Control',
@@ -756,6 +775,7 @@ ipcMain.handle('alias:open-coin-control', () => {
       nodeIntegration: false,
     },
   });
+  zoomToFit(coinControlWindow, displayScale());
   coinControlWindow.loadFile(path.join(__dirname, '..', 'renderer', 'coincontrol', 'index.html'));
   coinControlWindow.on('closed', () => { coinControlWindow = null; });
   attachDevHooks(coinControlWindow);
@@ -765,8 +785,9 @@ ipcMain.handle('alias:open-coin-control', () => {
 let aboutWindow = null;
 ipcMain.handle('alias:open-about', () => {
   if (aboutWindow && !aboutWindow.isDestroyed()) { aboutWindow.focus(); return; }
+  const aboutSize = fitSize(671, 347);
   aboutWindow = new BrowserWindow({
-    width: 671, height: 347, useContentSize: true,
+    width: aboutSize.width, height: aboutSize.height, useContentSize: true,
     parent: mainWindow || undefined,
     modal: false,
     resizable: false, minimizable: false, maximizable: false,
@@ -779,6 +800,7 @@ ipcMain.handle('alias:open-about', () => {
       nodeIntegration: false,
     },
   });
+  zoomToFit(aboutWindow, aboutSize.scale);
   aboutWindow.loadFile(path.join(__dirname, '..', 'renderer', 'about', 'index.html'));
   aboutWindow.on('closed', () => { aboutWindow = null; });
   attachDevHooks(aboutWindow);
@@ -797,8 +819,9 @@ ipcMain.handle('alias:open-edit-address', (_event, opts) => {
       address: opts.address || '',
       stealth: opts.stealth ? '1' : '0',
     }).toString();
+    const addrSize = fitSize(457, 129);
     const win = new BrowserWindow({
-      width: 457, height: 129, useContentSize: true,
+      width: addrSize.width, height: addrSize.height, useContentSize: true,
       parent: mainWindow || undefined,
       modal: true,
       resizable: false, minimizable: false, maximizable: false,
@@ -812,6 +835,7 @@ ipcMain.handle('alias:open-edit-address', (_event, opts) => {
       },
     });
     const url = `file://${path.join(__dirname, '..', 'renderer', 'editaddress', 'index.html').replace(/\\/g, '/')}?${qp}#${mode}`;
+    zoomToFit(win, addrSize.scale);
     win.loadURL(url);
     win.on('closed', () => { if (editAddressPending) { editAddressPending(null); editAddressPending = null; } });
     attachDevHooks(win);
@@ -929,8 +953,14 @@ function attachScreenshotHook(win) {
 // logo, shown during daemon startup. Closed once the main window or wizard
 // has finished loading.
 function createSplashWindow() {
+  // Same DIP-vs-physical trap as the main window: 600x686 is 900x1029 physical
+  // at 150% scaling, nearly the full height of a 1080p screen. Shrink the
+  // window and zoom the page by the same factor so the fixed 600x686 layout
+  // still fills it exactly.
+  const splashSize = fitSize(600, 686);
   splashWindow = new BrowserWindow({
-    width: 600, height: 686, useContentSize: true,
+    width: splashSize.width, height: splashSize.height,
+    useContentSize: true,
     frame: false,
     resizable: false, minimizable: false, maximizable: false,
     movable: false,
@@ -946,6 +976,7 @@ function createSplashWindow() {
     },
   });
   fitToWorkArea(splashWindow);
+  zoomToFit(splashWindow, splashSize.scale);
   splashWindow.loadFile(path.join(__dirname, '..', 'renderer', 'splash', 'index.html'));
   splashWindow.on('closed', () => { splashWindow = null; });
   // The splash renderer registers its IPC listener inside the IIFE that
@@ -984,9 +1015,10 @@ function createWizardWindow() {
   // at top (logo + title + subtitle), body below, button footer. Default
   // Qt size is roughly 575×460; we go a bit taller (490) so the 24-word
   // verify grid fits without scrolling.
+  const wizSize = fitSize(575, 490);
   wizardWindow = new BrowserWindow({
-    width: 575,
-    height: 490,
+    width: wizSize.width,
+    height: wizSize.height,
     useContentSize: true,
     title: 'ALIAS Wallet Setup',
     icon: APP_ICON,
@@ -1007,6 +1039,7 @@ function createWizardWindow() {
   // would get the unlock dialog instead of the wizard on the next launch.
   settings.set('wizardCompleted', false);
 
+  zoomToFit(wizardWindow, wizSize.scale);
   wizardWindow.loadFile(path.join(__dirname, '..', 'renderer', 'wizard', 'index.html'));
   wizardWindow.on('closed', () => {
     wizardWindow = null;
@@ -1022,15 +1055,72 @@ function createWizardWindow() {
   attachScreenshotHook(wizardWindow);
 }
 
-// Windows display scaling shrinks the work area measured in DIPs: a 1080p
-// screen at 150% leaves 1280x720, and at 175% only 1097x617. Our fixed window
-// sizes are in DIPs too, so past 125% they are larger than the whole screen --
-// the window hangs off the bottom, the UI looks oversized and the lower edge
-// (buttons, status bar) is unreachable. Qt sized its windows against the
-// screen; Electron does not, so clamp here. Called after creation because only
-// then are the frame dimensions known, and getBounds() is the outer rect.
+// Display scaling hits us twice. Electron measures windows in scaled units,
+// so at 150% a 1280x720 window covers 1920x1080 physical -- the whole of a
+// 1080p screen; and Chromium draws every CSS pixel 1.5x, so the logo and text
+// are oversized as well. v4.4.0 escaped both with QT_AUTO_SCREEN_SCALE_FACTOR=0,
+// which switched Qt's scaling off; Electron has no equivalent. CSS cannot fix
+// it either -- media queries measure scaled pixels, so the page sees an
+// ordinary 1280x720 viewport and no breakpoint fires. Zoom is the only lever.
+// Returns designed-pixels-per-scaled-unit, i.e. what the page must zoom by to
+// land 1:1 on the physical screen.
+function displayScale() {
+  return 1 / Math.max(1, screen.getPrimaryDisplay().scaleFactor);
+}
+
+// Designed size -> window size, 1:1 physical but never more than `fraction` of
+// the work area. `scale` is the matching page zoom.
+function fitSize(width, height, fraction = 0.8) {
+  const area = screen.getPrimaryDisplay().workArea;
+  const scale = Math.min(displayScale(),
+                         (area.width * fraction) / width,
+                         (area.height * fraction) / height);
+  return { width: Math.round(width * scale), height: Math.round(height * scale), scale };
+}
+
+// Without this the frame shrinks but the content keeps its old pixel size and
+// is simply cropped. Resizable windows pass displayScale() instead of their
+// fit factor: they keep whatever size the user gave them and reflow.
+// Always set, even at 1.0: Chromium persists the zoom level per host and every
+// window here is file://, so a window that sets nothing inherits the factor of
+// whichever one loaded before it.
+function zoomToFit(win, scale) {
+  win.webContents.on('did-finish-load', () => {
+    if (!win.isDestroyed()) win.webContents.setZoomFactor(scale);
+  });
+}
+
+// The user's override, or the display scale when they have not set one.
+function mainZoom() {
+  const saved = settings.get('mainZoom');
+  return saved > 0 ? saved : displayScale();
+}
+
+// 0.5-2 because the page stops working outside it: the sidebar labels collide
+// below, the send form stops fitting above.
+function setMainZoom(factor) {
+  const z = Math.min(2, Math.max(0.5, Math.round(factor * 100) / 100));
+  settings.set('mainZoom', z);
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.setZoomFactor(z);
+}
+
+function stepMainZoom(delta) {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  setMainZoom(mainWindow.webContents.getZoomFactor() + delta);
+}
+
+function resetMainZoom() {
+  settings.set('mainZoom', 0);
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.setZoomFactor(displayScale());
+}
+
+// Windows display scaling shrinks the work area measured in scaled units: a
+// 1080p screen at 150% leaves 1280x720, and at 175% only 1097x617. A window
+// restored from a saved size can therefore be larger than the whole screen --
+// it hangs off the bottom and the lower edge (buttons, status bar) is
+// unreachable. Called after creation because only then are the frame
+// dimensions known, and getBounds() is the outer rect.
 function fitToWorkArea(win) {
-  const { screen } = require('electron');
   const area = screen.getDisplayMatching(win.getBounds()).workArea;
   const b = win.getBounds();
   const width  = Math.min(b.width,  area.width);
@@ -1043,14 +1133,16 @@ function fitToWorkArea(win) {
   });
 }
 
+// v4.4.0's 1280x720 content area, kept as the preferred size.
+const DEFAULT_BOUNDS = { width: 1280, height: 720 };
+
 function createMainWindow() {
   // Match the original ALIAS v4.4.0 client window: ~1280×720 content area
   // (1296×759 outer with Windows chrome — 16:9).
-  let saved = settings.get('mainBounds') || { width: 1280, height: 720 };
+  let saved = settings.get('mainBounds') || { ...DEFAULT_BOUNDS };
   // Validate saved bounds against current displays — a window restored from
   // a different monitor layout can end up off-screen, looking like the app
   // failed to launch. Drop x/y if the rect doesn't overlap any display.
-  const { screen } = require('electron');
   const onScreen = screen.getAllDisplays().some((d) => {
     const r = d.workArea;
     return Number.isFinite(saved.x) && Number.isFinite(saved.y)
@@ -1060,6 +1152,19 @@ function createMainWindow() {
         && saved.y + 20 > r.y;
   });
   if (!onScreen) saved = { width: saved.width || 1280, height: saved.height || 720 };
+
+  // Put the default back on the physical screen at 1:1 -- see displayScale().
+  // Only when the user has never moved or resized the window: a size they
+  // chose themselves is theirs to keep. (settings has a `defaults` entry for
+  // mainBounds, so get() always returns a value and the stored default is
+  // indistinguishable from a first run -- which is what we want here.)
+  const untouched = saved.width === DEFAULT_BOUNDS.width
+                 && saved.height === DEFAULT_BOUNDS.height
+                 && !Number.isFinite(saved.x) && !Number.isFinite(saved.y);
+  if (untouched) {
+    const fit = fitSize(DEFAULT_BOUNDS.width, DEFAULT_BOUNDS.height);
+    saved = { width: fit.width, height: fit.height };
+  }
   mainWindow = new BrowserWindow({
     width:  saved.width,
     height: saved.height,
@@ -1079,6 +1184,9 @@ function createMainWindow() {
     },
   });
   fitToWorkArea(mainWindow);
+  mainWindow.webContents.on('did-finish-load', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.setZoomFactor(mainZoom());
+  });
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
   // Keep our window title — Electron otherwise replaces it with the page's
   // <title> on load. Matches original SpectreGUI::setWindowTitle().
@@ -1434,6 +1542,12 @@ function buildAppMenu() {
         { label: '&(Un)lock Wallet...',    click: () => triggerInRenderer('#toggleLock a') },
         { type: 'separator' },
         { label: '&Options...', accelerator: 'CmdOrCtrl+,', click: () => triggerInRenderer('#navitems a[href="#options"]') },
+        { type: 'separator' },
+        // The window follows the display scale on its own; these are the way
+        // out for anyone who wants it bigger or smaller than that.
+        { label: 'Zoom &In',  accelerator: 'CmdOrCtrl+=', click: () => stepMainZoom(0.1) },
+        { label: 'Zoom &Out', accelerator: 'CmdOrCtrl+-', click: () => stepMainZoom(-0.1) },
+        { label: '&Reset Zoom', accelerator: 'CmdOrCtrl+0', click: () => resetMainZoom() },
       ],
     },
     {

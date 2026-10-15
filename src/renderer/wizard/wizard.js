@@ -265,10 +265,19 @@
 
     // Create the two default addresses the original ALIAS UI shows in
     // Receive — "Default Public Address" and "Default Private Address".
-    // Without these, listreceivedbyaddress returns empty until the user
-    // generates one manually.
-    try { await rpcRetry('getnewaddress',        ['Default Public Address']);  } catch (_) {}
-    try { await rpcRetry('getnewstealthaddress', ['Default Private Address']); } catch (_) {}
+    // Only when the wallet has none: wallet.cpp creates both itself at init,
+    // and creating them unconditionally left two "Default Public Address"
+    // rows in Receive.
+    try {
+      const pub = await rpcRetry('listreceivedbyaddress', [0, true]).catch(() => []);
+      if (!Array.isArray(pub) || pub.length === 0)
+        await rpcRetry('getnewaddress', ['Default Public Address']);
+    } catch (_) {}
+    try {
+      const priv = await rpcRetry('listprivateaddresses', []).catch(() => null);
+      if (!priv || !priv['Stealth Address'])
+        await rpcRetry('getnewstealthaddress', ['Default Private Address']);
+    } catch (_) {}
   }
 
   function setEncryptError(msg, target) {

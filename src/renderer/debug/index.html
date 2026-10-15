@@ -9,7 +9,6 @@
   <div class="tabs">
     <button class="tab active" data-tab="information">Information</button>
     <button class="tab" data-tab="console">Console</button>
-    <button class="tab" data-tab="network">Network Traffic</button>
     <button class="tab" data-tab="peers">Peers</button>
   </div>
 
@@ -18,13 +17,13 @@
       <tr><th class="section" colspan="2">ALIAS Core</th></tr>
       <tr><th>Client name</th><td id="info-client-name">N/A</td></tr>
       <tr><th>Client version</th><td id="info-client-version">N/A</td></tr>
-      <tr><th>Using OpenSSL version</th><td id="info-openssl-version">N/A</td></tr>
-      <tr><th>Using BerkeleyDB version</th><td id="info-bdb-version">N/A</td></tr>
       <tr><th>Build date</th><td id="info-build-date">N/A</td></tr>
       <tr><th>Startup time</th><td id="info-startup-time">N/A</td></tr>
       <tr><th class="section" colspan="2">Network</th></tr>
       <tr><th>Name</th><td id="info-network-name">N/A</td></tr>
       <tr><th>Number of connections</th><td id="info-connections">N/A</td></tr>
+      <tr><th>Received</th><td id="net-in">N/A</td></tr>
+      <tr><th>Sent</th><td id="net-out">N/A</td></tr>
       <tr><th class="section" colspan="2">Block chain</th></tr>
       <tr><th>Current number of blocks</th><td id="info-blocks">N/A</td></tr>
       <tr><th>Estimated total blocks</th><td id="info-blocks-est">N/A</td></tr>
@@ -45,34 +44,30 @@
     </div>
   </div>
 
-  <div class="tab-content" id="tab-network" style="display:none">
-    <table class="net-grid">
-      <tr><th colspan="3">Totals</th></tr>
-      <tr><th>In:</th><td id="net-in">N/A</td><th>Out:</th></tr>
-      <tr><td></td><td id="net-out">N/A</td><td></td></tr>
-    </table>
-    <div class="net-graph-row">
-      <label>Range:
-        <select id="graph-range">
-          <option value="5" selected>5 minutes</option>
-          <option value="10">10 minutes</option>
-          <option value="30">30 minutes</option>
-          <option value="60">1 hour</option>
-        </select>
-      </label>
-      <button id="graph-clear">Clear</button>
-      <span class="graph-legend"><span class="dot-in"></span> In <span class="dot-out"></span> Out</span>
-    </div>
-    <canvas id="traffic-graph" width="700" height="160"></canvas>
-  </div>
-
   <div class="tab-content" id="tab-peers" style="display:none">
-    <div class="peer-hint">Select a peer to view detailed information.</div>
+    <div class="peer-hint" id="peer-hint">Select a peer to view detailed information.</div>
     <table class="peer-grid" id="peer-table">
       <thead>
         <tr><th>Address/Hostname</th><th>User Agent</th><th>Ping Time</th></tr>
       </thead>
       <tbody></tbody>
+    </table>
+    <table class="info-grid peer-detail" id="peer-detail" style="display:none">
+      <tr><th class="section" colspan="2">Peer</th></tr>
+      <tr><th>Address</th><td id="peer-addr"></td></tr>
+      <tr><th>Direction</th><td id="peer-direction"></td></tr>
+      <tr><th>User agent</th><td id="peer-subver"></td></tr>
+      <tr><th>Protocol version</th><td id="peer-version"></td></tr>
+      <tr><th>Services</th><td id="peer-services"></td></tr>
+      <tr><th>Chain height</th><td id="peer-chainheight"></td></tr>
+      <tr><th>Connection time</th><td id="peer-conntime"></td></tr>
+      <tr><th>Last send</th><td id="peer-lastsend"></td></tr>
+      <tr><th>Last receive</th><td id="peer-lastrecv"></td></tr>
+      <tr><th>Sent</th><td id="peer-bytessent"></td></tr>
+      <tr><th>Received</th><td id="peer-bytesrecv"></td></tr>
+      <tr><th>Ping time</th><td id="peer-pingtime"></td></tr>
+      <tr><th>Time offset</th><td id="peer-timeoffset"></td></tr>
+      <tr><th>Ban score</th><td id="peer-banscore"></td></tr>
     </table>
   </div>
 

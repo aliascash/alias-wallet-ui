@@ -421,7 +421,7 @@ window.addEventListener('unhandledrejection', (e) => {
         if (opts.DisplayUnit !== undefined)
           dispatch('optionsModel', 'displayUnitChanged', Number(opts.DisplayUnit) || 0);
         if (opts.ReserveBalance !== undefined)
-          dispatch('optionsModel', 'reserveBalanceChanged', Math.round(Number(opts.ReserveBalance) * 1e8));
+          dispatch('optionsModel', 'reserveBalanceChanged', Number(opts.ReserveBalance) || 0);
         if (opts.RowsPerPage !== undefined)
           dispatch('optionsModel', 'rowsPerPageChanged', Number(opts.RowsPerPage) || 25);
         if (Array.isArray(opts.VisibleTransactions))
