@@ -79,9 +79,11 @@ window.addEventListener('unhandledrejection', (e) => {
   }
 
   // The daemon hardcodes "Alias Foundation" in walletdb.cpp for the dev
-  // contribution address. Display it rebranded, in every path that shows a
-  // label, so the address list and the selected value never disagree.
+  // contribution address. It is not an entry the user added, so it is kept
+  // out of the address book; the rebrand still applies wherever the daemon
+  // hands us that label for an address the user did pick.
   const LABEL_REWRITES = { 'Alias Foundation': 'ALIAS Foundation' };
+  const HIDDEN_LABELS = ['Alias Foundation'];
   function rebrandLabel(label) {
     return LABEL_REWRITES[label] || label;
   }
@@ -759,8 +761,14 @@ window.addEventListener('unhandledrejection', (e) => {
               outputs[r.address] = Number(r.amount) || 0;
               totalOut += outputs[r.address];
             }
-            const FEE_PER_TX = 0.0001; // simplistic flat fee
-            const change = totalIn - totalOut - FEE_PER_TX;
+            // The fee the user set in Options, not a constant: a raw
+            // transaction pays exactly what we subtract here.
+            let feePerTx = 0.0001;
+            try {
+              const info = await rpc('getinfo', []);
+              if (info && Number(info.paytxfee) > 0) feePerTx = Number(info.paytxfee);
+            } catch (_) { /* keep the default */ }
+            const change = totalIn - totalOut - feePerTx;
             if (change < 0) throw new Error('Selected inputs are smaller than recipients + fee.');
             if (change > 0.00000001) {
               const cAddr = changeAddress || await rpc('getnewaddress', []);
@@ -1522,13 +1530,12 @@ window.addEventListener('unhandledrejection', (e) => {
         }
         const items = [];
 
-        // Public side. The daemon hardcodes "Alias Foundation" in
-        // walletdb.cpp for the dev contribution address — rebrand it to
-        // "ALIAS Foundation" at display time.
+        // Public side.
         const OWN_HINT = /^(Default|Initial) /;
         for (const r of (Array.isArray(byAddr) ? byAddr : [])) {
           if (!r.address) continue;
           const rawLbl = r.account || '';
+          if (HIDDEN_LABELS.includes(rawLbl)) continue;
           const lbl    = rebrandLabel(rawLbl);
           const isOwn  = !lbl || OWN_HINT.test(lbl);
           items.push({

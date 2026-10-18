@@ -120,7 +120,13 @@
     mnemonicWords.forEach((w, i) => {
       const div = document.createElement('div');
       div.className = 'word';
-      div.innerHTML = `<span class="idx">${i + 1}.</span><span class="text">${w}</span>`;
+      const idx = document.createElement('span');
+      idx.className = 'idx';
+      idx.textContent = (i + 1) + '.';
+      const text = document.createElement('span');
+      text.className = 'text';
+      text.textContent = w;
+      div.append(idx, text);
       grid.appendChild(div);
     });
   }

@@ -746,7 +746,6 @@ ipcMain.handle('alias:open-debug', () => {
     },
   });
   debugWindow.setMenu(null);
-  zoomToFit(debugWindow, displayScale());
   debugWindow.loadFile(path.join(__dirname, '..', 'renderer', 'debug', 'index.html'));
   attachDevHooks(debugWindow);
   debugWindow.on('closed', () => { debugWindow = null; });
@@ -775,7 +774,6 @@ ipcMain.handle('alias:open-coin-control', () => {
       nodeIntegration: false,
     },
   });
-  zoomToFit(coinControlWindow, displayScale());
   coinControlWindow.loadFile(path.join(__dirname, '..', 'renderer', 'coincontrol', 'index.html'));
   coinControlWindow.on('closed', () => { coinControlWindow = null; });
   attachDevHooks(coinControlWindow);
@@ -1055,45 +1053,41 @@ function createWizardWindow() {
   attachScreenshotHook(wizardWindow);
 }
 
-// Display scaling hits us twice. Electron measures windows in scaled units,
-// so at 150% a 1280x720 window covers 1920x1080 physical -- the whole of a
-// 1080p screen; and Chromium draws every CSS pixel 1.5x, so the logo and text
-// are oversized as well. v4.4.0 escaped both with QT_AUTO_SCREEN_SCALE_FACTOR=0,
-// which switched Qt's scaling off; Electron has no equivalent. CSS cannot fix
-// it either -- media queries measure scaled pixels, so the page sees an
-// ordinary 1280x720 viewport and no breakpoint fires. Zoom is the only lever.
-// Returns designed-pixels-per-scaled-unit, i.e. what the page must zoom by to
-// land 1:1 on the physical screen.
-function displayScale() {
-  return 1 / Math.max(1, screen.getPrimaryDisplay().scaleFactor);
-}
-
-// Designed size -> window size, 1:1 physical but never more than `fraction` of
-// the work area. `scale` is the matching page zoom.
+// Electron measures windows in scaled units, so at 150% display scaling a
+// 1280x720 window covers 1920x1080 physical -- the whole of a 1080p screen.
+// Shrink anything that would claim more than `fraction` of the work area and
+// report the factor, so fixed-layout pages can zoom to match.
+//
+// Deliberately NOT cancelling the display scale here. Rendering 1:1 (the
+// equivalent of Qt's QT_AUTO_SCREEN_SCALE_FACTOR=0) does match v4.4.0 pixel
+// for pixel, but someone who set Windows to 150% did so to get larger text,
+// and undoing it made the wizard unreadable. A user who wants it smaller has
+// the zoom controls in the Settings menu.
 function fitSize(width, height, fraction = 0.8) {
   const area = screen.getPrimaryDisplay().workArea;
-  const scale = Math.min(displayScale(),
+  const scale = Math.min(1,
                          (area.width * fraction) / width,
                          (area.height * fraction) / height);
   return { width: Math.round(width * scale), height: Math.round(height * scale), scale };
 }
 
 // Without this the frame shrinks but the content keeps its old pixel size and
-// is simply cropped. Resizable windows pass displayScale() instead of their
-// fit factor: they keep whatever size the user gave them and reflow.
-// Always set, even at 1.0: Chromium persists the zoom level per host and every
+// is simply cropped. Reflowing pages (main UI, debug, coin control) adapt on
+// their own and do not need it.
+// Always set, even at 1.0: Chromium keeps the zoom level per origin and every
 // window here is file://, so a window that sets nothing inherits the factor of
-// whichever one loaded before it.
+// whichever one loaded before it -- that is what made the UI jump back to
+// "giant" after the debug window was maximised and closed.
 function zoomToFit(win, scale) {
   win.webContents.on('did-finish-load', () => {
     if (!win.isDestroyed()) win.webContents.setZoomFactor(scale);
   });
 }
 
-// The user's override, or the display scale when they have not set one.
+// The user's override, or no zoom at all.
 function mainZoom() {
   const saved = settings.get('mainZoom');
-  return saved > 0 ? saved : displayScale();
+  return saved > 0 ? saved : 1;
 }
 
 // 0.5-2 because the page stops working outside it: the sidebar labels collide
@@ -1111,7 +1105,7 @@ function stepMainZoom(delta) {
 
 function resetMainZoom() {
   settings.set('mainZoom', 0);
-  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.setZoomFactor(displayScale());
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.setZoomFactor(1);
 }
 
 // Windows display scaling shrinks the work area measured in scaled units: a
@@ -1153,7 +1147,7 @@ function createMainWindow() {
   });
   if (!onScreen) saved = { width: saved.width || 1280, height: saved.height || 720 };
 
-  // Put the default back on the physical screen at 1:1 -- see displayScale().
+  // Keep the default inside the work area -- see fitSize().
   // Only when the user has never moved or resized the window: a size they
   // chose themselves is theirs to keep. (settings has a `defaults` entry for
   // mainBounds, so get() always returns a value and the stored default is
@@ -1184,9 +1178,11 @@ function createMainWindow() {
     },
   });
   fitToWorkArea(mainWindow);
-  mainWindow.webContents.on('did-finish-load', () => {
+  const applyMainZoom = () => {
     if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.setZoomFactor(mainZoom());
-  });
+  };
+  mainWindow.webContents.on('did-finish-load', applyMainZoom);
+  mainWindow.on('focus', applyMainZoom);
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
   // Keep our window title — Electron otherwise replaces it with the page's
   // <title> on load. Matches original SpectreGUI::setWindowTitle().

@@ -37,12 +37,6 @@
         $('info-last-block-time').textContent = blk.time ? new Date(blk.time * 1000).toLocaleString() : 'N/A';
       }
     } catch (e) { /* tolerate */ }
-    try {
-      const peers = await rpc('getpeerinfo', []);
-      const best = (Array.isArray(peers) ? peers : [])
-        .reduce((m, p) => Math.max(m, Number(p.chainheight) || 0), 0);
-      if (best > 0) $('info-blocks-est').textContent = String(best);
-    } catch (e) { /* tolerate */ }
   }
 
   // Console tab — command input + history (up/down navigation)
