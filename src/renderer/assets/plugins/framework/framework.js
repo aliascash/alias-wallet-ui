@@ -542,24 +542,41 @@ $(function () {
                 b[a] = setTimeout(c, d)
             }
         }();
+        // Sidebar pinning. Two fixes over the stock theme:
+        //
+        // 1. It only ran on `resize`, never at load, so the wallet always
+        //    started with the sidebar collapsed to icons however big the
+        //    window was -- it only corrected itself once the user dragged the
+        //    frame. Hence "not compensated from the start".
+        // 2. The threshold was Bootstrap's `.visible-lg`, i.e. 1200 CSS px.
+        //    CSS pixels shrink under display scaling: at 150% a 1536 physical
+        //    px window is 1024 CSS px, so 1200 is unreachable on a 1080p
+        //    screen and the sidebar could never pin. 900 is the width at which
+        //    the 250 px sidebar plus a usable content area still fits; below it the
+        //    Bootstrap grid stacks the panels, so nothing is squeezed.
+        var MENU_PIN_MIN_WIDTH = 900;
+
+        function applySidebarPin() {
+            if ($(window).width() >= MENU_PIN_MIN_WIDTH) {
+                $('body').addClass("menu-pin");
+                $("#sidebar-header").removeClass("sidebar-header-hidden");
+                $("#sidebar-header-collapsed").removeClass("sidebar-header-collapsed-visible");
+            } else {
+                $('body').removeClass("menu-pin");
+                if (!$("body").hasClass("sidebar-visible")) {
+                    $("#sidebar-header").addClass("sidebar-header-hidden");
+                    $("#sidebar-header-collapsed").addClass("sidebar-header-collapsed-visible");
+                }
+            }
+        }
+        $.Framework.applySidebarPin = applySidebarPin;
+
         $(window).load(function() {
             var fullDateString = new Date();
+            applySidebarPin();
             $(window).resize(function () {
                 if (!document.hidden) {
-                    waitForFinalEvent(function () {
-                        if ($.Framework.isVisibleLg()) {
-                            $('body').addClass("menu-pin");
-                            $("#sidebar-header").removeClass("sidebar-header-hidden");
-                            $("#sidebar-header-collapsed").removeClass("sidebar-header-collapsed-visible");
-                        } else {
-                            $('body').removeClass("menu-pin");
-                            if (!$("body").hasClass("sidebar-visible")) {
-                                $("#sidebar-header").addClass("sidebar-header-hidden");
-                                $("#sidebar-header-collapsed").addClass("sidebar-header-collapsed-visible");
-                            }
-                        }
-                        ;
-                    }, 200, fullDateString.getTime());
+                    waitForFinalEvent(applySidebarPin, 200, fullDateString.getTime());
                 }
             });
         });

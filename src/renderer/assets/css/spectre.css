@@ -1321,3 +1321,29 @@ body.fixed-header {
     }
 }
 
+
+/* Bootstrap splits .col-md-* into columns from 992px of *viewport* width, but
+   the pinned sidebar is 250px of that and is not part of the content area. At
+   1024px the two overview panels end up sharing 769px and the balance labels
+   truncate to "AVAILAB...". Stack them until the content area itself is wide
+   enough for the widest thing it has to show: a balance table is a label
+   column plus two amount columns, and a 9-figure amount is ~176px, so a panel
+   needs ~560px and the content area ~1150px. 1400 = 250 sidebar + 1150. */
+@media (max-width: 1400px) {
+    body.menu-pin .content .row > [class*="col-md-"] {
+        width: 100%;
+        float: none;
+    }
+}
+
+/* `td { text-overflow: ellipsis }` at the top of this file is right for
+   addresses and labels, but it also applies to the balance figures, and a
+   large balance would render as "1,234,567.89012...". The breakpoint above
+   keeps the panel wide enough; this makes truncation impossible regardless. */
+#balances td:not(:first-child),
+#balances th:not(:first-child),
+.total-balance {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+}

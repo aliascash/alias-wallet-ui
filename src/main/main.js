@@ -15,6 +15,52 @@ const isDev      = process.argv.includes('--dev');
 const forceSetup = process.argv.includes('--first-run');  // dev: force-show wizard
 const skipSetup  = process.argv.includes('--skip-wizard'); // dev: skip wizard even if first launch
 
+// ---------- where our own state lives ----------
+//
+// Electron derives userData from package.json `name` -- `productName` is set
+// only inside the electron-builder `build` block, which Electron never reads --
+// so the install produced a THIRD top-level folder,
+// %APPDATA%\alias-wallet-desktop, beside the program and the wallet data.
+// Put our state inside the wallet's own directory instead, under `ui/` so
+// Chromium's caches do not end up among wallet.dat and the chain files.
+//
+// This has to run before requestSingleInstanceLock() below: the lock writes
+// SingletonCookie/Lock/Socket into whatever userData points at when it is
+// taken, which would recreate the folder we are trying to be rid of.
+let cachedDataDir = null;
+const UI_STATE_DIR = path.join(getDataDir(), 'ui');
+// Everything Electron and electron-store write under userData, so we can tell
+// an abandoned state folder from one holding something we did not create.
+const KNOWN_STATE_FILES = new Set([
+  'config.json', 'Cache', 'Code Cache', 'Crashpad', 'DawnGraphiteCache',
+  'DawnWebGPUCache', 'Dictionaries', 'GPUCache', 'Local Storage',
+  'Network Persistent State', 'Session Storage', 'Shared Dictionary',
+  'SharedStorage', 'blob_storage', 'Preferences', 'Local State',
+  'SingletonCookie', 'SingletonLock', 'SingletonSocket',
+]);
+try {
+  fs.mkdirSync(UI_STATE_DIR, { recursive: true });
+  // Build the old path by hand rather than reading app.getPath('userData'):
+  // that getter creates the directory as a side effect, which is the very
+  // folder we are trying to stop appearing.
+  const legacyDir = path.join(app.getPath('appData'), app.getName());
+  app.setPath('userData', UI_STATE_DIR);
+  // Carry the old settings over once, so window size, zoom and Options are not
+  // reset for anyone upgrading.
+  const legacyConf = path.join(legacyDir, 'config.json');
+  const movedConf  = path.join(UI_STATE_DIR, 'config.json');
+  if (fs.existsSync(legacyConf) && !fs.existsSync(movedConf)) fs.copyFileSync(legacyConf, movedConf);
+  // An upgrade leaves the old folder behind and the uninstaller does not know
+  // about it. Clear it out, but only once everything in it is ours -- the
+  // directory is named after the app, yet nothing guarantees we put it there.
+  if (fs.existsSync(legacyDir)
+      && fs.readdirSync(legacyDir).every((f) => KNOWN_STATE_FILES.has(f))) {
+    fs.rmSync(legacyDir, { recursive: true, force: true });
+  }
+} catch (e) {
+  console.warn('[startup] could not relocate userData:', e.message);
+}
+
 // ---------- single-instance lock ----------
 //
 // Two wallet processes on the same datadir corrupt wallet.dat. requestSingleInstanceLock
@@ -104,7 +150,6 @@ function getDaemonPath() {
 // Without that file -- dev runs, or a build started by hand -- fall back to
 // the per-user default. The daemon is always launched with an explicit
 // -datadir, so this is the single source of truth.
-let cachedDataDir = null;
 function getDataDir() {
   if (cachedDataDir) return cachedDataDir;
   if (!isDev) {
@@ -736,6 +781,7 @@ ipcMain.handle('alias:open-debug', () => {
   const debugSize = fitSize(740, 480);
   debugWindow = new BrowserWindow({
     width: debugSize.width, height: debugSize.height, useContentSize: true,
+    ...minSize(620, 380),
     parent: mainWindow || undefined,
     modal: false,
     title: 'ALIAS - Debug window',
@@ -763,6 +809,7 @@ ipcMain.handle('alias:open-coin-control', () => {
   const ccSize = fitSize(760, 480);
   coinControlWindow = new BrowserWindow({
     width: ccSize.width, height: ccSize.height, useContentSize: true,
+    ...minSize(620, 380),
     parent: mainWindow || undefined,
     modal: false,
     title: 'Coin Control',
@@ -1071,6 +1118,16 @@ function fitSize(width, height, fraction = 0.8) {
   return { width: Math.round(width * scale), height: Math.round(height * scale), scale };
 }
 
+// A resizable window needs a floor, or it can be dragged down to a few pixels
+// and look broken. Clamped to the work area because the floor is in scaled
+// units: 640x400 is 1280x800 physical at 200%, which does not fit a 1366x768
+// laptop, and Electron would then force the window larger than the screen.
+function minSize(width, height) {
+  const area = screen.getPrimaryDisplay().workArea;
+  return { minWidth:  Math.min(width,  area.width),
+           minHeight: Math.min(height, area.height) };
+}
+
 // Without this the frame shrinks but the content keeps its old pixel size and
 // is simply cropped. Reflowing pages (main UI, debug, coin control) adapt on
 // their own and do not need it.
@@ -1162,6 +1219,7 @@ function createMainWindow() {
   mainWindow = new BrowserWindow({
     width:  saved.width,
     height: saved.height,
+    ...minSize(640, 400),
     x:      Number.isFinite(saved.x) ? saved.x : undefined,
     y:      Number.isFinite(saved.y) ? saved.y : undefined,
     useContentSize: true,
