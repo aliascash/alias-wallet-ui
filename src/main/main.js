@@ -662,6 +662,7 @@ function openPassphraseDialog(mode) {
       icon: APP_ICON,
       autoHideMenuBar: true,
       webPreferences: {
+        ...ownSession('alias-passphrase'),
         preload: path.join(__dirname, '..', 'preload.js'),
         contextIsolation: true,
         nodeIntegration: false,
@@ -840,6 +841,7 @@ ipcMain.handle('alias:open-about', () => {
     icon: APP_ICON,
     autoHideMenuBar: true,
     webPreferences: {
+      ...ownSession('alias-about'),
       preload: path.join(__dirname, '..', 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
@@ -874,6 +876,7 @@ ipcMain.handle('alias:open-edit-address', (_event, opts) => {
       icon: APP_ICON,
       autoHideMenuBar: true,
       webPreferences: {
+        ...ownSession('alias-editaddress'),
         preload: path.join(__dirname, '..', 'preload.js'),
         contextIsolation: true,
         nodeIntegration: false,
@@ -1015,6 +1018,7 @@ function createSplashWindow() {
     icon: APP_ICON,
     backgroundColor: '#282829',
     webPreferences: {
+      ...ownSession('alias-splash'),
       preload: path.join(__dirname, '..', 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
@@ -1072,6 +1076,7 @@ function createWizardWindow() {
     maximizable: false,
     autoHideMenuBar: true,
     webPreferences: {
+      ...ownSession('alias-wizard'),
       preload: path.join(__dirname, '..', 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
@@ -1128,13 +1133,24 @@ function minSize(width, height) {
            minHeight: Math.min(height, area.height) };
 }
 
+// Chromium keeps the zoom level per origin *per session*, and every window
+// here is file:// -- one origin. So setZoomFactor() on any one window silently
+// moved all the others, and whichever was touched last won: opening the wizard
+// shrank the main window with it, focusing the main window pushed the wizard
+// back. The factor was applied correctly every time, it just never stayed,
+// which is what "the scaling compensation doesn't work" looks like.
+//
+// Giving each fixed-size dialog its own in-memory session keeps its zoom to
+// itself. None of them store anything, so there is nothing to lose by it. The
+// resizable windows (main, debug, coin control) reflow instead of zooming and
+// stay on the default session.
+function ownSession(name) {
+  return { partition: name };
+}
+
 // Without this the frame shrinks but the content keeps its old pixel size and
 // is simply cropped. Reflowing pages (main UI, debug, coin control) adapt on
 // their own and do not need it.
-// Always set, even at 1.0: Chromium keeps the zoom level per origin and every
-// window here is file://, so a window that sets nothing inherits the factor of
-// whichever one loaded before it -- that is what made the UI jump back to
-// "giant" after the debug window was maximised and closed.
 function zoomToFit(win, scale) {
   win.webContents.on('did-finish-load', () => {
     if (!win.isDestroyed()) win.webContents.setZoomFactor(scale);
