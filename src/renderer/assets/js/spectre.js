@@ -1672,16 +1672,32 @@ var walletManagementPage = {
   }
 };
 
+// The window height is not the space the table has: the page header sits
+// above it and the panel has margins of its own, so this came out ~11px too
+// tall and the page ended up with a scrollbar and nothing to scroll. Set the
+// height, then measure what actually overflowed and take it back off -- that
+// needs no assumptions about the chrome around the table.
+function trimTableOverflow($tbody, articleId) {
+  var scroller = document.querySelector('.page-container > .page-content-wrapper');
+  if (!scroller || !$tbody.length) return;
+  // Only meaningful while this table's page is the visible one.
+  if ($('#' + articleId).is(':hidden')) return;
+  var over = scroller.scrollHeight - scroller.clientHeight;
+  if (over > 0) $tbody.height($tbody.height() - over);
+}
+
 function resizeTableBodies() {
   var newHeightTransactionTable = ($(window).height() < 480 || $(window).width() < 480) ?
       ($(window).height() - $("#transactions nav.navbar").height() - $('#transactions-table > thead').height() - $('#transactions-table > tfoot').height() - 10 ) :
       ($(window).height() - $('#transactions-table > tbody').offset().top - $('#transactions-table > tfoot').height() - 10);
   $("#transactions-table > tbody").height(newHeightTransactionTable);
+  trimTableOverflow($("#transactions-table > tbody"), 'transactions');
 
   var newHeighChaindataTable =  ($(window).height() < 480 || $(window).width() < 480) ?
       ($(window).height() - $("#chaindata nav.navbar").height() - $('#chaindata-table > thead').height() - $('#chaindata-table > tfoot').height() - 10 ) :
       ($(window).height() - $('#chaindata-table > tbody').offset().top - $('#chaindata-table > tfoot').height() - 10);
   $("#chaindata-table > tbody").height(newHeighChaindataTable);
+  trimTableOverflow($("#chaindata-table > tbody"), 'chaindata');
 }
 
 window.onload = function() {

@@ -1325,11 +1325,12 @@ body.fixed-header {
 /* Bootstrap splits .col-md-* into columns from 992px of *viewport* width, but
    the pinned sidebar is 250px of that and is not part of the content area. At
    1024px the two overview panels end up sharing 769px and the balance labels
-   truncate to "AVAILAB...". Stack them until the content area itself is wide
-   enough for the widest thing it has to show: a balance table is a label
-   column plus two amount columns, and a 9-figure amount is ~176px, so a panel
-   needs ~560px and the content area ~1150px. 1400 = 250 sidebar + 1150. */
-@media (max-width: 1400px) {
+   truncate to "AVAILAB...". 1250 = 250 sidebar + 1000 content, the point where
+   a panel is wide enough for a label column plus two amount columns.
+   Not higher: stacking at 1366 makes the overview 1125px tall and the window
+   scrolls vertically, which is worse than a tight fit. The rule below is what
+   keeps the figures readable at the tight end. */
+@media (max-width: 1250px) {
     body.menu-pin .content .row > [class*="col-md-"] {
         width: 100%;
         float: none;
@@ -1346,4 +1347,63 @@ body.fixed-header {
     overflow: visible;
     text-overflow: clip;
     white-space: nowrap;
+}
+
+
+/* Fill the window height. The content area is as tall as the window, but the
+   panels inside only take the height of their contents, so a maximised window
+   left a grey band over the bottom third.
+
+   Two things to know about the markup. #overview sits inside .container-fluid
+   while every other article is a direct child of .content, so both paths have
+   to be covered. And the theme gives the article's inner wrapper
+   min-height:100%, which is measured against the full content area and so
+   ignores the 60px header above it -- that is where the 11px of scroll with
+   nothing in it on Transactions and Chain Data came from. Replacing that with
+   a flex chain makes the height come out exact. min-height:0 is required:
+   flex items default to min-height:auto and refuse to shrink to their share.
+   The selectors are descendant, not child: Wallet Management nests a second
+   .page-content-wrapper inside the first. */
+.page-content-wrapper > .content,
+.page-content-wrapper > .content > article,
+.content > .container-fluid > article,
+article .page-content-wrapper,
+article .page-content-wrapper > .row:last-child,
+article .panel.full-width,
+article .panel.full-width > .panel-body,
+article .panel-body > .row > [class*="col-md-"] {
+    display: flex;
+    flex-direction: column;
+}
+.page-content-wrapper > .content > article,
+.content > .container-fluid > article,
+article .page-content-wrapper,
+article .page-content-wrapper > .row:last-child,
+article .panel.full-width,
+article .panel.full-width > .panel-body,
+article .panel-body > .row,
+article [class*="col-md-"] > .panel-spectre:last-child {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+/* .container-fluid wraps #overview only; the other articles are direct
+   children of .content. As a flex item it was claiming a share of the height
+   even while the article inside it was hidden, which put the grey band back on
+   every other page. display:contents takes it out of the layout so every
+   article is a flex child of .content on equal terms. */
+.page-content-wrapper > .content > .container-fluid {
+    display: contents;
+}
+
+/* The one row that stays a row: it holds the side-by-side columns. */
+article .panel-body > .row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* With the sidebar collapsed the content area loses its right padding, so the
+   grid's -15px row margin spills past the edge and draws a horizontal
+   scrollbar 10px wide at the 640px window minimum. */
+body:not(.menu-pin) .page-container > .page-content-wrapper > .content {
+    padding-right: 15px;
 }
