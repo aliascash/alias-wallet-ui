@@ -184,7 +184,10 @@ span.syncing-0 {
     bottom: 0px;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-right: 5px;
+    /* No padding-right. This wrapper is the scroller, and the 5px that used to
+       be here was reserved for its scrollbar -- but the content fits the
+       window now, so the scrollbar never appears and the 5px only made the
+       right margin wider than the left on every page. */
 }
 
 @media (max-width: 767px) {
@@ -1436,11 +1439,19 @@ article .panel-body > .row {
     flex-wrap: wrap;
 }
 
-/* With the sidebar collapsed the content area loses its right padding, so the
-   grid's -15px row margin spills past the edge and draws a horizontal
-   scrollbar 10px wide at the 640px window minimum. */
-body:not(.menu-pin) .page-container > .page-content-wrapper > .content {
-    padding-right: 15px;
+/* Below 768 the content area has no side padding of its own, but the grid
+   rows inside still carry Bootstrap's -15px margins, so they hung past both
+   edges and the wrapper's overflow-x:hidden cut them off -- 15px of the
+   overview panels, 10px of the Send and Options fields. The padding goes on
+   the article, never on .content: .content also holds the 60px header, and
+   padding there moves the header off the window edge and leaves a dead band
+   down the side. */
+@media (max-width: 767px) {
+    .content > article,
+    .content > .container-fluid > article {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
 }
 
 
