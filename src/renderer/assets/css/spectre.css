@@ -1322,31 +1322,66 @@ body.fixed-header {
 }
 
 
-/* Bootstrap splits .col-md-* into columns from 992px of *viewport* width, but
-   the pinned sidebar is 250px of that and is not part of the content area. At
-   1024px the two overview panels end up sharing 769px and the balance labels
-   truncate to "AVAILAB...". 1250 = 250 sidebar + 1000 content, the point where
-   a panel is wide enough for a label column plus two amount columns.
-   Not higher: stacking at 1366 makes the overview 1125px tall and the window
-   scrolls vertically, which is worse than a tight fit. The rule below is what
-   keeps the figures readable at the tight end. */
-@media (max-width: 1250px) {
-    body.menu-pin .content .row > [class*="col-md-"] {
+/* The two-column overview, kept side by side well below where Bootstrap would
+   give up on it. Bootstrap floats .col-md-* only from 992px of *viewport*
+   width, but the sidebar is part of that viewport and not part of the content
+   area, so the grid's idea of "enough room" is wrong in both directions here.
+   What the columns actually need is content width, and the sidebar decides how
+   much of the window is left: 250px pinned, 40px as the icon rail. The rail
+   takes over at 1024 (MENU_PIN_MIN_WIDTH in framework.js), which hands back
+   210px and carries the two columns down to 814. Below that they stack. */
+@media (min-width: 814px) and (max-width: 991px) {
+    .content .row > .col-md-6 {
+        width: 50%;
+        float: left;
+    }
+}
+@media (max-width: 813px) {
+    .content .row > [class*="col-md-"] {
         width: 100%;
         float: none;
     }
 }
 
+/* Three money columns in half of a narrow window is the tightest fit in the
+   UI, so the balance table gets its own sizing instead of the theme's.
+   table-layout:auto instead of the theme's fixed: fixed splits the panel into
+   three equal columns, and an equal third is not what these columns need -- at
+   a 1024px window it left the label column 72px for text that wants 98 and
+   printed "UNCONF...". Auto gives the labels exactly their width and hands the
+   remainder to the figures. The cell padding comes down from 20px for the same
+   reason. */
+#balances {
+    table-layout: auto;
+}
+#balances th,
+#balances td {
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
 /* `td { text-overflow: ellipsis }` at the top of this file is right for
-   addresses and labels, but it also applies to the balance figures, and a
-   large balance would render as "1,234,567.89012...". The breakpoint above
-   keeps the panel wide enough; this makes truncation impossible regardless. */
-#balances td:not(:first-child),
-#balances th:not(:first-child),
+   addresses and labels, but not here: a balance would render as
+   "1,234,567.89012..." and a row label as "UNCONF...", and both have to be
+   read in full. */
+#balances th,
+#balances td,
 .total-balance {
     overflow: visible;
     text-overflow: clip;
+}
+#balances th,
+#balances td:first-child,
+.total-balance {
     white-space: nowrap;
+}
+/* The figures are the one thing that may still run out of room, at a 1024px
+   window with the sidebar open and a balance of five figures or more. They
+   wrap to a second line there: with nowrap they would print over the next
+   column instead, and truncating is not an option for money. */
+#balances td:not(:first-child) {
+    white-space: normal;
+    word-break: break-word;
 }
 
 
@@ -1406,4 +1441,61 @@ article .panel-body > .row {
    scrollbar 10px wide at the 640px window minimum. */
 body:not(.menu-pin) .page-container > .page-content-wrapper > .content {
     padding-right: 15px;
+}
+
+
+/* Type scale. Everything above is sized in fixed px, which reads correctly up
+   to about a 1600px window and then stops keeping up -- at 2560 the balance
+   panel is 1103px wide and still carries 12px figures. Two steps up, and only
+   upward: a narrow window already has the smallest comfortable text, so
+   nothing below 1600 moves. The theme's own table-cell steps at 1001 and 1401
+   stay as they are; these continue the same progression. */
+@media (min-width: 1600px) {
+    body {
+        font-size: 14px;
+    }
+    .btn {
+        font-size: 15px;
+    }
+    /* The theme gives the label 65% of the 250px item and ellipsis for the
+       rest, which at 15px clips "Wallet Encryption". Widen it; the icon and
+       arrow to its right need about 70px. */
+    .page-sidebar .sidebar-menu .menu-items > li > a > .title {
+        font-size: 15px;
+        width: 68%;
+    }
+    .panel .panel-heading .panel-title {
+        font-size: 13px;
+    }
+    .table thead tr th {
+        font-size: 14px;
+    }
+    .table tbody tr td,
+    #overview .table tbody tr td,
+    #overview .table tbody tr td * {
+        font-size: 13px;
+    }
+}
+@media (min-width: 2000px) {
+    body {
+        font-size: 15px;
+    }
+    .btn {
+        font-size: 16px;
+    }
+    .page-sidebar .sidebar-menu .menu-items > li > a > .title {
+        font-size: 16px;
+        width: 72%;
+    }
+    .panel .panel-heading .panel-title {
+        font-size: 14px;
+    }
+    .table thead tr th {
+        font-size: 15px;
+    }
+    .table tbody tr td,
+    #overview .table tbody tr td,
+    #overview .table tbody tr td * {
+        font-size: 14px;
+    }
 }

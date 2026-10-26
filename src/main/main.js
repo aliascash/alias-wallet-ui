@@ -101,7 +101,7 @@ const initialUriArg = process.argv.find((a) => typeof a === 'string' && a.starts
 // the user's last size/position, and the zoom override (0 = follow the display).
 const settings = new Store({
   name: 'config',
-  defaults: { mainBounds: { width: 1280, height: 720 }, mainZoom: 0 },
+  defaults: { mainBounds: { width: 1280, height: 760 }, mainZoom: 0 },
 });
 
 // The daemon's traditional port, but only a preference. Anything on the
@@ -1200,12 +1200,13 @@ function fitToWorkArea(win) {
   });
 }
 
-// v4.4.0's 1280x720 content area, kept as the preferred size.
-const DEFAULT_BOUNDS = { width: 1280, height: 720 };
+// Comfortable room for the default layout -- sidebar open, two panel columns
+// -- which holds down to a 1024px window. Below that the sidebar collapses to
+// its icon rail, and below 814 the columns stack. See MENU_PIN_MIN_WIDTH in
+// framework.js.
+const DEFAULT_BOUNDS = { width: 1280, height: 760 };
 
 function createMainWindow() {
-  // Match the original ALIAS v4.4.0 client window: ~1280×720 content area
-  // (1296×759 outer with Windows chrome — 16:9).
   let saved = settings.get('mainBounds') || { ...DEFAULT_BOUNDS };
   // Validate saved bounds against current displays — a window restored from
   // a different monitor layout can end up off-screen, looking like the app
@@ -1218,9 +1219,12 @@ function createMainWindow() {
         && saved.y + 20 < r.y + r.height
         && saved.y + 20 > r.y;
   });
-  if (!onScreen) saved = { width: saved.width || 1280, height: saved.height || 720 };
+  if (!onScreen) saved = { width: saved.width || DEFAULT_BOUNDS.width,
+                           height: saved.height || DEFAULT_BOUNDS.height };
 
-  // Keep the default inside the work area -- see fitSize().
+  // Keep the default inside the work area. Clamp each side on its own
+  // rather than scaling both: the layout steps down by width, so giving up
+  // width that the screen actually has would cost the pinned sidebar.
   // Only when the user has never moved or resized the window: a size they
   // chose themselves is theirs to keep. (settings has a `defaults` entry for
   // mainBounds, so get() always returns a value and the stored default is
@@ -1229,8 +1233,9 @@ function createMainWindow() {
                  && saved.height === DEFAULT_BOUNDS.height
                  && !Number.isFinite(saved.x) && !Number.isFinite(saved.y);
   if (untouched) {
-    const fit = fitSize(DEFAULT_BOUNDS.width, DEFAULT_BOUNDS.height);
-    saved = { width: fit.width, height: fit.height };
+    const area = screen.getPrimaryDisplay().workArea;
+    saved = { width:  Math.min(DEFAULT_BOUNDS.width,  area.width),
+              height: Math.min(DEFAULT_BOUNDS.height, area.height) };
   }
   mainWindow = new BrowserWindow({
     width:  saved.width,

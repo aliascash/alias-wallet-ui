@@ -548,13 +548,13 @@ $(function () {
         //    started with the sidebar collapsed to icons however big the
         //    window was -- it only corrected itself once the user dragged the
         //    frame. Hence "not compensated from the start".
-        // 2. The threshold was Bootstrap's `.visible-lg`, i.e. 1200 CSS px.
-        //    CSS pixels shrink under display scaling: at 150% a 1536 physical
-        //    px window is 1024 CSS px, so 1200 is unreachable on a 1080p
-        //    screen and the sidebar could never pin. 900 is the width at which
-        //    the 250 px sidebar plus a usable content area still fits; below it the
-        //    Bootstrap grid stacks the panels, so nothing is squeezed.
-        var MENU_PIN_MIN_WIDTH = 900;
+        // 2. The threshold was Bootstrap's `.visible-lg`, i.e. 1200 CSS px,
+        //    picked for no reason that applies here. 1024 is the smallest
+        //    window the default layout has to hold at -- sidebar open, two
+        //    panel columns -- so that is the threshold. Below it the sidebar
+        //    gives up its 210 px for the icon rail, which is what keeps the
+        //    two columns alive down to 814 (see spectre.css).
+        var MENU_PIN_MIN_WIDTH = 1024;
 
         function applySidebarPin() {
             if ($(window).width() >= MENU_PIN_MIN_WIDTH) {
