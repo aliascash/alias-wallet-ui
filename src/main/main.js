@@ -101,7 +101,7 @@ const initialUriArg = process.argv.find((a) => typeof a === 'string' && a.starts
 // the user's last size/position, and the zoom override (0 = follow the display).
 const settings = new Store({
   name: 'config',
-  defaults: { mainBounds: { width: 1280, height: 760 }, mainZoom: 0 },
+  defaults: { mainBounds: { width: 1024, height: 680 }, mainZoom: 0 },
 });
 
 // The daemon's traditional port, but only a preference. Anything on the
@@ -1200,11 +1200,11 @@ function fitToWorkArea(win) {
   });
 }
 
-// Comfortable room for the default layout -- sidebar open, two panel columns
-// -- which holds down to a 1024px window. Below that the sidebar collapses to
-// its icon rail, and below 814 the columns stack. See MENU_PIN_MIN_WIDTH in
-// framework.js.
-const DEFAULT_BOUNDS = { width: 1280, height: 760 };
+// The smallest window that still shows the default layout -- sidebar open,
+// two panel columns. 1024 is exactly MENU_PIN_MIN_WIDTH in framework.js:
+// one pixel less and the sidebar collapses to its icon rail, and below 814
+// the columns stack. Keep this value and that one in step.
+const DEFAULT_BOUNDS = { width: 1024, height: 680 };
 
 function createMainWindow() {
   let saved = settings.get('mainBounds') || { ...DEFAULT_BOUNDS };
