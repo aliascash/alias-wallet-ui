@@ -101,7 +101,7 @@ const initialUriArg = process.argv.find((a) => typeof a === 'string' && a.starts
 // the user's last size/position, and the zoom override (0 = follow the display).
 const settings = new Store({
   name: 'config',
-  defaults: { mainBounds: { width: 1024, height: 680 }, mainZoom: 0 },
+  defaults: { mainBounds: { width: 1024, height: 624 }, mainZoom: 0 },
 });
 
 // The daemon's traditional port, but only a preference. Anything on the
@@ -391,6 +391,14 @@ function tailDaemonLogToSplash(logPath) {
       [/Verifying last (\d+) blocks at level/i, m => 'Validating last ' + m[1] + ' block...'],  // main.cpp Verify + matches init.cpp:847 wording
       [/Loading wallet/i,                'Loading wallet...'],                 // init.cpp:905
       [/Rescanning last (\d+) blocks \(from block (\d+)\)/i, m => 'Rescanning last ' + m[1] + ' blocks (from block ' + m[2] + ')...'],   // daemon's own wording
+      // Emitted every 10,000 blocks by the rescan callback (init.cpp). Keep
+      // this after the line above: that one fires once, this one replaces it
+      // as soon as the scan starts moving, so the splash stops looking stuck.
+      [/Rescan progress: (\d+) \/ (\d+) \((\d+) txns\)/i, (m) => {
+        const done = Number(m[1]), total = Number(m[2]);
+        const pct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
+        return `Rescanning... ${done.toLocaleString()} / ${total.toLocaleString()} (${pct}%, ${Number(m[3]).toLocaleString()} txns)`;
+      }],
       [/Done loading/i,                  'Core started!'],                     // init.cpp:1075 InitMessage; debug.log has "Done loading"
     ];
     for (const line of chunk.split(/\r?\n/)) {
@@ -1187,24 +1195,49 @@ function resetMainZoom() {
 // it hangs off the bottom and the lower edge (buttons, status bar) is
 // unreachable. Called after creation because only then are the frame
 // dimensions known, and getBounds() is the outer rect.
+//
+// Position is clamped as well as size, and that is the common case: a window
+// small enough to fit can still sit half off the right or bottom edge, after
+// the screen it was saved on got smaller or the scaling went up. Comparing
+// all four values rather than returning early on size keeps that from being
+// missed, and keeps setBounds out of the usual launch where nothing moves.
 function fitToWorkArea(win) {
   const area = screen.getDisplayMatching(win.getBounds()).workArea;
   const b = win.getBounds();
   const width  = Math.min(b.width,  area.width);
   const height = Math.min(b.height, area.height);
-  if (width === b.width && height === b.height) return;
-  win.setBounds({
-    width, height,
-    x: Math.max(area.x, Math.min(b.x, area.x + area.width  - width)),
-    y: Math.max(area.y, Math.min(b.y, area.y + area.height - height)),
-  });
+  const x = Math.max(area.x, Math.min(b.x, area.x + area.width  - width));
+  const y = Math.max(area.y, Math.min(b.y, area.y + area.height - height));
+  if (width === b.width && height === b.height && x === b.x && y === b.y) return;
+  win.setBounds({ width, height, x, y });
 }
 
-// The smallest window that still shows the default layout -- sidebar open,
-// two panel columns. 1024 is exactly MENU_PIN_MIN_WIDTH in framework.js:
-// one pixel less and the sidebar collapses to its icon rail, and below 814
-// the columns stack. Keep this value and that one in step.
-const DEFAULT_BOUNDS = { width: 1024, height: 680 };
+// The size we restore is the content size (the window is built with
+// useContentSize), but x/y in the BrowserWindow options are the OUTER window
+// position -- useContentSize does not apply to them. Saving getContentBounds()
+// whole mixed the two: its y is lower than the window's by the title bar, so
+// each close/reopen pushed the window down by that much, ~31px a launch on
+// Windows, until it walked off the bottom of the screen.
+function saveMainBounds() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  const outer = mainWindow.getBounds();
+  const content = mainWindow.getContentBounds();
+  settings.set('mainBounds', { x: outer.x, y: outer.y,
+                               width: content.width, height: content.height });
+}
+
+// The smallest window that still shows the default layout whole. 1024 is
+// exactly MENU_PIN_MIN_WIDTH in framework.js: one pixel less and the sidebar
+// collapses to its icon rail, and below 814 the columns stack. Keep this
+// value and that one in step.
+//
+// 624 is where the overview stops scrolling -- measured at 621, rounded up.
+// The height matters most at 150% Windows scaling, where a 1080p screen is
+// only 680 DIP of work area: 760 and 680 both clamped to it and gave a
+// full-height window, which is what users reported as "it fills the screen".
+// 624 leaves a margin there and still fits the content. Options is the one
+// page that scrolls at any size -- it is 1178 tall on its own.
+const DEFAULT_BOUNDS = { width: 1024, height: 624 };
 
 function createMainWindow() {
   let saved = settings.get('mainBounds') || { ...DEFAULT_BOUNDS };
@@ -1290,10 +1323,7 @@ function createMainWindow() {
   // minimize-on-close is set, the X button quits. Otherwise X just hides
   // (the tray icon is the way back).
   mainWindow.on('close', (e) => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      const b = mainWindow.getContentBounds();
-      settings.set('mainBounds', b);
-    }
+    saveMainBounds();
     const opts = settings.get('options') || {};
     const wantsHide = process.platform !== 'darwin'
                    && (opts.MinimizeToTray || opts.MinimizeOnClose)
@@ -1703,7 +1733,7 @@ app.on('window-all-closed', () => {
 app.on('before-quit', (e) => {
   app.isQuiting = true;  // unblock the close-event minimize-to-tray hold
   if (mainWindow && !mainWindow.isDestroyed()) {
-    try { settings.set('mainBounds', mainWindow.getContentBounds()); } catch (_) {}
+    try { saveMainBounds(); } catch (_) {}
   }
   if (trayIcon) { try { trayIcon.destroy(); } catch (_) {} trayIcon = null; }
   // Force-destroy every BrowserWindow so a lingering hidden child (debug,
