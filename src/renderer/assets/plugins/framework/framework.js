@@ -549,12 +549,18 @@ $(function () {
         //    window was -- it only corrected itself once the user dragged the
         //    frame. Hence "not compensated from the start".
         // 2. The threshold was Bootstrap's `.visible-lg`, i.e. 1200 CSS px,
-        //    picked for no reason that applies here. 1024 is the smallest
-        //    window the default layout has to hold at -- sidebar open, two
-        //    panel columns -- so that is the threshold. Below it the sidebar
-        //    gives up its 210 px for the icon rail, which is what keeps the
-        //    two columns alive down to 814 (see spectre.css).
-        var MENU_PIN_MIN_WIDTH = 1024;
+        //    picked for no reason that applies here. Below the threshold the
+        //    sidebar gives up its 210 px for the icon rail, which is what
+        //    keeps the two columns alive down to 814 (see spectre.css).
+        //
+        //    1000, not the 1024 the window opens at. Equal values put the
+        //    default window exactly on the boundary, so anything costing a
+        //    single pixel -- a zoom step, DPI rounding, a frame clamped to the
+        //    work area -- unpinned the sidebar, and the layout looked like it
+        //    broke at random. 1000 leaves 24 px of slack and still sits above
+        //    the real floor: Bootstrap floats .col-md-6 from 992, and below
+        //    that a pinned sidebar would mean one column.
+        var MENU_PIN_MIN_WIDTH = 1000;
 
         function applySidebarPin() {
             if ($(window).width() >= MENU_PIN_MIN_WIDTH) {
@@ -575,8 +581,15 @@ $(function () {
             var fullDateString = new Date();
             applySidebarPin();
             $(window).resize(function () {
+                waitForFinalEvent(applySidebarPin, 200, fullDateString.getTime());
+            });
+            // A resize that lands while the window is hidden -- minimized, or
+            // sent to the tray -- used to be dropped, and nothing recomputed
+            // the pin on the way back, so the sidebar stayed in whichever
+            // state it had before. Recheck whenever the page becomes visible.
+            document.addEventListener('visibilitychange', function () {
                 if (!document.hidden) {
-                    waitForFinalEvent(applySidebarPin, 200, fullDateString.getTime());
+                    applySidebarPin();
                 }
             });
         });
