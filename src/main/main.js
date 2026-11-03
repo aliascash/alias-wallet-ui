@@ -295,36 +295,29 @@ function migrateLegacyDataDir() {
   const legacyMtime    = fs.statSync(legacyWallet).mtimeMs;
   const canonicalMtime = fs.existsSync(canonicalWallet) ? fs.statSync(canonicalWallet).mtimeMs : 0;
   if (canonicalMtime >= legacyMtime) return;  // canonical is already newer; user already migrated
-  // Back up older canonical (if any), then rename legacy into place.
-  if (fs.existsSync(canonical)) {
-    // Except when the only thing in it is our own `ui` folder: UI_STATE_DIR is
-    // created at module load, long before this runs, so the destination always
-    // exists and every single upgrade used to leave a .bak- directory holding
-    // nothing but that. Set it aside, move the real data in, put it back.
-    const leftovers = fs.readdirSync(canonical).filter((f) => f !== 'ui');
-    if (leftovers.length === 0) {
-      const uiDir = path.join(canonical, 'ui');
-      const parked = canonical + '.ui-' + Date.now();
-      const hadUi = fs.existsSync(uiDir);
-      if (hadUi) fs.renameSync(uiDir, parked);
-      fs.rmSync(canonical, { recursive: true, force: true });
-      fs.renameSync(legacy, canonical);
-      if (hadUi) {
-        // A 4.4.x folder has no `ui` of its own; if some older build left one,
-        // ours wins -- it already carries the settings copied at startup.
-        fs.rmSync(path.join(canonical, 'ui'), { recursive: true, force: true });
-        fs.renameSync(parked, path.join(canonical, 'ui'));
-      }
-      console.log('[migrate] moved active data dir', legacy, '->', canonical);
-      return;
-    }
-    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const backup = canonical + '.bak-' + stamp;
-    fs.renameSync(canonical, backup);
-    console.log('[migrate] backed up older canonical data dir to', backup);
+  // Move the CONTENTS across, one entry at a time, instead of renaming the
+  // directory. The destination already exists and holds `ui`, which is this
+  // process's own userData: UI_STATE_DIR is set at module load and
+  // requestSingleInstanceLock() opens a lock file inside it. Windows refuses
+  // to rename a directory that holds open handles, so renaming either the
+  // destination or its `ui` threw EPERM there and killed startup before any
+  // window appeared -- while Linux allowed it, which is why it only ever
+  // showed up on Windows. Per-entry moves never touch `ui`.
+  fs.mkdirSync(canonical, { recursive: true });
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  for (const entry of fs.readdirSync(legacy)) {
+    const from = path.join(legacy, entry);
+    const to   = path.join(canonical, entry);
+    // Something already there under the same name is older data, since the
+    // wallet.dat check above proved the legacy copy is the newer one. Keep
+    // it beside the new one rather than overwriting.
+    if (fs.existsSync(to)) fs.renameSync(to, `${to}.bak-${stamp}`);
+    fs.renameSync(from, to);
   }
-  fs.renameSync(legacy, canonical);
-  console.log('[migrate] moved active data dir', legacy, '->', canonical);
+  // Only succeeds once the directory is empty, which is what we want: if
+  // anything was left behind, it stays visible rather than being deleted.
+  try { fs.rmdirSync(legacy); } catch (_) {}
+  console.log('[migrate] moved wallet data', legacy, '->', canonical);
 }
 
 function startDaemon() {
