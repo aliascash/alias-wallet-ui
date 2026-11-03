@@ -45,10 +45,13 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 VersionInfoVersion={#MyAppVersion}
 
-; Offer "for all users" vs "for me only" instead of forcing one. {autopf} and
-; {autoappdata} then resolve per that choice, so one script covers both.
+; Per-user only, as 4.4.x was. Offering "for all users" put the data dir in
+; C:\ProgramData\ALIAS, which every account on the machine then shares: the
+; first user to launch migrated their 4.4.x wallet in, and the next one opened
+; the app to someone else's wallet. It also crosses from a private folder to a
+; shared one, which the migration's rename cannot do across volumes. Without
+; the override {autopf} and {autoappdata} always resolve per-user.
 PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
 DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
 UninstallDisplayIcon={app}\{#MyAppExeName}
@@ -117,9 +120,9 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}
 //var
 //  DownloadPage: TDownloadWizardPage;
 
-// The data directory follows the install scope: %APPDATA%\ALIAS for a
-// per-user install, C:\ProgramData\ALIAS for all users. {autoappdata} already
-// resolves that way, so the app and the installer agree without a second rule.
+// %APPDATA%\ALIAS. The install is per-user only, so {autoappdata} always
+// resolves there, and it matches what main.js falls back to when datadir.txt
+// is missing -- the app and the installer agree without a second rule.
 function DataDir(): String;
 begin
   Result := ExpandConstant('{autoappdata}\{#MyAppName}');
