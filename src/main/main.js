@@ -862,7 +862,18 @@ ipcMain.handle('alias:open-debug', () => {
 
 ipcMain.handle('alias:open-debug-log', async () => {
   const logPath = path.join(getDataDir(), 'debug.log');
-  if (fs.existsSync(logPath)) await shell.openPath(logPath);
+  if (!fs.existsSync(logPath)) {
+    dialog.showErrorBox('No log yet',
+      'The daemon has not written ' + logPath + ' yet.');
+    return;
+  }
+  // openPath hands the file to whatever is registered for .log, and a clean
+  // Windows has nothing: the user just gets "This file does not have an app
+  // associated with it". It reports that as a returned string instead of
+  // throwing, so fall back to revealing the file in the file manager, which
+  // needs no association.
+  const err = await shell.openPath(logPath);
+  if (err) shell.showItemInFolder(logPath);
 });
 
 // Coin Control — UTXO list. Read-only v1; selection not yet wired into sendCoins.
