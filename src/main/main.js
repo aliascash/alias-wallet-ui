@@ -18,48 +18,67 @@ const skipSetup  = process.argv.includes('--skip-wizard'); // dev: skip wizard e
 
 // ---------- where our own state lives ----------
 //
-// Electron derives userData from package.json `name` -- `productName` is set
-// only inside the electron-builder `build` block, which Electron never reads --
-// so the install produced a THIRD top-level folder,
-// %APPDATA%\alias-wallet-desktop, beside the program and the wallet data.
-// Put our state inside the wallet's own directory instead, under `ui/` so
-// Chromium's caches do not end up among wallet.dat and the chain files.
+// Electron's userData (window size, zoom, Options, Chromium caches, the
+// single-instance lock) goes in the platform's place for app state, apart from
+// the wallet data:
+//   Windows  %LOCALAPPDATA%\ALIAS             (wallet: %APPDATA%\ALIAS)
+//   macOS    Application Support/cash.alias.wallet  (wallet: .../ALIAS)
+//   Linux    ~/.config/ALIAS                  (wallet: ~/.alias)
+// It used to sit inside the wallet folder as `ui/`, which meant that folder
+// existed, with files held open, before the 4.4.x data could be migrated into
+// it -- Windows then refused the move. Left to itself Electron would name the
+// folder after package.json `name` (alias-wallet-desktop), since it never
+// reads the electron-builder productName. On macOS the bundle ID names it,
+// because ALIAS there is already the wallet folder.
 //
 // This has to run before requestSingleInstanceLock() below: the lock writes
 // SingletonCookie/Lock/Socket into whatever userData points at when it is
-// taken, which would recreate the folder we are trying to be rid of.
+// taken.
 let cachedDataDir = null;
-const UI_STATE_DIR = path.join(getDataDir(), 'ui');
-// Everything Electron and electron-store write under userData, so we can tell
-// an abandoned state folder from one holding something we did not create.
+function uiStateDir() {
+  if (process.platform === 'win32') {
+    return path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'ALIAS');
+  }
+  if (process.platform === 'darwin') return path.join(app.getPath('appData'), 'cash.alias.wallet');
+  return path.join(app.getPath('appData'), 'ALIAS');
+}
+const UI_STATE_DIR = uiStateDir();
+// Everything Electron, electron-store and our log write under userData, so we
+// can tell an abandoned state folder from one holding something we did not
+// create.
 const KNOWN_STATE_FILES = new Set([
   'config.json', 'Cache', 'Code Cache', 'Crashpad', 'DawnGraphiteCache',
   'DawnWebGPUCache', 'Dictionaries', 'GPUCache', 'Local Storage',
   'Network Persistent State', 'Session Storage', 'Shared Dictionary',
   'SharedStorage', 'blob_storage', 'Preferences', 'Local State',
   'SingletonCookie', 'SingletonLock', 'SingletonSocket',
+  'Trust Tokens', 'Trust Tokens-journal', 'main.log', 'main.log.1',
 ]);
 try {
   fs.mkdirSync(UI_STATE_DIR, { recursive: true });
-  // Build the old path by hand rather than reading app.getPath('userData'):
-  // that getter creates the directory as a side effect, which is the very
-  // folder we are trying to stop appearing.
-  const legacyDir = path.join(app.getPath('appData'), app.getName());
   app.setPath('userData', UI_STATE_DIR);
-  // Carry the old settings over once, so window size, zoom and Options are not
-  // reset for anyone upgrading.
-  const legacyConf = path.join(legacyDir, 'config.json');
-  const movedConf  = path.join(UI_STATE_DIR, 'config.json');
-  if (fs.existsSync(legacyConf) && !fs.existsSync(movedConf)) fs.copyFileSync(legacyConf, movedConf);
-  // An upgrade leaves the old folder behind and the uninstaller does not know
-  // about it. Clear it out, but only once everything in it is ours -- the
-  // directory is named after the app, yet nothing guarantees we put it there.
-  if (fs.existsSync(legacyDir)
-      && fs.readdirSync(legacyDir).every((f) => KNOWN_STATE_FILES.has(f))) {
-    fs.rmSync(legacyDir, { recursive: true, force: true });
-  }
 } catch (e) {
   console.warn('[startup] could not relocate userData:', e.message);
+}
+// Where earlier builds kept it: `ui/` inside the wallet folder, and before
+// that alias-wallet-desktop. Built by hand, because app.getPath('userData')
+// creates the directory as a side effect. Carry the settings over once, so
+// window size, zoom and Options survive the upgrade, then clear the old
+// folder -- but only when everything in it is ours.
+for (const oldDir of [path.join(getDataDir(), 'ui'),
+                      path.join(app.getPath('appData'), app.getName())]) {
+  try {
+    if (!fs.existsSync(oldDir) || oldDir === UI_STATE_DIR) continue;
+    const oldConf = path.join(oldDir, 'config.json');
+    const newConf = path.join(UI_STATE_DIR, 'config.json');
+    if (fs.existsSync(oldConf) && !fs.existsSync(newConf)) fs.copyFileSync(oldConf, newConf);
+    if (fs.readdirSync(oldDir).every((f) => KNOWN_STATE_FILES.has(f))) {
+      fs.rmSync(oldDir, { recursive: true, force: true });
+    }
+  } catch (e) {
+    // An old 5.1.0 still running holds its files open; the next launch retries.
+    console.warn('[startup] could not clear old state folder', oldDir, e.message);
+  }
 }
 
 // ---------- log file ----------
@@ -296,13 +315,10 @@ function migrateLegacyDataDir() {
   const canonicalMtime = fs.existsSync(canonicalWallet) ? fs.statSync(canonicalWallet).mtimeMs : 0;
   if (canonicalMtime >= legacyMtime) return;  // canonical is already newer; user already migrated
   // Move the CONTENTS across, one entry at a time, instead of renaming the
-  // directory. The destination already exists and holds `ui`, which is this
-  // process's own userData: UI_STATE_DIR is set at module load and
-  // requestSingleInstanceLock() opens a lock file inside it. Windows refuses
-  // to rename a directory that holds open handles, so renaming either the
-  // destination or its `ui` threw EPERM there and killed startup before any
-  // window appeared -- while Linux allowed it, which is why it only ever
-  // showed up on Windows. Per-entry moves never touch `ui`.
+  // directory. The destination may already exist -- a 5.1.0 that ran before,
+  // or an old build that kept its `ui/` state there and still has files open
+  // in it, which made Windows refuse a directory rename with EPERM and killed
+  // startup. Per-entry moves leave whatever is already there in place.
   fs.mkdirSync(canonical, { recursive: true });
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   for (const entry of fs.readdirSync(legacy)) {
