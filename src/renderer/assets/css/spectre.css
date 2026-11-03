@@ -1387,6 +1387,20 @@ body.fixed-header {
     word-break: break-word;
 }
 
+/* Under ~1150 the label column is too narrow for the longest label plus the
+   help icon floated beside it, so the icon dropped to a second line and made
+   that one row ~19px taller than the others. Shrink the label rather than
+   widen the column: the figures above are the tighter fit and must not give
+   up any width -- at a 1024px window their column is 97px and a four-figure
+   balance already needs 92. The selector matches the specificity of
+   `#overview .table tbody tr td *` further up, which sets these labels to
+   13px and outranks anything scoped to #balances alone. */
+@media (max-width: 1199px) {
+    #overview .table#balances tbody tr td:first-child span {
+        font-size: 10px;
+    }
+}
+
 
 /* Fill the window height. The content area is as tall as the window, but the
    panels inside only take the height of their contents, so a maximised window
