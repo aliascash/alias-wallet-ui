@@ -1415,6 +1415,15 @@ async function collectPassphraseAtLogin() {
 }
 
 async function routeStartup() {
+  // Before isFirstLaunch(), not after. isFirstLaunch() decides by looking for
+  // wallet.dat in the CURRENT data dir, and an upgrade from 4.4.x has it in
+  // the old one until this runs -- so the check saw nothing, called it a first
+  // launch and opened the wizard, and the daemon's own startDaemon() migration
+  // landed too late to change that. The user then created a second wallet over
+  // their real one and reported their balance gone. Idempotent: it returns
+  // immediately once the legacy wallet.dat is no longer there.
+  migrateLegacyDataDir();
+
   const firstLaunch = isFirstLaunch();
 
   // Flow:
