@@ -3,6 +3,7 @@
 
 const { app, BrowserWindow, Menu, ipcMain, dialog, shell, Tray, Notification, nativeImage, screen } = require('electron');
 const path = require('path');
+const util = require('util');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const axios = require('axios');
@@ -59,6 +60,38 @@ try {
   }
 } catch (e) {
   console.warn('[startup] could not relocate userData:', e.message);
+}
+
+// ---------- log file ----------
+//
+// A packaged build has no console, so a startup that fails before the first
+// window leaves nothing to read -- a report of "tray icon, no window" could
+// not be diagnosed at all. Mirror console output to <datadir>/ui/main.log.
+// Safe to persist: nothing here prints credentials, and alias.conf and the
+// daemon's arguments are never logged.
+try {
+  const logPath = path.join(UI_STATE_DIR, 'main.log');
+  // One rotation, so a long-lived install cannot grow it without bound.
+  try {
+    if (fs.statSync(logPath).size > 2 * 1024 * 1024) fs.renameSync(logPath, logPath + '.1');
+  } catch (_) { /* no log yet */ }
+  const logStream = fs.createWriteStream(logPath, { flags: 'a' });
+  logStream.write(`\n=== ${new Date().toISOString()} ALIAS ${app.getVersion()} starting ===\n`);
+  const format = (a) => (a instanceof Error ? (a.stack || a.message)
+                       : typeof a === 'string' ? a
+                       : util.inspect(a, { depth: 2 }));
+  for (const level of ['log', 'warn', 'error']) {
+    const passThrough = console[level].bind(console);
+    console[level] = (...args) => {
+      passThrough(...args);
+      // Logging must never be the thing that breaks a launch.
+      try {
+        logStream.write(`${new Date().toISOString()} [${level}] ${args.map(format).join(' ')}\n`);
+      } catch (_) {}
+    };
+  }
+} catch (e) {
+  // Best effort only: a read-only data dir must not stop the app.
 }
 
 // ---------- single-instance lock ----------
@@ -264,6 +297,27 @@ function migrateLegacyDataDir() {
   if (canonicalMtime >= legacyMtime) return;  // canonical is already newer; user already migrated
   // Back up older canonical (if any), then rename legacy into place.
   if (fs.existsSync(canonical)) {
+    // Except when the only thing in it is our own `ui` folder: UI_STATE_DIR is
+    // created at module load, long before this runs, so the destination always
+    // exists and every single upgrade used to leave a .bak- directory holding
+    // nothing but that. Set it aside, move the real data in, put it back.
+    const leftovers = fs.readdirSync(canonical).filter((f) => f !== 'ui');
+    if (leftovers.length === 0) {
+      const uiDir = path.join(canonical, 'ui');
+      const parked = canonical + '.ui-' + Date.now();
+      const hadUi = fs.existsSync(uiDir);
+      if (hadUi) fs.renameSync(uiDir, parked);
+      fs.rmSync(canonical, { recursive: true, force: true });
+      fs.renameSync(legacy, canonical);
+      if (hadUi) {
+        // A 4.4.x folder has no `ui` of its own; if some older build left one,
+        // ours wins -- it already carries the settings copied at startup.
+        fs.rmSync(path.join(canonical, 'ui'), { recursive: true, force: true });
+        fs.renameSync(parked, path.join(canonical, 'ui'));
+      }
+      console.log('[migrate] moved active data dir', legacy, '->', canonical);
+      return;
+    }
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backup = canonical + '.bak-' + stamp;
     fs.renameSync(canonical, backup);
@@ -1422,7 +1476,18 @@ async function routeStartup() {
   // landed too late to change that. The user then created a second wallet over
   // their real one and reported their balance gone. Idempotent: it returns
   // immediately once the legacy wallet.dat is no longer there.
-  migrateLegacyDataDir();
+  // A rename can fail for reasons that have nothing to do with the wallet --
+  // the folder open in Explorer, antivirus holding a file, the two paths on
+  // different volumes. Report it and carry on with the old location rather
+  // than leaving the user with no window at all.
+  try {
+    migrateLegacyDataDir();
+  } catch (e) {
+    console.error('[migrate] failed:', e && e.stack || e);
+    dialog.showErrorBox('ALIAS could not move your wallet data',
+      'Your wallet is still in the old folder and has not been changed.\n\n'
+      + String((e && e.message) || e));
+  }
 
   const firstLaunch = isFirstLaunch();
 
@@ -1447,6 +1512,7 @@ async function routeStartup() {
     // covered by the retry in the alias:rpc handler, and the block index is
     // shown on the splash after the wizard finishes (alias:wizard-complete).
     createWizardWindow();
+    createTray();
     waitForRpcReady(5 * 60 * 1000).then((ready) => {
       if (!ready) console.error('Daemon RPC did not come up in 5 minutes on first launch.');
     });
@@ -1478,6 +1544,7 @@ async function routeStartup() {
   // On wrong passphrase, the dialog re-prompts WITHOUT re-running
   // waitForRpcReady — the daemon stays up across retries.
   startDaemon();
+  createTray();
 
   let daemonReady = false;
   while (true) {
@@ -1686,7 +1753,12 @@ app.whenReady().then(async () => {
     // window we create below; here we just hide it on the main one when
     // it's created.
   }
-  createTray();
+  // createTray() deliberately does NOT run here. It used to, so the icon
+  // appeared seconds before any window and stayed on its own whenever
+  // startup failed later -- and a tray with no window is inert, because
+  // every item in it starts with `if (!mainWindow) return`. It is created
+  // by routeStartup instead, next to the first window.
+  //
   // Before anything else, and before writeAliasConf() replaces the conf that
   // holds its credentials.
   await stopOrphanedDaemon(getDataDir());
@@ -1695,7 +1767,15 @@ app.whenReady().then(async () => {
     console.warn(`[startup] RPC port ${RPC_PORT} is in use by another program; using ${port}`);
     RPC_PORT = port;
   }
-  return routeStartup();
+  return routeStartup().catch((e) => {
+    // Without this the rejection only reached the unhandledRejection logger,
+    // and a packaged build has no console: the app sat there with no window
+    // and no way to find out why.
+    console.error('[startup] failed:', e && e.stack || e);
+    dialog.showErrorBox('ALIAS could not start',
+      String((e && e.message) || e) + '\n\nThe application will close.');
+    app.quit();
+  });
 });
 // Graceful daemon shutdown: prefer the JSON-RPC 'stop' command (lets the
 // daemon flush wallet.dat + block index), wait up to 8s for the process to
