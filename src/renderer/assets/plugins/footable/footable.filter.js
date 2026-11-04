@@ -15,7 +15,9 @@
                     filter = $table.data('current-filter').toUpperCase(),
                     text = $t.find('td').text();
                 if (!$table.data('filter-text-only')) {
-                    $t.find('td[data-value]').each(function () {
+                    // children(), not find(): on a row with an id, jQuery's find()
+                    // queries the whole document, minutes on ~20k rows.
+                    $t.children('td[data-value]').each(function () {
                         text += $(this).data('value');
                     });
                 }
@@ -121,16 +123,20 @@
             var ft = p.footable,
                 $table = $(ft.table);
 
-            $table.find('> tbody > tr:not(.footable-row-detail)').removeClass('footable-filtered').each(function () {
-                p.showRow(this, ft);
-            });
+            var $rows = $table.find('> tbody > tr:not(.footable-row-detail)').removeClass('footable-filtered');
+            // Detail rows only exist at a breakpoint; otherwise show all at once
+            // instead of one style recalculation per row.
+            if ($table.hasClass('breakpoint')) $rows.each(function () { p.showRow(this, ft); });
+            else $rows.show();
             $table.removeData('filter-string');
             ft.raise('footable_filtered', { clear: true });
         };
 
         p.showRow = function (row, ft) {
             var $row = $(row), $next = $row.next(), $table = $(ft.table);
-            if ($row.is(':visible')) return; //already visible - do nothing
+            // Rows are hidden with .hide(), so the inline style says enough.
+            // :visible forced a page layout per row, minutes on ~20k rows.
+            if (row.style.display !== 'none') return; //already visible - do nothing
             if ($table.hasClass('breakpoint') && $row.hasClass('footable-detail-show') && $next.hasClass('footable-row-detail')) {
                 $row.add($next).show();
                 ft.createOrUpdateDetailRow(row);

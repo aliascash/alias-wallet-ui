@@ -661,12 +661,13 @@
             // for styling if the first or last column is hidden (which won't work using :first-child or :last-child)
             $table.find('> thead > tr > th.footable-last-column, > tbody > tr > td.footable-last-column').removeClass('footable-last-column');
             $table.find('> thead > tr > th.footable-first-column, > tbody > tr > td.footable-first-column').removeClass('footable-first-column');
-            $table.find('> thead > tr, > tbody > tr')
-                .find('> th.footable-visible:last, > td.footable-visible:last')
-                .addClass('footable-last-column')
-                .end()
-                .find('> th.footable-visible:first, > td.footable-visible:first')
-                .addClass('footable-first-column');
+            // Per row: one :first/:last query over all rows made jQuery sort
+            // every matched cell, which took minutes on ~20k address rows.
+            $table.find('> thead > tr, > tbody > tr').each(function () {
+                var $visible = $(this).children('.footable-visible');
+                $visible.last().addClass('footable-last-column');
+                $visible.first().addClass('footable-first-column');
+            });
 
             ft.raise(evt.redrawn);
         };

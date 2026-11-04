@@ -385,35 +385,59 @@ function appendAddresses(err) {
     }
     err = JSON.parse(err.replace(/,\]$/, "]"));
   }
+  // New rows are collected and inserted once per table. Inserting them one at
+  // a time made each insert cost more as the table grew, and a wallet with
+  // ~24k addresses froze the window for minutes.
+  var rows = { "#receive": [], "#addressbook": [] };
+  var lookupRows = [];
+  var options = [];
+  var added = {};
   err.forEach(function(item) {
-    var revisionCheckbox = $("#" + item.address);
+    var isNew = !added[item.address] && null === document.getElementById(item.address);
     var target = "S" == item.type ? "#addressbook" : "#receive";
     if ("R" == item.type) {
       if (sendPage.initSendBalance(item)) {
         if (item.address.length < 75) {
-          if (0 == revisionCheckbox.length) {
-            $("#message-from-address").append("<option title='" + item.address + "' value='" + item.address + "'>" + item.label + "</option>");
+          if (isNew) {
+            options.push("<option title='" + item.address + "' value='" + item.address + "'>" + item.label + "</option>");
           } else {
             $("#message-from-address option[value=" + item.address + "]").text(item.label);
           }
         }
       }
     }
-    var param = "S" == item.type;
-    var common = "n/a" !== item.pubkey;
-    if (0 == revisionCheckbox.length) {
-      $(target + " .footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "'> <td data-toggle=true></td>     <td>           <span class='label2 editable' data-value='" + item.label_value + "'>" + item.label + "</span> </td>                <td class='address'>" + item.address + "</td>                 <td class='pubkey'>" + item.pubkey + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? TYPE_PRIVATE : TYPE_PUBLIC) + "</td></tr>");
-      $("#address-lookup-table.footable tbody").append("<tr id='" + item.address + "' lbl='" + item.label + "' class='addressType"+ item.type +"'> <td data-toggle=true></td>                 <td><span class='label2' data-value='" + item.label_value + "'>" + item.label + "</span></td>                 <td class='address'>" + item.address + "</td>                 <td class='addresstype'>" + (4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? TYPE_PRIVATE : TYPE_PUBLIC) + "</td></tr>");
-      $(target + " #" + item.address).selection("tr").find(".editable").on("dblclick", function(event) {
-        event.stopPropagation();
-        updateValue($(this));
-      }).attr("data-title", "Double click to edit").tooltip();
+    if (isNew) {
+      added[item.address] = true;
+      var type = 4 == item.at ? "Group" : 3 == item.at ? "BIP32" : 2 == item.at ? TYPE_PRIVATE : TYPE_PUBLIC;
+      rows[target].push("<tr id='" + item.address + "' lbl='" + item.label + "'> <td data-toggle=true></td>     <td>           <span class='label2 editable' data-value='" + item.label_value + "'>" + item.label + "</span> </td>                <td class='address'>" + item.address + "</td>                 <td class='pubkey'>" + item.pubkey + "</td>                 <td class='addresstype'>" + type + "</td></tr>");
+      lookupRows.push("<tr id='" + item.address + "' lbl='" + item.label + "' class='addressType"+ item.type +"'> <td data-toggle=true></td>                 <td><span class='label2' data-value='" + item.label_value + "'>" + item.label + "</span></td>                 <td class='address'>" + item.address + "</td>                 <td class='addresstype'>" + type + "</td></tr>");
     } else {
       $("#" + item.address + " .label2").data("value", item.label_value).text(item.label);
       $("#" + item.address + " .pubkey").text(item.pubkey);
     }
   });
-  $("#addressbook .footable, #receive .footable").trigger("footable_setup_paging");
+  Object.keys(rows).forEach(function(target) {
+    if (0 == rows[target].length) {
+      return;
+    }
+    var $rows = $(rows[target].join(""));
+    $(target + " .footable tbody").append($rows);
+    // children() rather than find(): find() sorts its result into document
+    // order, which alone took seconds on ~20k rows.
+    $rows.selection("tr").children().children(".editable").on("dblclick", function(event) {
+      event.stopPropagation();
+      updateValue($(this));
+    }).attr("data-title", "Double click to edit").tooltip();
+  });
+  if (lookupRows.length > 0) {
+    $("#address-lookup-table.footable tbody").append(lookupRows.join(""));
+  }
+  if (options.length > 0) {
+    $("#message-from-address").append(options.join(""));
+  }
+  // No plugin listens for "footable_setup_paging", so every row stayed in the
+  // page layout. "footable_redrawn" re-applies sort, filter and paging.
+  $("#addressbook .footable, #receive .footable").trigger("footable_redrawn");
   if ($("#addressbook .footable tbody tr.selected").length === 0) {
     $("#addressbook .footable tbody tr:first").addClass("selected");
   }

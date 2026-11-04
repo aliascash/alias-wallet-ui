@@ -1436,6 +1436,7 @@ window.addEventListener('unhandledrejection', (e) => {
 
   function onBridgeReady() {
     const seenTxids = new Set();
+    const sentAddresses = new Map();  // address -> label/pubkey/type last sent
     let lastEncStatus = -1;
 
     // Blank the RESERVED balance row at startup. The UI's formatValue clears
@@ -1445,7 +1446,16 @@ window.addEventListener('unhandledrejection', (e) => {
     // optionsModel init.
     dispatch('optionsModel', 'reserveBalanceChanged', 0);
 
+    // On a large wallet one poll can outlast POLL_MS; overlapping polls would
+    // pile up RPC calls and renderer work.
+    let polling = false;
     async function poll() {
+      if (polling) return;
+      polling = true;
+      try { await pollOnce(); } finally { polling = false; }
+    }
+
+    async function pollOnce() {
       // getinfo MUST be done independently of the heavier calls below.
       // Earlier this was a Promise.all([getinfo, listtransactions]) — if
       // listtransactions threw (e.g. during a daemon rescan, or while the
@@ -1564,7 +1574,15 @@ window.addEventListener('unhandledrejection', (e) => {
           });
         }
 
-        if (items.length > 0) dispatch('bridge', 'emitAddresses', items);
+        // Only new or changed entries go to the UI. Resending the full list
+        // every poll kept a large wallet's renderer busy without a break.
+        const changed = items.filter((it) => {
+          const key = [it.label, it.label_value, it.pubkey, it.type].join('\n');
+          if (sentAddresses.get(it.address) === key) return false;
+          sentAddresses.set(it.address, key);
+          return true;
+        });
+        if (changed.length > 0) dispatch('bridge', 'emitAddresses', changed);
       } catch (e) { /* best-effort */ }
 
       if (Array.isArray(txs)) {
