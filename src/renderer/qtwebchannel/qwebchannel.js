@@ -84,6 +84,14 @@ window.addEventListener('unhandledrejection', (e) => {
   // hands us that label for an address the user did pick.
   const LABEL_REWRITES = { 'Alias Foundation': 'ALIAS Foundation' };
   const HIDDEN_LABELS = ['Alias Foundation'];
+  // The wallet labels every one-time address it derives from a private
+  // payment "sa <16 chars>..." / "ao <16 chars>...", and maps a payee's
+  // one-time key to the full 102-char stealth address. 4.4.x hid these
+  // (IsStealthAddressMappingLabel in wallet.h); one wallet had ~19k of them.
+  const MAPPING_LABEL = /^(ao|sa)\s\w{16}\.{3}$/;
+  function isMappingLabel(label) {
+    return MAPPING_LABEL.test(label) || label.length === 102;
+  }
   function rebrandLabel(label) {
     return LABEL_REWRITES[label] || label;
   }
@@ -338,7 +346,7 @@ window.addEventListener('unhandledrejection', (e) => {
     populateTransactionTable: async function () {
       try {
         const txs = await rpc('listtransactions', ['*', 50, 0]);
-        dispatch('bridge', 'emitTransactions', txs);
+        dispatch('bridge', 'emitTransactions', txs.map(translateTx));
         return txs;
       } catch (e) { logRpcError('listtransactions', e); return []; }
     },
@@ -1041,30 +1049,85 @@ window.addEventListener('unhandledrejection', (e) => {
   // Map daemon listtransactions output → the compact shape the original C++
   // bridge serialized for the UI. See alias-wallet-ui/assets/js/spectre.js
   // appendTransactions / overviewPage.updateTransaction for fields used.
+  // Field rules follow the 4.4.x Qt bridge (TransactionModel::addTransaction,
+  // TransactionRecord, TransactionTableModel): the transactions table reads
+  // every field below and throws if one is missing.
+  const TX_KIND = {
+    //            [t_i public, t_i private, t, public label, private label]
+    receive:     [9,  13, 'input',       'Public received with', 'Private received with'],
+    send:        [7,  14, 'output',      'Public sent to',       'Private sent to'],
+    generate:    [1,  2,  'staked',      'Public staked',        'Private staked'],
+    immature:    [1,  2,  'staked',      'Public staked',        'Private staked'],
+    orphan:      [1,  2,  'staked',      'Public staked',        'Private staked'],
+    donated:     [3,  4,  'donated',     'Public donated',       'Private donated'],
+    contributed: [5,  6,  'contributed', 'Public contributed',   'Private contributed'],
+    move:        [11, 12, 'inout',       'Public sent to self',  'Private sent to self'],
+  };
+  const STAKE_MIN_CONFIRMATIONS = 450;  // chainparams.cpp nStakeMinConfirmations
+  const MIN_ANON_SPEND_DEPTH = 10;      // anon/ringsig.h
+  const RECOMMENDED_CONFIRMATIONS = 6;  // TransactionRecord::RecommendedNumConfirmations
+
   function translateTx(rpcTx) {
     const sat = Math.round((Number(rpcTx.amount) || 0) * 1e8);
-    let t = 'other';
-    switch (rpcTx.category) {
-      case 'receive':  t = 'input';  break;
-      case 'send':     t = 'output'; break;
-      case 'generate': t = 'staked'; break;
-      case 'immature': t = 'staked'; break;
-      case 'orphan':   t = 'orphan'; break;
-      case 'move':     t = 'inout';  break;
-    }
+    const isPrivate = rpcTx.currency === 'PRIVATE';
+    const kind = TX_KIND[rpcTx.category] || [0, 0, 'other', 'Other', 'Other'];
+    const conf = Number(rpcTx.confirmations) || 0;
     const time = Number(rpcTx.time) || 0;
+
+    // TransactionStatus index (s_i), icon (s) and status text (tt).
+    let s_i, s, tt;
+    const clock = (need) => {
+      const step = Math.floor((conf * 3) / need) + 1;
+      return step === 1 ? 'fa-clock-o grey' : step === 2 ? 'fa-clock-o lightgreen' : 'fa-clock-o green';
+    };
+    if (rpcTx.category === 'orphan') {
+      s_i = 9; s = 'fa-exclamation-triangle grey';
+      tt = 'Orphan ' + (isPrivate ? 'ALIAS (private)' : 'ALIAS (public)') + ' stake, someone else submitted the block before you.';
+    } else if (conf < 0) {
+      s_i = 6; s = 'fa-exclamation-triangle red'; tt = 'Conflicted';
+    } else if (rpcTx.category === 'immature') {
+      s_i = 7; s = clock(STAKE_MIN_CONFIRMATIONS);
+      tt = 'Immature (' + conf + ' confirmations, will be available after ' + STAKE_MIN_CONFIRMATIONS + ')';
+    } else if (conf === 0) {
+      s_i = 4; s = 'fa-question-circle grey'; tt = 'Unconfirmed';
+    } else {
+      const need = isPrivate ? MIN_ANON_SPEND_DEPTH : RECOMMENDED_CONFIRMATIONS;
+      if (conf < need) {
+        s_i = 5; s = clock(need);
+        tt = 'Confirming (' + conf + ' of ' + need + (isPrivate ? ' required' : ' recommended') + ' confirmations)';
+      } else {
+        s_i = 0; s = 'fa-check-circle green'; tt = 'Confirmed (' + conf + ' confirmations)';
+      }
+    }
+    const countsForBalance = s_i === 0 || s_i === 5 || s_i === 7;
+
+    const address = rpcTx.address || '';
+    const label = rpcTx.account || '';
+    const shortAddr = address.length === 102 ? address.substr(0, 34) + '...' : address;
+    const ad_d = !address ? 'unknown' : label ? label : shortAddr;
+    const amount = (typeof unit !== 'undefined') ? unit.format(sat) : (sat / 1e8).toFixed(8);
+
     return {
       id:      rpcTx.txid || '',
-      t:       t,
-      t_i:     0,
-      s_i:     (Number(rpcTx.confirmations) || 0) < 0 ? 8 : 0,
-      am:      sat,
-      am_curr: 'PUBLIC',
+      tt:      tt,
+      c:       conf,
+      s:       s,
+      s_i:     s_i,
       d:       time,
       d_s:     time ? new Date(time * 1000).toLocaleString() : '',
-      tt:      rpcTx.comment || (rpcTx.address || ''),
-      la:      rpcTx.label || '',
-      ad:      rpcTx.address || '',
+      t:       kind[2],
+      t_i:     isPrivate ? kind[1] : kind[0],
+      t_l:     isPrivate ? kind[4] : kind[3],
+      ad_c:    !countsForBalance ? '#808080' : label ? '#000000' : '#8c8c8c',
+      ad:      address,
+      ad_l:    label,
+      ad_d:    ad_d,
+      n:       rpcTx.narration || '',
+      am_c:    !countsForBalance ? '#808080' : sat < 0 ? '#ff0000' : '#000000',
+      am:      sat,
+      am_d:    countsForBalance ? amount : '[' + amount + ']',
+      am_curr: isPrivate ? 'PRIVATE' : 'PUBLIC',
+      la:      label,
     };
   }
 
@@ -1545,7 +1608,7 @@ window.addEventListener('unhandledrejection', (e) => {
         for (const r of (Array.isArray(byAddr) ? byAddr : [])) {
           if (!r.address) continue;
           const rawLbl = r.account || '';
-          if (HIDDEN_LABELS.includes(rawLbl)) continue;
+          if (HIDDEN_LABELS.includes(rawLbl) || isMappingLabel(rawLbl)) continue;
           const lbl    = rebrandLabel(rawLbl);
           const isOwn  = !lbl || OWN_HINT.test(lbl);
           items.push({
