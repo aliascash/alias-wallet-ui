@@ -150,10 +150,10 @@ const initialUriArg = process.argv.find((a) => typeof a === 'string' && a.starts
 // ---------- persistent settings ----------
 //
 // Saved at <userData>/config.json. Tracks window bounds so the app reopens at
-// the user's last size/position, and the zoom override (0 = follow the display).
+// the user's last size/position. The zoom lives in the Options as Zoom.
 const settings = new Store({
   name: 'config',
-  defaults: { mainBounds: { width: 1024, height: 624 }, mainZoom: 0 },
+  defaults: { mainBounds: { width: 1024, height: 624 } },
 });
 
 // The daemon's traditional port, but only a preference. Anything on the
@@ -815,13 +815,14 @@ const DEFAULT_OPTIONS = {
 ipcMain.handle('alias:daemon-started-at', () => daemonStartedAt);
 ipcMain.handle('alias:get-options', () => {
   const stored = settings.get('options') || {};
-  return Object.assign({}, DEFAULT_OPTIONS, stored);
+  return Object.assign({}, DEFAULT_OPTIONS, stored, { Zoom: zoomPercent() });
 });
 ipcMain.handle('alias:set-options', async (_event, changes) => {
   if (!changes || typeof changes !== 'object') return false;
   const current = settings.get('options') || {};
   const next    = Object.assign({}, DEFAULT_OPTIONS, current, changes);
   settings.set('options', next);
+  if (Object.prototype.hasOwnProperty.call(changes, 'Zoom')) setZoomPercent(Number(changes.Zoom));
   // Mirror daemon-side options that have RPC equivalents.
   try {
     if (Object.prototype.hasOwnProperty.call(changes, 'Fee'))
@@ -1239,28 +1240,30 @@ function zoomToFit(win, scale) {
   });
 }
 
-// The user's override, or no zoom at all.
+// Users found the page 20% too large, so the old 80% is the new 100%.
+// The Options page and the zoom keys work in percent of this base.
+const ZOOM_BASE = 0.8;
+
+function clampZoomPercent(p) {
+  return Math.min(150, Math.max(80, Math.round(p / 10) * 10));
+}
+
+function zoomPercent() {
+  const saved = Number((settings.get('options') || {}).Zoom);
+  if (saved > 0) return clampZoomPercent(saved);
+  // 5.1.0 saved a custom zoom as a raw factor under mainZoom; carry it over.
+  const old = settings.get('mainZoom');
+  return old > 0 ? clampZoomPercent(old / ZOOM_BASE * 100) : 100;
+}
+
 function mainZoom() {
-  const saved = settings.get('mainZoom');
-  return saved > 0 ? saved : 1;
+  return ZOOM_BASE * zoomPercent() / 100;
 }
 
-// 0.5-2 because the page stops working outside it: the sidebar labels collide
-// below, the send form stops fitting above.
-function setMainZoom(factor) {
-  const z = Math.min(2, Math.max(0.5, Math.round(factor * 100) / 100));
-  settings.set('mainZoom', z);
-  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.setZoomFactor(z);
-}
-
-function stepMainZoom(delta) {
-  if (!mainWindow || mainWindow.isDestroyed()) return;
-  setMainZoom(mainWindow.webContents.getZoomFactor() + delta);
-}
-
-function resetMainZoom() {
-  settings.set('mainZoom', 0);
-  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.setZoomFactor(1);
+function setZoomPercent(p) {
+  const options = Object.assign({}, settings.get('options'), { Zoom: clampZoomPercent(p) });
+  settings.set('options', options);
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.setZoomFactor(mainZoom());
 }
 
 // Windows display scaling shrinks the work area measured in scaled units: a
@@ -1745,10 +1748,11 @@ function buildAppMenu() {
         { label: '&Options...', accelerator: 'CmdOrCtrl+,', click: () => triggerInRenderer('#navitems a[href="#options"]') },
         { type: 'separator' },
         // The window follows the display scale on its own; these are the way
-        // out for anyone who wants it bigger or smaller than that.
-        { label: 'Zoom &In',  accelerator: 'CmdOrCtrl+=', click: () => stepMainZoom(0.1) },
-        { label: 'Zoom &Out', accelerator: 'CmdOrCtrl+-', click: () => stepMainZoom(-0.1) },
-        { label: '&Reset Zoom', accelerator: 'CmdOrCtrl+0', click: () => resetMainZoom() },
+        // out for anyone who wants it bigger or smaller than that. Same steps
+        // as the Zoom choice on the Options page.
+        { label: 'Zoom &In',  accelerator: 'CmdOrCtrl+=', click: () => setZoomPercent(zoomPercent() + 10) },
+        { label: 'Zoom &Out', accelerator: 'CmdOrCtrl+-', click: () => setZoomPercent(zoomPercent() - 10) },
+        { label: '&Reset Zoom', accelerator: 'CmdOrCtrl+0', click: () => setZoomPercent(100) },
       ],
     },
     {
