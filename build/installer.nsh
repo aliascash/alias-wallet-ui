@@ -149,8 +149,12 @@ SectionEnd
 
   ; The app reads this to find the same directory. Without it the app would
   ; default to the per-user path and an all-users install would look empty.
+  ; UTF-16 with a BOM: FileWrite writes the ANSI code page, which the app
+  ; cannot decode, and a user name like "Configuracion" with an accent then
+  ; came out as an unusable path.
   FileOpen $9 "$INSTDIR\datadir.txt" w
-  FileWrite $9 "$0"
+  FileWriteWord $9 0xFEFF
+  FileWriteUTF16LE $9 "$0"
   FileClose $9
   DetailPrint "Data directory ($6 install): $0"
 

@@ -191,6 +191,18 @@ function getDaemonPath() {
   return path.join(process.resourcesPath, 'daemon', exe);
 }
 
+// The installer writes UTF-16 with a BOM. Installers up to 5.1.0 wrote the
+// ANSI code page, which decodes to U+FFFD wherever the path has a non-ASCII
+// letter; that path does not exist, so ignore it and use the default.
+function readDataDirMarker(file) {
+  const buf = fs.readFileSync(file);
+  const text = (buf[0] === 0xFF && buf[1] === 0xFE)
+    ? buf.subarray(2).toString('utf16le')
+    : buf.toString('utf8');
+  const dir = text.trim();
+  return dir.includes('\uFFFD') ? '' : dir;
+}
+
 // MUST match the daemon's GetDefaultDataDir() in util.cpp:1051-1081 exactly.
 // If these diverge, the daemon syncs into a different folder than the one
 // the original v4.4.0 wallet (and any pre-extracted blockchain bootstrap)
@@ -206,8 +218,7 @@ function getDataDir() {
   if (cachedDataDir) return cachedDataDir;
   if (!isDev) {
     try {
-      const recorded = fs.readFileSync(
-        path.join(path.dirname(process.execPath), 'datadir.txt'), 'utf8').trim();
+      const recorded = readDataDirMarker(path.join(path.dirname(process.execPath), 'datadir.txt'));
       if (recorded) {
         cachedDataDir = recorded;
         return cachedDataDir;
