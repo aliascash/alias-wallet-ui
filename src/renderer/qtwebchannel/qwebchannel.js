@@ -472,7 +472,7 @@ window.addEventListener('unhandledrejection', (e) => {
           out.push({
             block_hash:         b.hash,
             block_height:       b.height,
-            block_timestamp:    b.time,
+            block_timestamp:    b.time ? formatDateTime(b.time * 1000) : '',
             block_transactions: Array.isArray(b.tx) ? b.tx.length : 0,
           });
         }
@@ -490,7 +490,7 @@ window.addEventListener('unhandledrejection', (e) => {
           error_msg: '',
           block_hash:         b.hash,
           block_height:       b.height,
-          block_timestamp:    b.time,
+          block_timestamp:    b.time ? formatDateTime(b.time * 1000) : '',
           block_transactions: Array.isArray(b.tx) ? b.tx.length : 0,
         });
       } catch (e) {
@@ -524,7 +524,7 @@ window.addEventListener('unhandledrejection', (e) => {
           block_height:      b.height,
           block_type:        b.flags || (b.proofhash ? 'PoS' : 'PoW'),
           block_reward:      b.reward != null ? b.reward : '',
-          block_timestamp:   b.time ? new Date(b.time * 1000).toISOString() : '',
+          block_timestamp:   b.time ? formatDateTime(b.time * 1000) : '',
           block_merkle_root: b.merkleroot || '',
           block_prev_block:  b.previousblockhash || '',
           block_next_block:  b.nextblockhash || '',
@@ -572,8 +572,8 @@ window.addEventListener('unhandledrejection', (e) => {
         const out = {
           transaction_hash:          r.txid || txid,
           transaction_size:          r.size || '',
-          transaction_rcv_time:      wallet.timereceived ? new Date(wallet.timereceived * 1000).toISOString() : '',
-          transaction_mined_time:    wallet.blocktime ? new Date(wallet.blocktime * 1000).toISOString() : '',
+          transaction_rcv_time:      wallet.timereceived ? formatDateTime(wallet.timereceived * 1000) : '',
+          transaction_mined_time:    wallet.blocktime ? formatDateTime(wallet.blocktime * 1000) : '',
           transaction_block_hash:    wallet.blockhash || '',
           transaction_reward:        wallet.amount != null ? wallet.amount : 0,
           transaction_confirmations: wallet.confirmations != null ? wallet.confirmations : '',
@@ -641,7 +641,7 @@ window.addEventListener('unhandledrejection', (e) => {
         }
         const explorer = 'https://chainz.cryptoid.info/alias/';
         const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
-        const dateStr = tx.time ? new Date(tx.time * 1000).toLocaleString() : '';
+        const dateStr = tx.time ? formatDateTime(tx.time * 1000) : '';
         const fmt = (n) => (n == null ? '' : Number(n).toFixed(8) + ' ALIAS');
         const explorerLink = (path, label) => `<a href="javascript:void(0)" onclick='bridge.urlClicked(${JSON.stringify(explorer + path)})'>${esc(label)}</a>`;
 
@@ -1114,7 +1114,7 @@ window.addEventListener('unhandledrejection', (e) => {
       s:       s,
       s_i:     s_i,
       d:       time,
-      d_s:     time ? new Date(time * 1000).toLocaleString() : '',
+      d_s:     time ? formatDateTime(time * 1000) : '',
       t:       kind[2],
       t_i:     isPrivate ? kind[1] : kind[0],
       t_l:     isPrivate ? kind[4] : kind[3],

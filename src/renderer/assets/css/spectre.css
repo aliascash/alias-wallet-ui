@@ -1183,6 +1183,15 @@ progress::-webkit-progress-value {
     width: 38px;
 }
 
+/* The global "td { max-width: 0 }" overrides the widths above. Qt's old engine
+   ignored max-width on table cells; current Chromium applies it and shrank
+   these columns to their padding, hiding the date and the type icon. */
+#transactions-table > tbody > tr > td.trans-status,
+#transactions-table > tbody > tr > td.trans-date,
+#transactions-table > tbody > tr > td.trans-type-icon {
+    max-width: none;
+}
+
 #transactions-table > tbody > tr > td.trans-type-icon img {
     margin-top: -4px;
     margin-bottom: -4px;

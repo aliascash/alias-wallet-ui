@@ -28,13 +28,13 @@
       // getinfo has no startup time; the main process started the daemon,
       // so ask it.
       const started = bridge.daemonStartedAt ? await bridge.daemonStartedAt() : null;
-      $('info-startup-time').textContent = started ? new Date(started).toLocaleString() : 'N/A';
+      $('info-startup-time').textContent = started ? formatDateTime(started) : 'N/A';
     } catch (e) { /* tolerate */ }
     try {
       const tip = await rpc('getbestblockhash', []);
       if (tip) {
         const blk = await rpc('getblock', [tip]);
-        $('info-last-block-time').textContent = blk.time ? new Date(blk.time * 1000).toLocaleString() : 'N/A';
+        $('info-last-block-time').textContent = blk.time ? formatDateTime(blk.time * 1000) : 'N/A';
       }
     } catch (e) { /* tolerate */ }
   }
@@ -121,7 +121,7 @@
   }
   function formatTime(unixSecs) {
     const v = Number(unixSecs);
-    return v > 0 ? new Date(v * 1000).toLocaleString() : '';
+    return v > 0 ? formatDateTime(v * 1000) : '';
   }
 
   // Selected peer survives a refresh, so the detail panel does not clear
