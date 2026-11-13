@@ -548,6 +548,12 @@ async function stopOrphanedDaemon(dataDir) {
   console.error('[startup] previous daemon did not exit; the new one may fail to start');
 }
 
+// Unlocking a large wallet can take minutes: the daemon decrypts every
+// stealth and anon key while holding the wallet lock. The usual 30 s cut it
+// short, the login loop took that for a wrong passphrase and asked again,
+// and every later try failed with "already unlocked" -- an endless loop.
+const UNLOCK_TIMEOUT_MS = 30 * 60 * 1000;
+
 async function rpc(method, params = []) {
   const res = await axios.post(`http://${RPC_HOST}:${RPC_PORT}/`, {
     jsonrpc: '1.0',
@@ -561,7 +567,7 @@ async function rpc(method, params = []) {
     // turns every call into a 401 that never reaches the daemon -- so the
     // daemon logs nothing and the failure looks like a wrong password.
     proxy: false,
-    timeout: 30000,
+    timeout: method === 'walletpassphrase' ? UNLOCK_TIMEOUT_MS : 30000,
   });
   if (res.data.error) throw new Error(res.data.error.message);
   return res.data.result;
@@ -1476,22 +1482,6 @@ function isFirstLaunch() {
 // unlock once at launch and the wallet stays usable until they close the app.
 const SESSION_UNLOCK_SECS = 86400;
 
-async function promptUnlockAtLogin() {
-  const r = await openPassphraseDialog('unlocklogin');
-  if (!r || !r.passphrase) return false;
-  try {
-    // walletpassphrase <pass> <timeout> [stakingOnly]
-    const params = [r.passphrase, SESSION_UNLOCK_SECS];
-    if (r.stakingOnly) params.push(true);
-    await rpc('walletpassphrase', params);
-    return true;
-  } catch (e) {
-    // Show the dialog again with a (TODO) error hint; for now retry once.
-    console.error('[startup] unlock failed:', e.message);
-    return await promptUnlockAtLogin();
-  }
-}
-
 // Open the passphrase dialog and return what the user typed WITHOUT
 // attempting the unlock RPC. Used in routeStartup so the unlock dialog
 // can appear before the daemon is ready — the actual walletpassphrase
@@ -1613,18 +1603,29 @@ async function routeStartup() {
     try {
       const params = [collected.passphrase, SESSION_UNLOCK_SECS];
       if (collected.stakingOnly) params.push(true);
+      splashStatus('Unlocking wallet...');
       await rpc('walletpassphrase', params);
       break;  // unlock success
     } catch (e) {
-      const msg = String(e && e.message || e);
-      if (/unencrypted/i.test(msg)) {
-        // Wallet is not encrypted — no unlock needed, continue to main.
-        break;
-      }
-      // Wrong passphrase. Close splash so the next unlock dialog isn't
-      // hidden behind it, then loop.
+      // The daemon answers errors with HTTP 500 and the reason in the body;
+      // axios's own message only says "status code 500".
+      const body = e && e.response && e.response.data;
+      const msg = String((body && body.error && body.error.message) || (e && e.message) || e);
+      // Not encrypted, or an earlier attempt finished unlocking it.
+      if (/unencrypted|already unlocked/i.test(msg)) break;
       console.error('[startup] unlock failed:', msg);
+      // Close the splash so the next unlock dialog isn't hidden behind it.
       closeSplash();
+      // Only a wrong passphrase is the user's to fix. Anything else (the
+      // daemon restarting, a timeout) is reported as it is, and the daemon
+      // is waited for again before the next try.
+      if (/incorrect/i.test(msg)) {
+        dialog.showErrorBox('Wallet unlock failed',
+          'The passphrase entered for the wallet decryption was incorrect.');
+      } else {
+        dialog.showErrorBox('Wallet unlock failed', msg);
+        daemonReady = false;
+      }
     }
   }
 
