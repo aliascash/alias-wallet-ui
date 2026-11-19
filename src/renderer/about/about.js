@@ -1,13 +1,14 @@
 (function () {
   'use strict';
-  // Populate version from the daemon's getinfo.
-  if (window.aliasBridge && window.aliasBridge.rpc) {
-    window.aliasBridge.rpc('getinfo', []).then((info) => {
-      if (info && info.version) {
-        document.getElementById('versionLabel').textContent = info.version;
-      }
-    }).catch(() => {});
-  }
+  // Populate version from the daemon's getinfo. Main waits for aboutReady
+  // before measuring the page, because the version line can wrap.
+  window.aboutReady = Promise.resolve(window.aliasBridge && window.aliasBridge.rpc
+    ? window.aliasBridge.rpc('getinfo', []).then((info) => {
+        if (info && info.version) {
+          document.getElementById('versionLabel').textContent = info.version;
+        }
+      }).catch(() => {})
+    : null).then(() => document.fonts.ready);
   // Route in-doc <a> clicks through the OS browser so we don't navigate.
   document.querySelectorAll('a[href^="http"], a[href^="mailto:"]').forEach((a) => {
     a.addEventListener('click', (e) => {

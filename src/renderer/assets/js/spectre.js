@@ -1,6 +1,8 @@
+// toString() writes amounts below 0.000001 as "1e-8", which has no "." and
+// threw here, emptying the whole transaction table; toFixed(8) never does.
 Number.prototype.countDecimals = function () {
   if(Math.floor(this.valueOf()) === this.valueOf()) return 0;
-  return this.toString().split(".")[1].length || 0;
+  return this.toFixed(8).replace(/0+$/, "").split(".")[1].length;
 }
 
 var TYPE_PRIVATE = "Private"
@@ -1027,7 +1029,7 @@ var unit = {
         value /= 1E8;
     }
     let mask = this.mask(arg);
-    return value = stripTrailingZeros && mask >= 2 ? value.countDecimals() > 2 ? value.toString() : value.toFixed(2) :
+    return value = stripTrailingZeros && mask >= 2 ? value.countDecimals() > 2 ? value.toFixed(value.countDecimals()) : value.toFixed(2) :
         value.toFixed(mask), void 0 == results ? value : void results.val(value);
   },
   parse : function(value, text) {

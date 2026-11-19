@@ -92,6 +92,24 @@ window.addEventListener('unhandledrejection', (e) => {
   function isMappingLabel(label) {
     return MAPPING_LABEL.test(label) || label.length === 102;
   }
+
+  // BitcoinUnits::format from 4.4.x: drop trailing zeros but keep two
+  // decimals, so 3 ALIAS reads "3.00" and one satoshi "0.00000001".
+  function formatAmount(sat) {
+    const n = Math.abs(Math.round(Number(sat) || 0));
+    const frac = String(n % 1e8).padStart(8, '0').replace(/0+$/, '').padEnd(2, '0');
+    return (sat < 0 ? '-' : '') + Math.floor(n / 1e8) + '.' + frac;
+  }
+
+  // 4.4.x showed an own address's public key in base58, and only a
+  // compressed one (AddressTableModel::pubkeyForAddress).
+  const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  function pubkeyBase58(hex) {
+    if (!/^0[23][0-9a-f]{64}$/i.test(hex || '')) return 'n/a';
+    let n = BigInt('0x' + hex), out = '';
+    while (n > 0n) { out = B58[Number(n % 58n)] + out; n /= 58n; }
+    return out;
+  }
   function rebrandLabel(label) {
     return LABEL_REWRITES[label] || label;
   }
@@ -301,7 +319,7 @@ window.addEventListener('unhandledrejection', (e) => {
     // `send` echoes back the 4th arg (true=for send-side new address,
     // false=for receive-side); UI uses it to decide what to clear/show.
     newAddress: async function (label, addressType, address /* unused */, send) {
-      const cmd = (addressType === 1) ? 'getnewstealthaddress' : 'getnewaddress';
+      const cmd = (addressType === 1) ? 'getnewprivateaddress' : 'getnewaddress';
       try {
         const addr = await rpc(cmd, label ? [label] : []);
         dispatch('bridge', 'newAddressResult', true, '', addr, !!send);
@@ -313,11 +331,11 @@ window.addEventListener('unhandledrejection', (e) => {
           const isStealth = (addressType === 1);
           dispatch('bridge', 'emitAddresses', [{
             address:     addr,
-            label:       label || 'Unlabeled',
+            label:       label || '(no label)',
             label_value: label || '',
             pubkey:      isStealth ? 'Stealth Address' : 'n/a',
             type:        'R',
-            at:          isStealth ? 2 : 0,
+            at:          isStealth ? 2 : 1,
           }]);
         }
         return addr;
@@ -346,7 +364,7 @@ window.addEventListener('unhandledrejection', (e) => {
     populateTransactionTable: async function () {
       try {
         const txs = await rpc('listtransactions', ['*', 50, 0]);
-        dispatch('bridge', 'emitTransactions', txs.map(translateTx));
+        dispatch('bridge', 'emitTransactions', mergeStakeEntries(txs).map(translateTx));
         return txs;
       } catch (e) { logRpcError('listtransactions', e); return []; }
     },
@@ -447,11 +465,12 @@ window.addEventListener('unhandledrejection', (e) => {
       } catch (e) { logRpcError('getblock', e); }
     },
     listAnonOutputs: async function () {
-      // listanonoutputs is the Qt-bridge in-process implementation; no daemon
-      // RPC equivalent. Dispatch an empty result so the ChainData page shows
-      // its empty-state instead of waiting forever.
+      // The daemon's listanonoutputs carries the 4.4.x bridge's fields, keyed
+      // by coin value in satoshis; only the display string is added here.
+      // A daemon from before that RPC answers null: the page stays empty.
       try {
-        const r = await rpc('listanonoutputs', []);
+        const r = (await rpc('listanonoutputs', [])) || {};
+        for (const value of Object.keys(r)) r[value].value_s = formatAmount(Number(value));
         dispatch('bridge', 'listAnonOutputsResult', r);
       } catch (_) {
         dispatch('bridge', 'listAnonOutputsResult', {});
@@ -501,16 +520,19 @@ window.addEventListener('unhandledrejection', (e) => {
     listTransactionsForBlock: async function (blockHash) {
       try {
         const block = await rpc('getblock', [String(blockHash)]);
-        const txs = [];
-        for (const txid of (block && block.tx) || []) {
-          let info = { txid };
+        // Shape of SpectreBridge::listTransactionsForBlock: index ->
+        // { transaction_hash, transaction_value }, leaving out transactions
+        // that pay nothing (a proof-of-stake block's empty coinbase).
+        const txs = {};
+        const ids = (block && block.tx) || [];
+        for (let i = 0; i < ids.length; i++) {
           try {
-            const r = await rpc('getrawtransaction', [txid, 1]);
-            info = { txid: r.txid, time: r.time, version: r.version };
+            const r = await rpc('getrawtransaction', [ids[i], 1]);
+            const out = (r.vout || []).reduce((sum, o) => sum + Math.round(Number(o.value) * 1e8), 0);
+            if (out === 0) continue;
+            txs[i] = { transaction_hash: r.txid, transaction_value: formatAmount(out) };
           } catch (_) {}
-          txs.push(info);
         }
-        // UI handler: listTransactionsForBlockResult(blkHash, result).
         dispatch('bridge', 'listTransactionsForBlockResult', blockHash, txs);
       } catch (e) { logRpcError('getblock', e); }
     },
@@ -542,42 +564,56 @@ window.addEventListener('unhandledrejection', (e) => {
     txnDetails: async function (blockHashOrTxid, maybeTxid) {
       const txid = maybeTxid || blockHashOrTxid;
       try {
-        const rawHex = await rpc('getrawtransaction', [String(txid), 0]);
-        const r = await rpc('decoderawtransaction', [rawHex]);
-        // gettransaction gives confirmations/blockhash/time (wallet-aware).
-        // For non-wallet txs this returns 500; tolerate and continue.
-        let wallet = {};
-        try { wallet = await rpc('gettransaction', [String(txid)]); } catch (_) {}
-        // Resolve input source addresses via decoderawtransaction on each
-        // prev-tx. Skip on error — UI shows the field empty.
+        // Fields as SpectreBridge::txnDetails filled them, read from the chain
+        // rather than the wallet so any transaction in a block shows them.
+        const PRIVATE = 'ALIAS (private)';
+        const tx = await rpc('getrawtransaction', [String(txid), 1]);
+        let valueIn = 0;
         const inputs = [];
-        for (const vin of (r.vin || [])) {
-          if (!vin.txid) continue;
-          try {
-            const prevHex = await rpc('getrawtransaction', [String(vin.txid), 0]);
-            const prev = await rpc('decoderawtransaction', [prevHex]);
-            const prevOut = (prev.vout || [])[vin.vout || 0];
-            inputs.push({
-              input_source_address: ((prevOut && prevOut.scriptPubKey && prevOut.scriptPubKey.addresses) || [''])[0],
-              input_value:          prevOut ? prevOut.value : '',
-            });
-          } catch (_) {
-            inputs.push({ input_source_address: vin.txid + ':' + (vin.vout || 0), input_value: '' });
+        for (const vin of (tx.vin || [])) {
+          if (vin.keyimage) {
+            const known = vin.value != null;
+            if (known) valueIn += Math.round(Number(vin.value) * 1e8);
+            inputs.push({ input_source_address: PRIVATE,
+                          input_value: known ? formatAmount(Math.round(Number(vin.value) * 1e8)) : 'spend not in chain!' });
+          } else if (vin.txid) {
+            try {
+              const prev = await rpc('getrawtransaction', [String(vin.txid), 1]);
+              const prevOut = (prev.vout || [])[vin.vout || 0];
+              const sat = prevOut ? Math.round(Number(prevOut.value) * 1e8) : 0;
+              valueIn += sat;
+              inputs.push({
+                input_source_address: ((prevOut && prevOut.scriptPubKey && prevOut.scriptPubKey.addresses) || [''])[0],
+                input_value:          prevOut ? formatAmount(sat) : '',
+              });
+            } catch (_) {
+              inputs.push({ input_source_address: vin.txid + ':' + (vin.vout || 0), input_value: '' });
+            }
           }
         }
-        const outputs = (r.vout || []).map((o) => ({
-          output_source_address: ((o.scriptPubKey && o.scriptPubKey.addresses) || [''])[0],
-          output_value:          o.value,
-        }));
+        let valueOut = 0;
+        const outputs = [];
+        for (const o of (tx.vout || [])) {
+          const sat = Math.round(Number(o.value) * 1e8);
+          if (sat < 1) continue;  // metadata output: narration or stealth
+          valueOut += sat;
+          const spk = o.scriptPubKey || {};
+          // An anon output's script starts OP_RETURN OP_ANON_MARKER.
+          const isPrivate = tx.version === 1000 && /^6ab9/i.test(spk.hex || '');
+          outputs.push({
+            output_source_address: isPrivate ? PRIVATE : (spk.addresses || [''])[0],
+            output_value:          formatAmount(sat),
+          });
+        }
         const out = {
-          transaction_hash:          r.txid || txid,
-          transaction_size:          r.size || '',
-          transaction_rcv_time:      wallet.timereceived ? formatDateTime(wallet.timereceived * 1000) : '',
-          transaction_mined_time:    wallet.blocktime ? formatDateTime(wallet.blocktime * 1000) : '',
-          transaction_block_hash:    wallet.blockhash || '',
-          transaction_reward:        wallet.amount != null ? wallet.amount : 0,
-          transaction_confirmations: wallet.confirmations != null ? wallet.confirmations : '',
-          transaction_value:         outputs.reduce((s, o) => s + Number(o.output_value || 0), 0).toFixed(8),
+          transaction_hash:          tx.txid || txid,
+          transaction_size:          tx.hex ? tx.hex.length / 2 : '',
+          transaction_rcv_time:      tx.time ? formatDateTime(tx.time * 1000) : '',
+          transaction_mined_time:    tx.blocktime ? formatDateTime(tx.blocktime * 1000) : '',
+          transaction_block_hash:    tx.blockhash || '',
+          transaction_reward:        formatAmount(valueOut - valueIn),
+          transaction_confirmations: tx.confirmations != null ? tx.confirmations : '',
+          transaction_value:         formatAmount(valueOut),
           transaction_inputs:        inputs,
           transaction_outputs:       outputs,
           error_msg: '',
@@ -1067,6 +1103,31 @@ window.addEventListener('unhandledrejection', (e) => {
   const MIN_ANON_SPEND_DEPTH = 10;      // anon/ringsig.h
   const RECOMMENDED_CONFIRMATIONS = 6;  // TransactionRecord::RecommendedNumConfirmations
 
+  // 4.4.x showed a stake whose reward went to the foundation as one record:
+  // "contributed" (or "donated"), +reward, to the foundation's address. The
+  // daemon lists it twice under one txid -- the reward as "generate" and,
+  // once mature, a "contributed"/"donated" send of -reward -- which showed
+  // two rows and took two of the overview's seven recent slots.
+  function mergeStakeEntries(txs, labels) {
+    const gifts = new Map();
+    for (const t of txs)
+      if (t.category === 'contributed' || t.category === 'donated') gifts.set(t.txid, t);
+    const rewarded = new Set(txs.filter((t) => t.category === 'generate').map((t) => t.txid));
+    const out = [];
+    for (const t of txs) {
+      const gift = gifts.get(t.txid);
+      if (!gift || !rewarded.has(t.txid)) { out.push(t); continue; }
+      if (t === gift) continue;
+      if (t.category !== 'generate') { out.push(t); continue; }
+      out.push(Object.assign({}, t, {
+        category: gift.category,
+        address:  gift.address,
+        account:  rebrandLabel((labels && labels.get(gift.address)) || ''),
+      }));
+    }
+    return out;
+  }
+
   function translateTx(rpcTx) {
     const sat = Math.round((Number(rpcTx.amount) || 0) * 1e8);
     const isPrivate = rpcTx.currency === 'PRIVATE';
@@ -1105,7 +1166,7 @@ window.addEventListener('unhandledrejection', (e) => {
     const label = rpcTx.account || '';
     const shortAddr = address.length === 102 ? address.substr(0, 34) + '...' : address;
     const ad_d = !address ? 'unknown' : label ? label : shortAddr;
-    const amount = (typeof unit !== 'undefined') ? unit.format(sat) : (sat / 1e8).toFixed(8);
+    const amount = formatAmount(sat);
 
     return {
       id:      rpcTx.txid || '',
@@ -1500,6 +1561,18 @@ window.addEventListener('unhandledrejection', (e) => {
   function onBridgeReady() {
     const seenTxids = new Set();
     const sentAddresses = new Map();  // address -> label/pubkey/type last sent
+    // address -> { mine, pubkey } from validateaddress. Neither changes for
+    // an address, so each is asked once.
+    const addressInfo = new Map();
+    const addressLabels = new Map();  // every address-book label, hidden ones too
+    // The first poll loads the whole history, as 4.4.x listed it. Later polls
+    // take only the newest entries: that covers every status still changing
+    // (a stake matures after 450 blocks, about 12 h), and the UI's merge
+    // compares each new entry with every stored one, so resending a 12k
+    // history every poll would stall it.
+    let historyLoaded = false;
+    const TX_ALL = 1000000000;
+    const TX_RECENT = 200;
     let lastEncStatus = -1;
 
     // Blank the RESERVED balance row at startup. The UI's formatValue clears
@@ -1537,7 +1610,7 @@ window.addEventListener('unhandledrejection', (e) => {
         return;
       }
       let txs = null;
-      try { txs = await rpc('listtransactions', ['*', 50, 0]); } catch (_) {}
+      try { txs = await rpc('listtransactions', ['*', historyLoaded ? TX_RECENT : TX_ALL, 0]); } catch (_) {}
 
       if (info) {
         if (info.version) bridge.info.build = info.version;
@@ -1580,57 +1653,73 @@ window.addEventListener('unhandledrejection', (e) => {
       // Populate the Receive + Address Book tabs by dispatching emitAddresses.
       //
       // Data sources:
-      //   listreceivedbyaddress 0 true  → public addresses + .account (label).
-      //     Entries with a default label like "Default Public Address" are the
-      //     wallet's own (type=R); others (e.g. "Alias Foundation") are
-      //     address-book entries (type=S).
-      //   listprivateaddresses         → stealth addresses. Unusual response
-      //     shape: { Account, "Stealth Address": "<addr> - <label>" }.
+      //   listreceivedbyaddress 0 true  → every address-book entry + label.
+      //     validateaddress says whether it is the wallet's own (Receive tab,
+      //     type=R) or someone else's (Address Book, type=S), as 4.4.x did.
+      //   listprivateaddresses         → stealth addresses in "addresses".
+      //     Its "Stealth Address" key repeats per address, so JSON keeps only
+      //     the last one; it is read only from daemons without "addresses".
       //
       // If listreceivedbyaddress returns empty (fresh wallet — wizard set up
       // master+account but didn't generate default addresses) seed the two
       // defaults so the Receive tab matches the original.
       try {
         let byAddr = await rpc('listreceivedbyaddress', [0, true]).catch(() => []);
+        for (const r of (Array.isArray(byAddr) ? byAddr : [])) if (r.address) addressLabels.set(r.address, r.account || '');
         if (Array.isArray(byAddr) && byAddr.length === 0) {
           try { await rpc('getnewaddress',        ['Default Public Address']);  } catch (_) {}
           byAddr = await rpc('listreceivedbyaddress', [0, true]).catch(() => []);
         }
         let privAddrs = await rpc('listprivateaddresses', []).catch(() => null);
         if (!privAddrs || !privAddrs['Stealth Address']) {
-          try { await rpc('getnewstealthaddress', ['Default Private Address']); } catch (_) {}
+          try { await rpc('getnewprivateaddress', ['Default Private Address']); } catch (_) {}
           privAddrs = await rpc('listprivateaddresses', []).catch(() => null);
         }
         const items = [];
 
         // Public side.
-        const OWN_HINT = /^(Default|Initial) /;
-        for (const r of (Array.isArray(byAddr) ? byAddr : [])) {
-          if (!r.address) continue;
+        const publicRows = (Array.isArray(byAddr) ? byAddr : []).filter((r) => {
           const rawLbl = r.account || '';
-          if (HIDDEN_LABELS.includes(rawLbl) || isMappingLabel(rawLbl)) continue;
-          const lbl    = rebrandLabel(rawLbl);
-          const isOwn  = !lbl || OWN_HINT.test(lbl);
+          return r.address && !HIDDEN_LABELS.includes(rawLbl) && !isMappingLabel(rawLbl);
+        });
+        const unknown = publicRows.filter((r) => !addressInfo.has(r.address));
+        for (let i = 0; i < unknown.length; i += 20) {
+          await Promise.all(unknown.slice(i, i + 20).map(async (r) => {
+            try {
+              const v = await rpc('validateaddress', [r.address]);
+              if (v && v.isvalid) addressInfo.set(r.address, { mine: !!v.ismine, pubkey: pubkeyBase58(v.pubkey) });
+            } catch (_) { /* asked again next poll */ }
+          }));
+        }
+        for (const r of publicRows) {
+          const info = addressInfo.get(r.address);
+          // Unknown until validateaddress answers: a row put in the wrong tab
+          // would not move later.
+          if (!info) continue;
+          const lbl = rebrandLabel(r.account || '');
           items.push({
             address:     r.address,
-            label:       lbl || 'Unlabeled',
+            label:       lbl || '(no label)',
             label_value: lbl,
-            pubkey:      'n/a',
-            type:        isOwn ? 'R' : 'S',
-            at:          0,  // 0/default = Public
+            pubkey:      info.pubkey,
+            type:        info.mine ? 'R' : 'S',
+            at:          1,  // AT_Normal
           });
         }
 
-        // Stealth side — parse the daemon's combined "addr - label" string.
-        if (privAddrs && privAddrs['Stealth Address']) {
+        // Stealth side.
+        let stealth = Array.isArray(privAddrs && privAddrs.addresses) ? privAddrs.addresses : [];
+        if (!stealth.length && privAddrs && privAddrs['Stealth Address']) {
           const raw = String(privAddrs['Stealth Address']);
           const sep = raw.indexOf(' - ');
-          const addr = sep === -1 ? raw : raw.slice(0, sep);
-          const lbl  = sep === -1 ? 'Default Private Address' : raw.slice(sep + 3);
-          if (addr) items.push({
-            address:     addr,
-            label:       lbl,
-            label_value: lbl,
+          stealth = [{ address: sep === -1 ? raw : raw.slice(0, sep),
+                       label:   sep === -1 ? 'Default Private Address' : raw.slice(sep + 3) }];
+        }
+        for (const p of stealth) {
+          if (p.address) items.push({
+            address:     p.address,
+            label:       p.label || '(no label)',
+            label_value: p.label || '',
             pubkey:      'Stealth Address',
             type:        'R',
             at:          2,  // 2 = Private/Stealth
@@ -1649,9 +1738,15 @@ window.addEventListener('unhandledrejection', (e) => {
       } catch (e) { /* best-effort */ }
 
       if (Array.isArray(txs)) {
-        const translated = txs.map(translateTx);
-        // Full-table refresh (covers initial load + history changes).
-        dispatch('bridge', 'emitTransactions', translated);
+        // A recent-only window can start between the two entries of a
+        // contributed stake; that stake was complete in an earlier poll.
+        let window = txs;
+        if (historyLoaded && txs.length === TX_RECENT) window = txs.filter((t) => t.txid !== txs[0].txid);
+        const translated = mergeStakeEntries(window, addressLabels).map(translateTx);
+        // First poll replaces the table with the whole history; later ones
+        // merge the newest entries into it.
+        dispatch('bridge', 'emitTransactions', translated, !historyLoaded);
+        historyLoaded = true;
         // Newly-seen txs (after first poll) → also fire a single-row update so
         // the overview's recent-transactions list ticks live.
         if (seenTxids.size > 0) {

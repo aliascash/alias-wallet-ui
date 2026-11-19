@@ -282,7 +282,7 @@
     try {
       const priv = await rpcRetry('listprivateaddresses', []).catch(() => null);
       if (!priv || !priv['Stealth Address'])
-        await rpcRetry('getnewstealthaddress', ['Default Private Address']);
+        await rpcRetry('getnewprivateaddress', ['Default Private Address']);
     } catch (_) {}
   }
 

@@ -486,7 +486,8 @@ function tailDaemonLogToSplash(logPath) {
 }
 
 // Methods the renderer polls speculatively that the daemon rejects for
-// known reasons (listanonoutputs not implemented; getaccount on stealth
+// known reasons (listanonoutputs is missing from daemons before it was
+// added for the Chain Data page; getaccount on stealth
 // addresses returns 500). The renderer's qwebchannel shim already
 // tolerates a null/empty result. Returning null here keeps Electron's
 // ipcMain from logging "Error occurred in handler" on every poll.
@@ -927,7 +928,7 @@ ipcMain.handle('alias:open-coin-control', () => {
   attachDevHooks(coinControlWindow);
 });
 
-// About — non-modal info dialog (671×347) showing version + license text.
+// About — non-modal info dialog, 671 wide, as tall as its text.
 let aboutWindow = null;
 ipcMain.handle('alias:open-about', () => {
   if (aboutWindow && !aboutWindow.isDestroyed()) { aboutWindow.focus(); return; }
@@ -939,6 +940,7 @@ ipcMain.handle('alias:open-about', () => {
     resizable: false, minimizable: false, maximizable: false,
     title: 'About ALIAS',
     icon: APP_ICON,
+    show: false,
     autoHideMenuBar: true,
     webPreferences: {
       ...ownSession('alias-about'),
@@ -948,6 +950,18 @@ ipcMain.handle('alias:open-about', () => {
     },
   });
   zoomToFit(aboutWindow, aboutSize.scale);
+  // Fit the window to the text once the version line is in, capped to the
+  // screen; the page's own scrollbar is left only for screens too short.
+  const win = aboutWindow;
+  win.webContents.on('did-finish-load', async () => {
+    try {
+      const h = await win.webContents.executeJavaScript(
+        'window.aboutReady.then(() => document.querySelector(".about").offsetHeight)');
+      const maxH = Math.round(screen.getPrimaryDisplay().workArea.height * 0.9);
+      if (!win.isDestroyed()) win.setContentSize(aboutSize.width, Math.min(maxH, Math.ceil(h * aboutSize.scale)));
+    } catch (_) { /* keep the default size */ }
+    if (!win.isDestroyed()) win.show();
+  });
   aboutWindow.loadFile(path.join(__dirname, '..', 'renderer', 'about', 'index.html'));
   aboutWindow.on('closed', () => { aboutWindow = null; });
   attachDevHooks(aboutWindow);

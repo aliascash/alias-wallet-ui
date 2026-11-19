@@ -12,9 +12,11 @@ body {
   overflow: hidden;
 }
 
+/* Height follows the text; main sizes the window to it, so the license
+   reads without scrolling whatever font and scaling the system uses. */
 .about {
   display: flex;
-  width: 671px; height: 347px;
+  width: 671px; min-height: 347px;
   box-sizing: border-box;
 }
 
@@ -43,7 +45,7 @@ body {
   cursor: text;
   user-select: text;
 }
-.version-row b { font-weight: 700; }
+.version-label { white-space: nowrap; }
 
 .scroll-area {
   flex: 1; overflow-y: auto;
