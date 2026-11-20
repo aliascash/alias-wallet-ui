@@ -187,7 +187,7 @@ function getDaemonPath() {
     const exe = process.platform === 'win32' ? 'aliaswalletd.exe' : 'aliaswalletd';
     return path.join(repoRoot, 'alias-modernized', 'dist', platform, exe);
   }
-  const exe = process.platform === 'win32' ? 'aliaswalletd.exe' : 'aliaswalletd';
+  const exe = process.platform === 'win32' ? 'ALIASwalletd.exe' : 'aliaswalletd';
   return path.join(process.resourcesPath, 'daemon', exe);
 }
 

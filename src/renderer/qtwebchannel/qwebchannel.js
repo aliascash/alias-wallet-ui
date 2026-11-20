@@ -1324,12 +1324,22 @@ window.addEventListener('unhandledrejection', (e) => {
     if (secs < 24 * 60 * 60)  return Math.floor(secs / 3600) + ' hour(s) ago';
     return Math.floor(secs / 86400) + ' day(s) ago';
   }
+  // Returns null while there are no peers: the state is unknown then.
   async function applySyncStateToDOM(info) {
     const $sync = $('#syncingIcon');
     const $syncTxt = $('#syncingIconText');
     if (!$sync.length) return false;
     const blocks = Number(info && info.blocks) || 0;
     const peers  = Number(info && info.connections) || 0;
+
+    // spectregui.cpp:571-577: without peers the icon is hidden. Showing it
+    // judged the tip against the checkpoint alone and put up "Up to date".
+    if (peers === 0) {
+      $sync.addClass('none');
+      $syncTxt.addClass('none');
+      return null;
+    }
+    $sync.removeClass('none');
 
     // Discover peer tip (= nTotalBlocks in original). Match
     // main.cpp:2031-2034: median of peer chain heights, floored at the
@@ -1359,8 +1369,7 @@ window.addEventListener('unhandledrejection', (e) => {
     const denom    = nTotalBlocks > 0 ? nTotalBlocks : lastPeerHeight;
     const haveTip  = denom > 0;
     // "Up to date" predicate (spectregui.cpp:667-668): caught up AND last
-    // block age < 30 min. The original does NOT require peers > 0 here —
-    // an offline wallet with a recent tip still shows "Up to date".
+    // block age < 30 min.
     const caughtUp = haveTip && blocks >= denom;
     const nowSecs  = Math.floor(Date.now() / 1000);
     const secsSinceTip = lastTipBlockTime > 0 ? Math.max(0, nowSecs - lastTipBlockTime) : Infinity;
@@ -1647,7 +1656,8 @@ window.addEventListener('unhandledrejection', (e) => {
         // SpectreGUI::setNumBlocks (spectregui.cpp:678-684) hides the
         // .outofsync ribbons inside the "Up to date" branch. We share that
         // judgement via the syncedToTip flag the sync function returned.
-        if (syncedToTip) $('.outofsync').hide(); else $('.outofsync').show();
+        if (syncedToTip === true) $('.outofsync').hide();
+        else if (syncedToTip === false) $('.outofsync').show();
       }
 
       // Populate the Receive + Address Book tabs by dispatching emitAddresses.

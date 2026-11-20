@@ -277,5 +277,10 @@ begin
   end;
 end;
 
+[InstallDelete]
+; Windows keeps a file's old letter case when it is overwritten, so an update
+; would leave the daemon named aliaswalletd.exe. Delete it before copying.
+Type: files; Name: "{app}\resources\daemon\aliaswalletd.exe"
+
 [UninstallDelete]
 Type: files; Name: "{app}\datadir.txt"

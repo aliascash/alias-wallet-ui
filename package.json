@@ -39,7 +39,7 @@
         "to": "daemon",
         "filter": [
           "aliaswalletd",
-          "aliaswalletd.exe",
+          "ALIASwalletd.exe",
           "*.dll",
           "Tor/**/*"
         ]

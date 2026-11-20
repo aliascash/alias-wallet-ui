@@ -20,7 +20,7 @@
     try {
       const info = await rpc('getinfo', []);
       $('info-client-name').textContent = 'ALIAS Core';
-      $('info-client-version').textContent = info.version || 'N/A';
+      $('info-client-version').textContent = (info.version || 'N/A').replace(/^v/, '').replace(/\([0-9a-f]+ - /, '(');
       $('info-build-date').textContent = info.build_date || (info.version || '').replace(/.* - /, '').replace(/\)$/, '') || 'N/A';
       $('info-network-name').textContent = info.testnet ? 'testnet' : 'main';
       $('info-connections').textContent = String(info.connections != null ? info.connections : 'N/A');
