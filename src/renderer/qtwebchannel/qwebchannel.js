@@ -1077,9 +1077,10 @@ window.addEventListener('unhandledrejection', (e) => {
   // ---------- background pollers ----------
   //
   // Replace Qt's C++ side which polled the daemon and emit'd signals into JS.
-  // One coordinated poll every POLL_MS: fetches getinfo + listtransactions in
-  // parallel, then dispatches the matching signals.
+  // Two loops: getinfo for balances and status icons every STATUS_MS, and
+  // transactions + addresses every POLL_MS.
 
+  const STATUS_MS = 5000;
   const POLL_MS = 8000;
 
   // Map daemon listtransactions output → the compact shape the original C++
@@ -1600,26 +1601,26 @@ window.addEventListener('unhandledrejection', (e) => {
       try { await pollOnce(); } finally { polling = false; }
     }
 
-    async function pollOnce() {
-      // getinfo MUST be done independently of the heavier calls below.
-      // Earlier this was a Promise.all([getinfo, listtransactions]) — if
-      // listtransactions threw (e.g. during a daemon rescan, or while the
-      // wallet is loading), Promise.all rejected and we returned without
-      // updating any of the status icons. The top-right then froze with the
-      // initial HTML state: encryption icon hidden (class "none"), sync icon
-      // text "0%", tooltip "Checking wallet state with network".
+    // Balances and the top-right icons run on their own loop. Inside the
+    // poll they waited for the transaction and address calls, which are slow
+    // while the daemon syncs, so the sync progress stood still for minutes.
+    let statusBusy = false;
+    async function status() {
+      if (statusBusy) return;
+      statusBusy = true;
+      try { await statusOnce(); } finally { statusBusy = false; }
+    }
+
+    async function statusOnce() {
       let info = null;
       try { info = await rpc('getinfo', []); }
       catch (_) {
         // Daemon RPC is down (e.g. mid-restart right after encryptwallet
-        // returns to the wizard). Don't wait the full 8 s for the next
-        // setInterval tick — schedule a fast retry so the status icons
-        // pick up the current state as soon as the daemon comes back up.
-        setTimeout(poll, 1500);
+        // returns to the wizard). Retry soon so the status icons pick up the
+        // current state as soon as the daemon comes back up.
+        setTimeout(status, 1500);
         return;
       }
-      let txs = null;
-      try { txs = await rpc('listtransactions', ['*', historyLoaded ? TX_RECENT : TX_ALL, 0]); } catch (_) {}
 
       if (info) {
         if (info.version) bridge.info.build = info.version;
@@ -1659,6 +1660,11 @@ window.addEventListener('unhandledrejection', (e) => {
         if (syncedToTip === true) $('.outofsync').hide();
         else if (syncedToTip === false) $('.outofsync').show();
       }
+    }
+
+    async function pollOnce() {
+      let txs = null;
+      try { txs = await rpc('listtransactions', ['*', historyLoaded ? TX_RECENT : TX_ALL, 0]); } catch (_) {}
 
       // Populate the Receive + Address Book tabs by dispatching emitAddresses.
       //
@@ -1750,9 +1756,9 @@ window.addEventListener('unhandledrejection', (e) => {
       if (Array.isArray(txs)) {
         // A recent-only window can start between the two entries of a
         // contributed stake; that stake was complete in an earlier poll.
-        let window = txs;
-        if (historyLoaded && txs.length === TX_RECENT) window = txs.filter((t) => t.txid !== txs[0].txid);
-        const translated = mergeStakeEntries(window, addressLabels).map(translateTx);
+        let recent = txs;
+        if (historyLoaded && txs.length === TX_RECENT) recent = txs.filter((t) => t.txid !== txs[0].txid);
+        const translated = mergeStakeEntries(recent, addressLabels).map(translateTx);
         // First poll replaces the table with the whole history; later ones
         // merge the newest entries into it.
         dispatch('bridge', 'emitTransactions', translated, !historyLoaded);
@@ -1785,6 +1791,8 @@ window.addEventListener('unhandledrejection', (e) => {
       }
     }
 
+    status();
+    setInterval(status, STATUS_MS);
     poll();
     setInterval(poll, POLL_MS);
   }

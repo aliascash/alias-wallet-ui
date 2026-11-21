@@ -153,7 +153,7 @@ const initialUriArg = process.argv.find((a) => typeof a === 'string' && a.starts
 // the user's last size/position. The zoom lives in the Options as Zoom.
 const settings = new Store({
   name: 'config',
-  defaults: { mainBounds: { width: 1024, height: 624 } },
+  defaults: { mainBounds: { width: 1024, height: 472 } },
 });
 
 // The daemon's traditional port, but only a preference. Anything on the
@@ -1339,16 +1339,21 @@ function saveMainBounds() {
 // collapses to its icon rail, and below 814 the columns stack. Keep this
 // value and that one in step.
 //
-// 624 is where the overview stops scrolling -- measured at 621, rounded up.
-// The height matters most at 150% Windows scaling, where a 1080p screen is
-// only 680 DIP of work area: 760 and 680 both clamped to it and gave a
-// full-height window, which is what users reported as "it fills the screen".
-// 624 leaves a margin there and still fits the content. Options is the one
-// page that scrolls at any size -- it is 1178 tall on its own.
-const DEFAULT_BOUNDS = { width: 1024, height: 624 };
+// 472 is the height of the overview at the 80% base zoom: 590 CSS px, with
+// its last row about 12px above the bottom. A taller window left a grey band
+// under the panels. It is a multiple of 4 so the page height is a whole CSS
+// pixel; at 470 (587.5) the rounding showed an empty scrollbar. Options is
+// the one page that scrolls at any size.
+const DEFAULT_BOUNDS = { width: 1024, height: 472 };
+// The default before the 80% zoom base. A window still at exactly this size
+// was never resized, so it moves to the new default.
+const OLD_DEFAULT_HEIGHT = 624;
 
 function createMainWindow() {
   let saved = settings.get('mainBounds') || { ...DEFAULT_BOUNDS };
+  if (saved.width === DEFAULT_BOUNDS.width && saved.height === OLD_DEFAULT_HEIGHT) {
+    saved = { ...saved, height: DEFAULT_BOUNDS.height };
+  }
   // Validate saved bounds against current displays — a window restored from
   // a different monitor layout can end up off-screen, looking like the app
   // failed to launch. Drop x/y if the rect doesn't overlap any display.
