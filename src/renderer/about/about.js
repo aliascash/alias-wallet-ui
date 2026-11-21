@@ -5,7 +5,7 @@
   window.aboutReady = Promise.resolve(window.aliasBridge && window.aliasBridge.rpc
     ? window.aliasBridge.rpc('getinfo', []).then((info) => {
         if (info && info.version) {
-          document.getElementById('versionLabel').textContent = info.version.replace(/^v/, '');
+          document.getElementById('versionLabel').textContent = info.version.replace(/^v/, '').replace(/\([0-9a-f]+ - /, '(');
         }
       }).catch(() => {})
     : null).then(() => document.fonts.ready);

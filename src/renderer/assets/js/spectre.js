@@ -1241,8 +1241,10 @@ var overviewPage = {
     }
   },
   clientInfo : function() {
-    $("#version").text(bridge.info.build.replace(/\-[\w\d]*$/, ""));
-    $("#clientinfo").attr("data-title", "Build Desc: " + bridge.info.build + "\nBuild Date: " + bridge.info.date).tooltip();
+    // Same text as About: "5.1.0.0 (Nov 18 2026, 18:58:32)", no "v" or commit hash.
+    var build = bridge.info.build.replace(/^v/, "").replace(/\([0-9a-f]+ - /, "(");
+    $("#version").text(build);
+    $("#clientinfo").attr("data-title", "Build Desc: " + build + "\nBuild Date: " + bridge.info.date).tooltip();
   },
   encryptionStatusChanged : function(status) {
     switch(status) {

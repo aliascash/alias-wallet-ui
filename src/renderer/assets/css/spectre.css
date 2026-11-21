@@ -1447,6 +1447,22 @@ article [class*="col-md-"] > .panel-spectre:last-child {
     flex: 1 1 auto;
     min-height: 0;
 }
+/* Overview panels end with their last row. Stretched to the window, they
+   showed an empty white block under it. */
+#overview [class*="col-md-"] > .panel-spectre:last-child {
+    flex: 0 0 auto;
+}
+#overview #recenttxns-container {
+    height: auto;
+}
+#overview .wallet {
+    min-height: 0;
+}
+#overview #balances,
+#overview #recenttxns {
+    margin-bottom: 0;
+}
+
 /* .container-fluid wraps #overview only; the other articles are direct
    children of .content. As a flex item it was claiming a share of the height
    even while the article inside it was hidden, which put the grey band back on
