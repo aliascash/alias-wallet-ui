@@ -636,6 +636,16 @@ table {
     }
 }
 
+/* Paged lists keep the compact row height at every window height, so a
+   taller window shows more of the page's rows instead of taller rows. */
+#transactions-table > tbody > tr > td, #transactions-table > thead > tr > th,
+#chaindata-table > tbody > tr > td, #chaindata-table > thead > tr > th,
+#receive-table > tbody > tr > td, #receive-table > thead > tr > th,
+#addressbook .footable > tbody > tr > td, #addressbook .footable > thead > tr > th {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
 @media (min-width: 1001px) {
     .table tbody tr td {
         font-size: 12px;
