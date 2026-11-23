@@ -93,6 +93,13 @@ window.addEventListener('unhandledrejection', (e) => {
     return MAPPING_LABEL.test(label) || label.length === 102;
   }
 
+  // Rows per page: 10, 15, 20, ... A typed value is rounded to a step of 5
+  // and never goes below 10, so the pager cannot get a negative page size.
+  function rowsPerPage(v) {
+    const n = Math.round(Number(v) / 5) * 5;
+    return n >= 10 ? n : 10;
+  }
+
   // BitcoinUnits::format from 4.4.x: drop trailing zeros but keep two
   // decimals, so 3 ALIAS reads "3.00" and one satoshi "0.00000001".
   function formatAmount(sat) {
@@ -380,6 +387,7 @@ window.addEventListener('unhandledrejection', (e) => {
     getOptions: async function () {
       try {
         const opts = await window.aliasBridge.getOptions();
+        opts.RowsPerPage = rowsPerPage(opts.RowsPerPage);
         // The Options page populates each <select> from result["opt<Name>"]
         // — see spectre.js optionsPage.getOptionResult. Without these lists
         // the Language / Notifications / VisibleTransactions selects would
@@ -451,7 +459,7 @@ window.addEventListener('unhandledrejection', (e) => {
         if (opts.ReserveBalance !== undefined)
           dispatch('optionsModel', 'reserveBalanceChanged', Number(opts.ReserveBalance) || 0);
         if (opts.RowsPerPage !== undefined)
-          dispatch('optionsModel', 'rowsPerPageChanged', Number(opts.RowsPerPage) || 25);
+          dispatch('optionsModel', 'rowsPerPageChanged', opts.RowsPerPage);
         if (Array.isArray(opts.VisibleTransactions))
           dispatch('optionsModel', 'visibleTransactionsChanged', opts.VisibleTransactions);
       } catch (_) {}
@@ -872,6 +880,9 @@ window.addEventListener('unhandledrejection', (e) => {
       // for now stash the changes on bridge.info.options so the values
       // round-trip within the session, and acknowledge the call cleanly.
       if (action && typeof action === 'object' && action.optionsChanged) {
+        if ('RowsPerPage' in action.optionsChanged) {
+          action.optionsChanged.RowsPerPage = rowsPerPage(action.optionsChanged.RowsPerPage);
+        }
         const langChanged = Object.prototype.hasOwnProperty.call(action.optionsChanged, 'Language');
         bridge.info.options = Object.assign(bridge.info.options || {}, action.optionsChanged);
         try {
@@ -980,7 +991,7 @@ window.addEventListener('unhandledrejection', (e) => {
     // UI may read these synchronously; provide safe defaults.
     displayUnit:        0,    // 0 = ALIAS (full coin)
     reserveBalance:     0,
-    rowsPerPage:        25,
+    rowsPerPage:        10,
     visibleTransactions: [],
   };
 
@@ -1077,9 +1088,11 @@ window.addEventListener('unhandledrejection', (e) => {
   // ---------- background pollers ----------
   //
   // Replace Qt's C++ side which polled the daemon and emit'd signals into JS.
-  // Two loops: getinfo for balances and status icons every STATUS_MS, and
-  // transactions + addresses every POLL_MS.
+  // Three loops: connections and sync progress every SYNC_MS, getinfo for
+  // balances, lock and staking every STATUS_MS, and transactions + addresses
+  // every POLL_MS.
 
+  const SYNC_MS = 2000;
   const STATUS_MS = 5000;
   const POLL_MS = 8000;
 
@@ -1304,16 +1317,24 @@ window.addEventListener('unhandledrejection', (e) => {
     return s.length % 2 ? s[m] : Math.floor((s[m - 1] + s[m]) / 2);
   }
 
-  async function refreshTipBlockTime(blocks) {
-    // Avoid extra RPCs if height hasn't moved.
+  // getblock waits for the daemon's main lock, which a sync holds for long
+  // stretches. Not awaited by the sync icon, so the block count keeps moving;
+  // the "last block" age catches up when this returns.
+  let tipTimePending = false;
+  async function refreshTipBlockTime() {
+    if (tipTimePending) return;
+    tipTimePending = true;
     try {
       const tipHash = await rpc('getbestblockhash', []);
       if (tipHash && tipHash !== lastTipKnownHash) {
-        lastTipKnownHash = tipHash;
         const blk = await rpc('getblock', [String(tipHash)]);
-        if (blk && Number(blk.time)) lastTipBlockTime = Number(blk.time);
+        if (blk && Number(blk.time)) {
+          lastTipKnownHash = tipHash;
+          lastTipBlockTime = Number(blk.time);
+        }
       }
     } catch (_) { /* tolerate */ }
+    finally { tipTimePending = false; }
   }
 
   // Returns the syncedToTip flag so callers (staking icon) can use the same
@@ -1365,7 +1386,7 @@ window.addEventListener('unhandledrejection', (e) => {
     // peers temporarily drop to 0; the live nTotalBlocks drives the %.
     if (nTotalBlocks > lastPeerHeight) lastPeerHeight = nTotalBlocks;
     // Refresh our tip block time (= clientModel->getLastBlockDate()).
-    await refreshTipBlockTime(blocks);
+    refreshTipBlockTime();
 
     const denom    = nTotalBlocks > 0 ? nTotalBlocks : lastPeerHeight;
     const haveTip  = denom > 0;
@@ -1643,8 +1664,6 @@ window.addEventListener('unhandledrejection', (e) => {
           applyEncryptionStateToDOM(enc, false /* stakingOnly: TODO track via walletpassphrase arg */);
           lastEncStatus = enc;
         }
-        applyConnectionStateToDOM(info.connections);
-        const syncedToTip = await applySyncStateToDOM(info);
         // getstakinginfo gives us the full priority chain + rich "Staking"
         // tooltip data. Tolerate failure — staking icon falls back to the
         // getinfo.stakeweight proxy if stakingInfo is null.
@@ -1654,12 +1673,29 @@ window.addEventListener('unhandledrejection', (e) => {
         // Daemon's status-bar warning (chain warnings, version warnings, etc.)
         // is surfaced in #network-alert via networkAlert(text).
         dispatch('bridge', 'networkAlert', info.errors || '');
+      }
+    }
+
+    // Connections and sync progress, every SYNC_MS. getblockcount,
+    // getconnectioncount and getpeerinfo skip the daemon's main lock (5.1.0
+    // daemons from Build76), so they answer while a sync holds it; getinfo
+    // waits for it and for the whole wallet balance.
+    let syncedToTip = null;
+    let syncBusy = false;
+    async function syncTick() {
+      if (syncBusy) return;
+      syncBusy = true;
+      try {
+        const [connections, blocks] = await Promise.all([
+          rpc('getconnectioncount', []), rpc('getblockcount', [])]);
+        applyConnectionStateToDOM(connections);
+        syncedToTip = await applySyncStateToDOM({ connections, blocks });
         // SpectreGUI::setNumBlocks (spectregui.cpp:678-684) hides the
-        // .outofsync ribbons inside the "Up to date" branch. We share that
-        // judgement via the syncedToTip flag the sync function returned.
+        // .outofsync ribbons inside the "Up to date" branch.
         if (syncedToTip === true) $('.outofsync').hide();
         else if (syncedToTip === false) $('.outofsync').show();
-      }
+      } catch (_) { /* daemon down: status() retries and reports it */ }
+      finally { syncBusy = false; }
     }
 
     async function pollOnce() {
@@ -1699,8 +1735,10 @@ window.addEventListener('unhandledrejection', (e) => {
           return r.address && !HIDDEN_LABELS.includes(rawLbl) && !isMappingLabel(rawLbl);
         });
         const unknown = publicRows.filter((r) => !addressInfo.has(r.address));
-        for (let i = 0; i < unknown.length; i += 20) {
-          await Promise.all(unknown.slice(i, i + 20).map(async (r) => {
+        // 4 at a time: each takes an RPC thread, and more would leave none
+        // for the status calls.
+        for (let i = 0; i < unknown.length; i += 4) {
+          await Promise.all(unknown.slice(i, i + 4).map(async (r) => {
             try {
               const v = await rpc('validateaddress', [r.address]);
               if (v && v.isvalid) addressInfo.set(r.address, { mine: !!v.ismine, pubkey: pubkeyBase58(v.pubkey) });
@@ -1791,6 +1829,8 @@ window.addEventListener('unhandledrejection', (e) => {
       }
     }
 
+    syncTick();
+    setInterval(syncTick, SYNC_MS);
     status();
     setInterval(status, STATUS_MS);
     poll();

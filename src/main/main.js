@@ -187,7 +187,7 @@ function getDaemonPath() {
     const exe = process.platform === 'win32' ? 'aliaswalletd.exe' : 'aliaswalletd';
     return path.join(repoRoot, 'alias-modernized', 'dist', platform, exe);
   }
-  const exe = process.platform === 'win32' ? 'ALIASwalletd.exe' : 'aliaswalletd';
+  const exe = process.platform === 'win32' ? 'ALIASwalletd.exe' : 'ALIASwalletd';
   return path.join(process.resourcesPath, 'daemon', exe);
 }
 
@@ -370,7 +370,9 @@ function startDaemon() {
   // Opt-in faster IBD: set ALIAS_DISABLEWALLET=1 (env var) to launch the
   // daemon with -disablewallet. Wallet still loads (RPC works) but per-block
   // scan is skipped. Next normal launch without the var will rescan forward.
-  const daemonArgs = [`-datadir=${dataDir}`, '-server'];
+  // -rpcthreads: the default 4 can all be waiting on the daemon's main lock
+  // during a sync, and the sync icon's calls then queue behind them.
+  const daemonArgs = [`-datadir=${dataDir}`, '-server', '-rpcthreads=8'];
   if (process.env.ALIAS_DISABLEWALLET === '1') {
     daemonArgs.push('-disablewallet');
     console.log('ALIAS_DISABLEWALLET=1 — launching daemon with -disablewallet');
@@ -827,7 +829,7 @@ const DEFAULT_OPTIONS = {
   DisplayUnit:       0,
   DisplayAddresses:  true,
   Language:          'en',
-  RowsPerPage:       25,
+  RowsPerPage:       10,
   VisibleTransactions: [],
 };
 ipcMain.handle('alias:daemon-started-at', () => daemonStartedAt);

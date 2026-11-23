@@ -68,7 +68,7 @@ jobs:
             daemon_pattern: "*Mac.zip"
             stage_dir: resources/darwin/x64
             daemon_bin: aliaswalletd
-            daemon_name: aliaswalletd
+            daemon_name: ALIASwalletd
             build_script: build:mac
             artifact_glob: "dist/*x64.dmg"
 
@@ -78,7 +78,7 @@ jobs:
             daemon_pattern: "*Mac-arm64.zip"
             stage_dir: resources/darwin/arm64
             daemon_bin: aliaswalletd
-            daemon_name: aliaswalletd
+            daemon_name: ALIASwalletd
             build_script: build:mac
             artifact_glob: "dist/*arm64.dmg"
 
@@ -88,7 +88,7 @@ jobs:
             daemon_pattern: "*Linux.zip"
             stage_dir: resources/linux/x64
             daemon_bin: aliaswalletd
-            daemon_name: aliaswalletd
+            daemon_name: ALIASwalletd
             build_script: build:linux
             # multiline so softprops/action-gh-release (splits files on newlines) uploads both
             artifact_glob: |
@@ -233,7 +233,7 @@ jobs:
             echo "ERROR: ${{ matrix.daemon_bin }} not found inside $(basename "$archive"). Cannot stage daemon binary."
             exit 1
           fi
-          # daemon_name: the file name users see (Windows: ALIASwalletd.exe).
+          # daemon_name: the file name users see, ALIASwalletd[.exe].
           cp "$daemon_src" "${{ matrix.stage_dir }}/${{ matrix.daemon_name }}"
           # Mac and linux binaries must be executable.
           chmod +x "${{ matrix.stage_dir }}/${{ matrix.daemon_name }}"

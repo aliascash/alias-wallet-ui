@@ -1,9 +1,10 @@
 {
   "name": "alias-wallet-desktop",
   "version": "5.1.0",
-  "description": "ALIAS wallet desktop UI — Electron front-end for the aliaswalletd daemon. Mirrors the original ALIAS UI (HTML/CSS/JS from aliascash/alias-wallet-ui) without Qt.",
+  "description": "ALIAS wallet desktop UI — Electron front-end for the ALIASwalletd daemon. Mirrors the original ALIAS UI (HTML/CSS/JS from aliascash/alias-wallet-ui) without Qt.",
   "main": "src/main/main.js",
   "author": "ALIAS Developers",
+  "homepage": "https://alias.cash",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
@@ -38,7 +39,7 @@
         "from": "resources/${platform}/${arch}",
         "to": "daemon",
         "filter": [
-          "aliaswalletd",
+          "ALIASwalletd",
           "ALIASwalletd.exe",
           "*.dll",
           "Tor/**/*"
@@ -47,6 +48,7 @@
     ],
     "linux": {
       "target": ["AppImage", "deb"],
+      "executableName": "ALIAS",
       "category": "Finance",
       "maintainer": "ALIAS Developers <dev@alias.cash>"
     },
