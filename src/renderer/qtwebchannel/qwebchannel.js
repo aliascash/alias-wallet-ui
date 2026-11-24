@@ -1604,6 +1604,35 @@ window.addEventListener('unhandledrejection', (e) => {
     let historyLoaded = false;
     const TX_ALL = 1000000000;
     const TX_RECENT = 200;
+
+    // Entries whose status can still change, by txid, as last listed. A row
+    // only updates while listtransactions lists it, so one that drops out --
+    // an orphaned stake on a daemon without the orphan listing fix, or a stake
+    // pushed past the newest TX_RECENT entries -- froze, e.g. at "Immature, 1
+    // confirmation". 4.4.x re-read every row on each block; this does the same.
+    const pendingTxs = new Map();
+    const PENDING_STATUS = new Set([4, 5, 7]);  // unconfirmed, confirming, immature
+
+    async function recheckUnlisted(listedIds) {
+      const updates = [];
+      for (const [txid, entry] of pendingTxs) {
+        if (listedIds.has(txid)) continue;
+        let conf;
+        try {
+          conf = Number((await rpc('gettransaction', [txid])).confirmations);
+        } catch (e) {
+          // Only a definite "not known" counts; a timeout is asked again.
+          if (!/No information available/i.test(String(e && e.message || e))) continue;
+          conf = -1;
+        }
+        if (!Number.isFinite(conf)) continue;
+        let category = entry.category;
+        if (entry.generated && conf < 1) category = 'orphan';
+        else if (category === 'immature' && conf >= STAKE_MIN_CONFIRMATIONS) category = 'generate';
+        updates.push(Object.assign({}, entry, { category, confirmations: conf }));
+      }
+      return updates;
+    }
     let lastEncStatus = -1;
 
     // Blank the RESERVED balance row at startup. The UI's formatValue clears
@@ -1796,7 +1825,13 @@ window.addEventListener('unhandledrejection', (e) => {
         // contributed stake; that stake was complete in an earlier poll.
         let recent = txs;
         if (historyLoaded && txs.length === TX_RECENT) recent = txs.filter((t) => t.txid !== txs[0].txid);
-        const translated = mergeStakeEntries(recent, addressLabels).map(translateTx);
+        const listed = mergeStakeEntries(recent, addressLabels);
+        const entries = listed.concat(await recheckUnlisted(new Set(listed.map((t) => t.txid))));
+        const translated = entries.map(translateTx);
+        entries.forEach((entry, i) => {
+          if (PENDING_STATUS.has(translated[i].s_i)) pendingTxs.set(entry.txid, entry);
+          else pendingTxs.delete(entry.txid);
+        });
         // First poll replaces the table with the whole history; later ones
         // merge the newest entries into it.
         dispatch('bridge', 'emitTransactions', translated, !historyLoaded);
