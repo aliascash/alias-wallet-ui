@@ -214,9 +214,10 @@ window.addEventListener('unhandledrejection', (e) => {
     const r = await askPassphrase('unlock');
     if (!r || !r.passphrase) return;
     // A deliberate unlock from the menu should last the session, not 60s like
-    // the one-shot unlock above, and must forward the staking-only choice --
-    // otherwise ticking the box had no effect.
-    const params = [r.passphrase, 86400];
+    // the one-shot unlock above (same ~3 years as the startup unlock, so
+    // staking never stops on its own), and must forward the staking-only
+    // choice -- otherwise ticking the box had no effect.
+    const params = [r.passphrase, 99999999];
     if (r.stakingOnly) params.push(true);
     try { await rpc('walletpassphrase', params); }
     catch (e) { logRpcError('walletpassphrase', e); }
@@ -1402,9 +1403,14 @@ window.addEventListener('unhandledrejection', (e) => {
     // Build the rich multi-line tooltip exactly as the original does
     // (spectregui.cpp:603-733). Header is "Up to date" or "Catching up..."
     // followed by the descriptive body.
+    // At or past the peers' height there is nothing left to count, so 4.4.x
+    // shows the plain block count (and a spinner while the tip is old)
+    // instead of "~0 remaining" and over 100% done.
     let tooltip;
     if (synced) {
       tooltip = 'Up to date<br>Downloaded ' + blocks + ' block(s) of transaction history.';
+    } else if (caughtUp) {
+      tooltip = 'Catching up...<br>Downloaded ' + blocks + ' block(s) of transaction history.';
     } else {
       const remaining   = Math.max(0, denom - blocks);
       const pctForLabel = denom > 0 ? (blocks / (denom * 0.01)) : 0;
@@ -1422,7 +1428,7 @@ window.addEventListener('unhandledrejection', (e) => {
       $sync.attr('src', 'assets/svg/synced.svg').removeClass('fa-spin syncing');
       $syncTxt.removeClass('syncing').addClass('none').text('');
       $sync.attr('data-title', tooltip);
-    } else if (haveTip) {
+    } else if (haveTip && !caughtUp) {
       // Verbatim from SpectreGUI::setNumBlocks (spectregui.cpp:691-710):
       //   build a data-URI SVG with a 30%-opacity background ring + an
       //   orange progress arc. stroke-dasharray length = pct * 2πr / 100
@@ -1446,10 +1452,10 @@ window.addEventListener('unhandledrejection', (e) => {
       $syncTxt.text(pctText).removeClass('none').addClass('syncing');
       $sync.attr('data-title', tooltip);
     } else {
-      // Bootstrap state — we haven't yet learned ANY tip estimate.
+      // No tip estimate yet, or caught up with an old tip: spinner, no %.
       $sync.attr('src', 'assets/svg/spinner.svg').addClass('fa-spin').removeClass('syncing');
       $syncTxt.removeClass('syncing').addClass('none').text('');
-      $sync.attr('data-title', 'Synchronizing with network...');
+      $sync.attr('data-title', haveTip ? tooltip : 'Synchronizing with network...');
     }
     return synced;
   }

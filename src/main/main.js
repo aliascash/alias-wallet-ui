@@ -1499,9 +1499,10 @@ function isFirstLaunch() {
   return true;
 }
 
-// Long-lived session unlock — 24h. Matches the user expectation that they
-// unlock once at launch and the wallet stays usable until they close the app.
-const SESSION_UNLOCK_SECS = 86400;
+// Session unlock: the daemon relocks the wallet when this runs out, which
+// stops staking. 24h did exactly that to wallets left staking overnight, so
+// it is ~3 years: unlocked until the user locks it or closes the app.
+const SESSION_UNLOCK_SECS = 99999999;
 
 // Open the passphrase dialog and return what the user typed WITHOUT
 // attempting the unlock RPC. Used in routeStartup so the unlock dialog
